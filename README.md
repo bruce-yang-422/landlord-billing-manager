@@ -33,6 +33,119 @@ A web tool for managing rent, electricity bills, and billing history for landlor
 - 支援響應式設計，可在手機上使用
 - 資料格式：JSON（包含 settings 與 records）
 
+## 資料結構說明（多房源 / 多租客設計）
+
+本專案目前版本以「單一房源、單一租客」為主，  
+資料結構已預先規劃可擴充為「多房源、多租客」架構，以利後續功能演進。
+
+---
+
+### 目前版本（v1）資料結構
+
+目前所有資料皆儲存在瀏覽器 `localStorage` 中，主要結構如下：
+
+```json
+{
+  "settings": {
+    "pricePerUnit": 5.5,
+    "rent": 7000,
+    "bankCode": "011",
+    "payeeName": "Example Name",
+    "accountNumber": "123456789"
+  },
+  "records": [
+    {
+      "id": 1768040357422,
+      "date": "2026-01-10",
+      "lastReading": 10715,
+      "currentReading": 10935,
+      "usage": 220,
+      "electricityFee": 1210,
+      "gasFee": 580,
+      "total": 8790
+    }
+  ]
+}
+````
+
+說明：
+
+* `settings`
+  儲存電費單價、租金與收款資訊，會被自動記憶並套用到新帳單
+
+* `records`
+  帳單歷史紀錄清單，每一筆代表一期帳單資料
+
+---
+
+### 規劃中版本（v2+）資料結構
+
+為支援多房源與多租客管理，預計將資料結構調整為階層式設計：
+
+```json
+{
+  "houses": [
+    {
+      "id": "house_001",
+      "name": "中山路一號",
+      "address": "台北市中山區...",
+      "tenants": [
+        {
+          "id": "tenant_001",
+          "name": "王小明",
+          "settings": {
+            "pricePerUnit": 5.5,
+            "rent": 7000,
+            "bankCode": "011",
+            "payeeName": "Example Name",
+            "accountNumber": "123456789"
+          },
+          "records": [
+            {
+              "id": 1768040357422,
+              "date": "2026-01-10",
+              "lastReading": 10715,
+              "currentReading": 10935,
+              "usage": 220,
+              "electricityFee": 1210,
+              "gasFee": 580,
+              "total": 8790
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "uiState": {
+    "currentHouseId": "house_001",
+    "currentTenantId": "tenant_001"
+  }
+}
+```
+
+---
+
+### 設計理念說明
+
+* 每一個「房源（house）」可包含多位租客
+* 每一位「租客（tenant）」擁有獨立的：
+
+  * 費用設定（settings）
+  * 帳單歷史紀錄（records）
+* `uiState` 用於記憶目前使用者操作中的房源與租客狀態
+* 所有資料仍維持在前端儲存，確保工具輕量且可離線使用
+
+---
+
+### 相容性與遷移說明（規劃）
+
+未來升級至多房源版本時，將提供資料轉換機制：
+
+* 單一 `settings` 與 `records` 會自動轉換為預設房源與租客
+* 舊版 JSON 備份仍可正常匯入並轉換
+
+```
+
 ## 授權
 
 MIT License
