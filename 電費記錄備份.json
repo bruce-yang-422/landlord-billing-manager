@@ -1,0 +1,23 @@
+{
+  "settings": {
+    "pricePerUnit": 5.5,
+    "rent": 7000,
+    "bankCode": "011",
+    "payeeName": "黃素卿",
+    "accountNumber": "59203000084488"
+  },
+  "records": [
+    {
+      "id": 1768040357422,
+      "date": "2026-01-10",
+      "lastReading": 10715,
+      "currentReading": 10935,
+      "usage": 220,
+      "electricityFee": 1210,
+      "rent": 7000,
+      "gasFee": 580,
+      "total": 8790,
+      "pricePerUnit": 5.5
+    }
+  ]
+}
