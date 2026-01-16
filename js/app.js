@@ -329,6 +329,110 @@ function clearHistory() {
 }
 
 // --- 資料存取核心 ---
+
+// 資料標準化函數：將舊版本資料轉換為新版本格式
+function normalizeData(data) {
+    if (!data || typeof data !== 'object') {
+        return data;
+    }
+    
+    // 確保有 settings 物件
+    if (!data.settings) {
+        data.settings = {};
+    }
+    
+    // 標準化 settings
+    if (data.settings) {
+        // 補齊缺失的開關狀態（根據現有資料推斷）
+        if (data.settings.enableElectricity === undefined) {
+            // 如果有電費相關資料，預設開啟
+            data.settings.enableElectricity = (data.settings.pricePerUnit !== undefined && data.settings.pricePerUnit > 0);
+        }
+        if (data.settings.enableRent === undefined) {
+            data.settings.enableRent = (data.settings.rent !== undefined && data.settings.rent > 0);
+        }
+        if (data.settings.enableWater === undefined) {
+            data.settings.enableWater = false; // 預設關閉
+        }
+        if (data.settings.enableGas === undefined) {
+            data.settings.enableGas = false; // 預設關閉
+        }
+        if (data.settings.enableManagement === undefined) {
+            data.settings.enableManagement = false; // 預設關閉
+        }
+        if (data.settings.enableOther === undefined) {
+            data.settings.enableOther = false; // 預設關閉
+        }
+    }
+    
+    // 確保有 records 陣列
+    if (!data.records) {
+        data.records = [];
+    }
+    
+    // 標準化 records
+    if (data.records && Array.isArray(data.records)) {
+        data.records = data.records.map(record => {
+            // 補齊缺失的費用欄位
+            if (record.waterFee === undefined) {
+                record.waterFee = 0;
+            }
+            if (record.managementFee === undefined) {
+                record.managementFee = 0;
+            }
+            if (record.otherFee === undefined) {
+                record.otherFee = 0;
+            }
+            
+            // 補齊缺失的開關狀態（根據現有資料推斷）
+            if (record.enableElectricity === undefined) {
+                // 如果有電費相關資料，預設開啟
+                record.enableElectricity = (record.usage !== undefined && record.usage > 0) || 
+                                          (record.electricityFee !== undefined && record.electricityFee > 0);
+            }
+            if (record.enableRent === undefined) {
+                record.enableRent = (record.rent !== undefined && record.rent > 0);
+            }
+            if (record.enableWater === undefined) {
+                record.enableWater = (record.waterFee !== undefined && record.waterFee > 0);
+            }
+            if (record.enableGas === undefined) {
+                record.enableGas = (record.gasFee !== undefined && record.gasFee > 0);
+            }
+            if (record.enableManagement === undefined) {
+                record.enableManagement = (record.managementFee !== undefined && record.managementFee > 0);
+            }
+            if (record.enableOther === undefined) {
+                record.enableOther = (record.otherFee !== undefined && record.otherFee > 0);
+            }
+            
+            // 確保有必要的欄位
+            if (record.lastReading === undefined) record.lastReading = 0;
+            if (record.currentReading === undefined) record.currentReading = 0;
+            if (record.usage === undefined) record.usage = 0;
+            if (record.electricityFee === undefined) record.electricityFee = 0;
+            if (record.rent === undefined) record.rent = 0;
+            if (record.gasFee === undefined) record.gasFee = 0;
+            if (record.total === undefined) {
+                // 重新計算總金額
+                record.total = (record.electricityFee || 0) + 
+                              (record.rent || 0) + 
+                              (record.waterFee || 0) + 
+                              (record.gasFee || 0) + 
+                              (record.managementFee || 0) + 
+                              (record.otherFee || 0);
+            }
+            if (record.pricePerUnit === undefined) {
+                record.pricePerUnit = data.settings?.pricePerUnit || 0;
+            }
+            
+            return record;
+        });
+    }
+    
+    return data;
+}
+
 function saveToLocalStorage() {
     try {
         localStorage.setItem('electricityCalculator_db', JSON.stringify(appData));
@@ -341,7 +445,9 @@ function loadFromLocalStorage() {
     try {
         const json = localStorage.getItem('electricityCalculator_db');
         if (json) {
-            appData = JSON.parse(json);
+            let parsedData = JSON.parse(json);
+            // 標準化資料（處理舊版本格式）
+            appData = normalizeData(parsedData);
             
             // 還原設定值到 UI
             if (appData.settings.pricePerUnit) {
@@ -360,12 +466,16 @@ function loadFromLocalStorage() {
                 document.getElementById('accountNumber').value = appData.settings.accountNumber;
             }
             
-            // 載入開關狀態
+            // 載入開關狀態（使用標準化後的資料）
             if (appData.settings.enableElectricity !== undefined) {
                 document.getElementById('enableElectricity').checked = appData.settings.enableElectricity;
+            } else {
+                document.getElementById('enableElectricity').checked = true; // 預設開啟
             }
             if (appData.settings.enableRent !== undefined) {
                 document.getElementById('enableRent').checked = appData.settings.enableRent;
+            } else {
+                document.getElementById('enableRent').checked = true; // 預設開啟
             }
             if (appData.settings.enableWater !== undefined) {
                 document.getElementById('enableWater').checked = appData.settings.enableWater;
@@ -379,6 +489,9 @@ function loadFromLocalStorage() {
             if (appData.settings.enableOther !== undefined) {
                 document.getElementById('enableOther').checked = appData.settings.enableOther;
             }
+            
+            // 儲存標準化後的資料
+            saveToLocalStorage();
             
             renderHistory();
         }
@@ -415,7 +528,8 @@ function importData(input) {
             const importedData = JSON.parse(e.target.result);
             // 簡單格式檢查
             if (importedData.records && Array.isArray(importedData.records)) {
-                appData = importedData;
+                // 標準化資料（處理舊版本格式）
+                appData = normalizeData(importedData);
                 saveToLocalStorage();
                 loadFromLocalStorage(); // 刷新介面
                 autoFillLastReading();
