@@ -188,6 +188,25 @@
         #fileInput {
             display: none;
         }
+        /* 費用區塊樣式 */
+        .fee-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .fee-fields {
+            margin-top: 10px;
+        }
+        .fee-fields input[type="number"] {
+            margin-bottom: 10px;
+        }
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
         @media (max-width: 600px) {
             .grid-row {
                 grid-template-columns: 1fr;
@@ -211,31 +230,95 @@
                 <label for="billDate">📅 帳單日期</label>
                 <input type="date" id="billDate" value="" placeholder="請選擇日期">
             </div>
-            <div>
-                <label for="pricePerUnit">💰 電費單價（元/度）</label>
-                <input type="number" id="pricePerUnit" value="" step="0.1" placeholder="請輸入每度電費">
+        </div>
+        
+        <!-- 電費區塊 -->
+        <div class="fee-section">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <input type="checkbox" id="enableElectricity" checked style="width: auto; margin-right: 10px; cursor: pointer;">
+                <label for="enableElectricity" style="margin: 0; font-weight: bold; color: #2c3e50;">⚡ 電費</label>
+            </div>
+            <div id="electricityFields" class="fee-fields">
+                <div class="grid-row">
+                    <div>
+                        <label for="pricePerUnit">💰 電費單價（元/度）</label>
+                        <input type="number" id="pricePerUnit" value="" step="0.1" placeholder="請輸入每度電費">
+                    </div>
+                </div>
+                <div class="grid-row">
+                    <div>
+                        <label for="lastReading">🔢 上期電錶讀數</label>
+                        <input type="number" id="lastReading" value="" placeholder="請輸入上期讀數">
+                    </div>
+                    <div>
+                        <label for="currentReading">🔢 本期電錶讀數</label>
+                        <input type="number" id="currentReading" value="" placeholder="請輸入本期讀數">
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="grid-row">
-            <div>
-                <label for="lastReading">🔢 上期電錶讀數</label>
-                <input type="number" id="lastReading" value="" placeholder="請輸入上期讀數">
+        <!-- 租金區塊 -->
+        <div class="fee-section">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <input type="checkbox" id="enableRent" checked style="width: auto; margin-right: 10px; cursor: pointer;">
+                <label for="enableRent" style="margin: 0; font-weight: bold; color: #2c3e50;">🏠 租金</label>
             </div>
-            <div>
-                <label for="currentReading">🔢 本期電錶讀數</label>
-                <input type="number" id="currentReading" value="" placeholder="請輸入本期讀數">
+            <div id="rentFields" class="fee-fields">
+                <div class="grid-row">
+                    <div>
+                        <label for="rent">🏠 租金（元）</label>
+                        <input type="number" id="rent" value="" placeholder="請輸入租金">
+                    </div>
+                </div>
             </div>
         </div>
         
+        <!-- 水費、瓦斯費 -->
         <div class="grid-row">
-            <div>
-                <label for="rent">🏠 租金（元）</label>
-                <input type="number" id="rent" value="" placeholder="請輸入租金">
+            <div class="fee-section">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input type="checkbox" id="enableWater" style="width: auto; margin-right: 10px; cursor: pointer;">
+                    <label for="enableWater" style="margin: 0; font-weight: bold; color: #2c3e50;">💧 水費</label>
+                </div>
+                <div id="waterFields" class="fee-fields" style="display: none;">
+                    <label for="waterFee">💧 水費（元）</label>
+                    <input type="number" id="waterFee" value="0" placeholder="請輸入水費">
+                </div>
             </div>
-            <div>
-                <label for="gasFee">🔥 瓦斯費（元）</label>
-                <input type="number" id="gasFee" value="0" placeholder="請輸入瓦斯費">
+            <div class="fee-section">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input type="checkbox" id="enableGas" style="width: auto; margin-right: 10px; cursor: pointer;">
+                    <label for="enableGas" style="margin: 0; font-weight: bold; color: #2c3e50;">🔥 瓦斯費</label>
+                </div>
+                <div id="gasFields" class="fee-fields" style="display: none;">
+                    <label for="gasFee">🔥 瓦斯費（元）</label>
+                    <input type="number" id="gasFee" value="0" placeholder="請輸入瓦斯費">
+                </div>
+            </div>
+        </div>
+        
+        <!-- 管理費、其他費用 -->
+        <div class="grid-row">
+            <div class="fee-section">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input type="checkbox" id="enableManagement" style="width: auto; margin-right: 10px; cursor: pointer;">
+                    <label for="enableManagement" style="margin: 0; font-weight: bold; color: #2c3e50;">🏢 管理費</label>
+                </div>
+                <div id="managementFields" class="fee-fields" style="display: none;">
+                    <label for="managementFee">🏢 管理費（元）</label>
+                    <input type="number" id="managementFee" value="0" placeholder="請輸入管理費">
+                </div>
+            </div>
+            <div class="fee-section">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input type="checkbox" id="enableOther" style="width: auto; margin-right: 10px; cursor: pointer;">
+                    <label for="enableOther" style="margin: 0; font-weight: bold; color: #2c3e50;">📝 其他費用</label>
+                </div>
+                <div id="otherFields" class="fee-fields" style="display: none;">
+                    <label for="otherFee">📝 其他費用（元）</label>
+                    <input type="number" id="otherFee" value="0" placeholder="請輸入其他費用">
+                </div>
             </div>
         </div>
         
@@ -256,10 +339,13 @@
         </div>
         
         <div id="result" class="result" style="display: none;">
-            <div class="usage-display">用電量：<span id="usage"></span> 度</div>
-            <div>電費：$<span id="electricityFee"></span></div>
-            <div>租金：$<span id="rentDisplay"></span></div>
-            <div>瓦斯費：$<span id="gasFeeDisplay"></span></div>
+            <div id="usageDisplay" class="usage-display" style="display: none;">用電量：<span id="usage"></span> 度</div>
+            <div id="electricityFeeDisplay" style="display: none;">電費：$<span id="electricityFee"></span></div>
+            <div id="rentDisplayDiv" style="display: none;">租金：$<span id="rentDisplay"></span></div>
+            <div id="waterFeeDisplay" style="display: none;">水費：$<span id="waterFeeDisplayAmount"></span></div>
+            <div id="gasFeeDisplayDiv" style="display: none;">瓦斯費：$<span id="gasFeeDisplay"></span></div>
+            <div id="managementFeeDisplay" style="display: none;">管理費：$<span id="managementFeeDisplayAmount"></span></div>
+            <div id="otherFeeDisplay" style="display: none;">其他費用：$<span id="otherFeeDisplayAmount"></span></div>
             <div class="total-display">本期應付總金額：$<span id="totalAmount"></span></div>
         </div>
         
@@ -304,11 +390,6 @@
         };
 
         function calculateAndSave() {
-            const lastReading = parseFloat(document.getElementById('lastReading').value) || 0;
-            const currentReading = parseFloat(document.getElementById('currentReading').value) || 0;
-            const pricePerUnit = parseFloat(document.getElementById('pricePerUnit').value) || 0;
-            const rent = parseFloat(document.getElementById('rent').value) || 0;
-            const gasFee = parseFloat(document.getElementById('gasFee').value) || 0;
             const billDate = document.getElementById('billDate').value;
             const payeeName = document.getElementById('payeeName').value;
             const bankCode = document.getElementById('bankCode').value;
@@ -320,14 +401,43 @@
                 return;
             }
             
-            if (currentReading <= lastReading) {
-                alert('本期電錶讀數必須大於上期讀數！');
-                return;
+            // 檢查各費用開關狀態
+            const enableElectricity = document.getElementById('enableElectricity').checked;
+            const enableRent = document.getElementById('enableRent').checked;
+            const enableWater = document.getElementById('enableWater').checked;
+            const enableGas = document.getElementById('enableGas').checked;
+            const enableManagement = document.getElementById('enableManagement').checked;
+            const enableOther = document.getElementById('enableOther').checked;
+            
+            // 計算電費
+            let electricityFee = 0;
+            let usage = 0;
+            let lastReading = 0;
+            let currentReading = 0;
+            let pricePerUnit = 0;
+            
+            if (enableElectricity) {
+                lastReading = parseFloat(document.getElementById('lastReading').value) || 0;
+                currentReading = parseFloat(document.getElementById('currentReading').value) || 0;
+                pricePerUnit = parseFloat(document.getElementById('pricePerUnit').value) || 0;
+                
+                if (currentReading <= lastReading) {
+                    alert('本期電錶讀數必須大於上期讀數！');
+                    return;
+                }
+                
+                usage = currentReading - lastReading;
+                electricityFee = Math.round(usage * pricePerUnit);
             }
             
-            const usage = currentReading - lastReading;
-            const electricityFee = Math.round(usage * pricePerUnit);
-            const totalAmount = electricityFee + rent + gasFee;
+            // 計算其他費用
+            const rent = enableRent ? (parseFloat(document.getElementById('rent').value) || 0) : 0;
+            const waterFee = enableWater ? (parseFloat(document.getElementById('waterFee').value) || 0) : 0;
+            const gasFee = enableGas ? (parseFloat(document.getElementById('gasFee').value) || 0) : 0;
+            const managementFee = enableManagement ? (parseFloat(document.getElementById('managementFee').value) || 0) : 0;
+            const otherFee = enableOther ? (parseFloat(document.getElementById('otherFee').value) || 0) : 0;
+            
+            const totalAmount = electricityFee + rent + waterFee + gasFee + managementFee + otherFee;
             
             // 更新設定 (記憶使用者的偏好)
             appData.settings = {
@@ -335,7 +445,13 @@
                 rent: rent,
                 bankCode: bankCode,
                 payeeName: payeeName,
-                accountNumber: accountNumber
+                accountNumber: accountNumber,
+                enableElectricity: enableElectricity,
+                enableRent: enableRent,
+                enableWater: enableWater,
+                enableGas: enableGas,
+                enableManagement: enableManagement,
+                enableOther: enableOther
             };
             
             // 新增一筆紀錄
@@ -347,9 +463,18 @@
                 usage: usage,
                 electricityFee: electricityFee,
                 rent: rent,
+                waterFee: waterFee,
                 gasFee: gasFee,
+                managementFee: managementFee,
+                otherFee: otherFee,
                 total: totalAmount,
-                pricePerUnit: pricePerUnit
+                pricePerUnit: pricePerUnit,
+                enableElectricity: enableElectricity,
+                enableRent: enableRent,
+                enableWater: enableWater,
+                enableGas: enableGas,
+                enableManagement: enableManagement,
+                enableOther: enableOther
             };
             
             // 把新紀錄加到最前面
@@ -361,11 +486,74 @@
             // 儲存歷史記錄到 localStorage
             saveToLocalStorage();
             
+            // 顯示結果
+            displayResult(newRecord);
+            
             // 更新介面
             renderHistory();
             generateReport(newRecord, appData.settings);
             
             alert('✅ 計算完成並已自動存檔！');
+        }
+        
+        // 顯示計算結果
+        function displayResult(record) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            
+            // 顯示用電量（僅當電費啟用時）
+            if (record.enableElectricity && record.usage > 0) {
+                document.getElementById('usageDisplay').style.display = 'block';
+                document.getElementById('usage').textContent = record.usage;
+                document.getElementById('electricityFeeDisplay').style.display = 'block';
+                document.getElementById('electricityFee').textContent = record.electricityFee.toLocaleString();
+            } else {
+                document.getElementById('usageDisplay').style.display = 'none';
+                document.getElementById('electricityFeeDisplay').style.display = 'none';
+            }
+            
+            // 顯示租金
+            if (record.enableRent && record.rent > 0) {
+                document.getElementById('rentDisplayDiv').style.display = 'block';
+                document.getElementById('rentDisplay').textContent = record.rent.toLocaleString();
+            } else {
+                document.getElementById('rentDisplayDiv').style.display = 'none';
+            }
+            
+            // 顯示水費
+            if (record.enableWater && record.waterFee > 0) {
+                document.getElementById('waterFeeDisplay').style.display = 'block';
+                document.getElementById('waterFeeDisplayAmount').textContent = record.waterFee.toLocaleString();
+            } else {
+                document.getElementById('waterFeeDisplay').style.display = 'none';
+            }
+            
+            // 顯示瓦斯費
+            if (record.enableGas && record.gasFee > 0) {
+                document.getElementById('gasFeeDisplayDiv').style.display = 'block';
+                document.getElementById('gasFeeDisplay').textContent = record.gasFee.toLocaleString();
+            } else {
+                document.getElementById('gasFeeDisplayDiv').style.display = 'none';
+            }
+            
+            // 顯示管理費
+            if (record.enableManagement && record.managementFee > 0) {
+                document.getElementById('managementFeeDisplay').style.display = 'block';
+                document.getElementById('managementFeeDisplayAmount').textContent = record.managementFee.toLocaleString();
+            } else {
+                document.getElementById('managementFeeDisplay').style.display = 'none';
+            }
+            
+            // 顯示其他費用
+            if (record.enableOther && record.otherFee > 0) {
+                document.getElementById('otherFeeDisplay').style.display = 'block';
+                document.getElementById('otherFeeDisplayAmount').textContent = record.otherFee.toLocaleString();
+            } else {
+                document.getElementById('otherFeeDisplay').style.display = 'none';
+            }
+            
+            // 顯示總金額
+            document.getElementById('totalAmount').textContent = record.total.toLocaleString();
         }
         
         function generateReport(record, settings) {
@@ -382,27 +570,72 @@
                          String(now.getDate()).padStart(2, '0');
             }
             
-            const report = `📅 ${dateStr} 房租電費通知
-⚡ 電費計算
-${record.currentReading} (本期) - ${record.lastReading} (上期) 
-= ${record.usage} 度
-${record.usage} 度 × ${record.pricePerUnit} = $${record.electricityFee}
-
-💰 應繳金額
-電費：$${record.electricityFee.toLocaleString()}
-房租：$${record.rent.toLocaleString()}
-瓦斯：$${record.gasFee.toLocaleString()}
-──────────────
-總計：$${record.total.toLocaleString()}
-
-🏦 匯款資訊
-(${settings.bankCode}) ${settings.accountNumber}
-戶名：${settings.payeeName}
-
-計算過程：
-${record.currentReading} - ${record.lastReading} = ${record.usage} 度
-${record.usage} × ${record.pricePerUnit} = ${record.electricityFee}
-${record.electricityFee} + ${record.rent} + ${record.gasFee} = ${record.total}`;
+            let report = `📅 ${dateStr} 房租費用通知\n\n`;
+            
+            // 電費計算部分
+            if (record.enableElectricity && record.usage > 0) {
+                report += `⚡ 電費計算\n`;
+                report += `${record.currentReading} (本期) - ${record.lastReading} (上期) \n`;
+                report += `= ${record.usage} 度\n`;
+                report += `${record.usage} 度 × ${record.pricePerUnit} = $${record.electricityFee}\n\n`;
+            }
+            
+            // 應繳金額部分
+            report += `💰 應繳金額\n`;
+            if (record.enableElectricity && record.electricityFee > 0) {
+                report += `電費：$${record.electricityFee.toLocaleString()}\n`;
+            }
+            if (record.enableRent && record.rent > 0) {
+                report += `房租：$${record.rent.toLocaleString()}\n`;
+            }
+            if (record.enableWater && record.waterFee > 0) {
+                report += `水費：$${record.waterFee.toLocaleString()}\n`;
+            }
+            if (record.enableGas && record.gasFee > 0) {
+                report += `瓦斯：$${record.gasFee.toLocaleString()}\n`;
+            }
+            if (record.enableManagement && record.managementFee > 0) {
+                report += `管理費：$${record.managementFee.toLocaleString()}\n`;
+            }
+            if (record.enableOther && record.otherFee > 0) {
+                report += `其他費用：$${record.otherFee.toLocaleString()}\n`;
+            }
+            report += `──────────────\n`;
+            report += `總計：$${record.total.toLocaleString()}\n\n`;
+            
+            // 匯款資訊
+            if (settings.bankCode && settings.accountNumber) {
+                report += `🏦 匯款資訊\n`;
+                report += `(${settings.bankCode}) ${settings.accountNumber}\n`;
+                report += `戶名：${settings.payeeName}\n\n`;
+            }
+            
+            // 計算過程
+            report += `計算過程：\n`;
+            const feeParts = [];
+            if (record.enableElectricity && record.usage > 0) {
+                report += `${record.currentReading} - ${record.lastReading} = ${record.usage} 度\n`;
+                report += `${record.usage} × ${record.pricePerUnit} = ${record.electricityFee}\n`;
+                feeParts.push(record.electricityFee);
+            }
+            if (record.enableRent && record.rent > 0) {
+                feeParts.push(record.rent);
+            }
+            if (record.enableWater && record.waterFee > 0) {
+                feeParts.push(record.waterFee);
+            }
+            if (record.enableGas && record.gasFee > 0) {
+                feeParts.push(record.gasFee);
+            }
+            if (record.enableManagement && record.managementFee > 0) {
+                feeParts.push(record.managementFee);
+            }
+            if (record.enableOther && record.otherFee > 0) {
+                feeParts.push(record.otherFee);
+            }
+            if (feeParts.length > 0) {
+                report += feeParts.join(' + ') + ` = ${record.total}`;
+            }
             
             document.getElementById('reportText').textContent = report;
             document.getElementById('reportSection').style.display = 'block';
@@ -433,9 +666,10 @@ ${record.electricityFee} + ${record.rent} + ${record.gasFee} = ${record.total}`;
                               String(date.getMonth() + 1).padStart(2, '0') + '/' + 
                               String(date.getDate()).padStart(2, '0');
                 
+                const usageText = (record.enableElectricity && record.usage > 0) ? `${record.usage} 度` : '-';
                 tr.innerHTML = `
                     <td>${dateStr}</td>
-                    <td>${record.usage} 度</td>
+                    <td>${usageText}</td>
                     <td style="color:#e74c3c; font-weight:bold;">$${record.total.toLocaleString()}</td>
                     <td>
                         <button class="delete-record" onclick="deleteRecord(${record.id})">刪除</button>
@@ -503,6 +737,26 @@ ${record.electricityFee} + ${record.rent} + ${record.gasFee} = ${record.total}`;
                     }
                     if (appData.settings.accountNumber) {
                         document.getElementById('accountNumber').value = appData.settings.accountNumber;
+                    }
+                    
+                    // 載入開關狀態
+                    if (appData.settings.enableElectricity !== undefined) {
+                        document.getElementById('enableElectricity').checked = appData.settings.enableElectricity;
+                    }
+                    if (appData.settings.enableRent !== undefined) {
+                        document.getElementById('enableRent').checked = appData.settings.enableRent;
+                    }
+                    if (appData.settings.enableWater !== undefined) {
+                        document.getElementById('enableWater').checked = appData.settings.enableWater;
+                    }
+                    if (appData.settings.enableGas !== undefined) {
+                        document.getElementById('enableGas').checked = appData.settings.enableGas;
+                    }
+                    if (appData.settings.enableManagement !== undefined) {
+                        document.getElementById('enableManagement').checked = appData.settings.enableManagement;
+                    }
+                    if (appData.settings.enableOther !== undefined) {
+                        document.getElementById('enableOther').checked = appData.settings.enableOther;
                     }
                     
                     renderHistory();
@@ -601,11 +855,20 @@ ${record.electricityFee} + ${record.rent} + ${record.gasFee} = ${record.total}`;
                     currentReading: document.getElementById('currentReading').value,
                     pricePerUnit: document.getElementById('pricePerUnit').value,
                     rent: document.getElementById('rent').value,
+                    waterFee: document.getElementById('waterFee').value,
                     gasFee: document.getElementById('gasFee').value,
+                    managementFee: document.getElementById('managementFee').value,
+                    otherFee: document.getElementById('otherFee').value,
                     billDate: document.getElementById('billDate').value,
                     payeeName: document.getElementById('payeeName').value,
                     bankCode: document.getElementById('bankCode').value,
-                    accountNumber: document.getElementById('accountNumber').value
+                    accountNumber: document.getElementById('accountNumber').value,
+                    enableElectricity: document.getElementById('enableElectricity').checked,
+                    enableRent: document.getElementById('enableRent').checked,
+                    enableWater: document.getElementById('enableWater').checked,
+                    enableGas: document.getElementById('enableGas').checked,
+                    enableManagement: document.getElementById('enableManagement').checked,
+                    enableOther: document.getElementById('enableOther').checked
                 };
                 localStorage.setItem('electricityCalculator_inputs', JSON.stringify(inputs));
             } catch (e) {
@@ -624,11 +887,22 @@ ${record.electricityFee} + ${record.rent} + ${record.gasFee} = ${record.total}`;
                     if (inputs.currentReading) document.getElementById('currentReading').value = inputs.currentReading;
                     if (inputs.pricePerUnit) document.getElementById('pricePerUnit').value = inputs.pricePerUnit;
                     if (inputs.rent) document.getElementById('rent').value = inputs.rent;
+                    if (inputs.waterFee !== undefined) document.getElementById('waterFee').value = inputs.waterFee;
                     if (inputs.gasFee !== undefined) document.getElementById('gasFee').value = inputs.gasFee;
+                    if (inputs.managementFee !== undefined) document.getElementById('managementFee').value = inputs.managementFee;
+                    if (inputs.otherFee !== undefined) document.getElementById('otherFee').value = inputs.otherFee;
                     if (inputs.billDate) document.getElementById('billDate').value = inputs.billDate;
                     if (inputs.payeeName) document.getElementById('payeeName').value = inputs.payeeName;
                     if (inputs.bankCode) document.getElementById('bankCode').value = inputs.bankCode;
                     if (inputs.accountNumber) document.getElementById('accountNumber').value = inputs.accountNumber;
+                    
+                    // 載入開關狀態
+                    if (inputs.enableElectricity !== undefined) document.getElementById('enableElectricity').checked = inputs.enableElectricity;
+                    if (inputs.enableRent !== undefined) document.getElementById('enableRent').checked = inputs.enableRent;
+                    if (inputs.enableWater !== undefined) document.getElementById('enableWater').checked = inputs.enableWater;
+                    if (inputs.enableGas !== undefined) document.getElementById('enableGas').checked = inputs.enableGas;
+                    if (inputs.enableManagement !== undefined) document.getElementById('enableManagement').checked = inputs.enableManagement;
+                    if (inputs.enableOther !== undefined) document.getElementById('enableOther').checked = inputs.enableOther;
                 }
             } catch (e) {
                 console.error('載入失敗:', e);
@@ -637,7 +911,7 @@ ${record.electricityFee} + ${record.rent} + ${record.gasFee} = ${record.total}`;
         
         // 為所有輸入欄位添加自動儲存功能
         function setupAutoSave() {
-            const inputIds = ['lastReading', 'currentReading', 'pricePerUnit', 'rent', 'gasFee', 'billDate', 'payeeName', 'bankCode', 'accountNumber'];
+            const inputIds = ['lastReading', 'currentReading', 'pricePerUnit', 'rent', 'gasFee', 'waterFee', 'managementFee', 'otherFee', 'billDate', 'payeeName', 'bankCode', 'accountNumber'];
             
             inputIds.forEach(id => {
                 const input = document.getElementById(id);
@@ -648,6 +922,31 @@ ${record.electricityFee} + ${record.rent} + ${record.gasFee} = ${record.total}`;
                     input.addEventListener('change', function() {
                         saveAllInputs();
                     });
+                }
+            });
+        }
+        
+        // 費用開關切換功能
+        function setupFeeToggles() {
+            const toggles = [
+                { checkbox: 'enableElectricity', fields: 'electricityFields' },
+                { checkbox: 'enableRent', fields: 'rentFields' },
+                { checkbox: 'enableWater', fields: 'waterFields' },
+                { checkbox: 'enableGas', fields: 'gasFields' },
+                { checkbox: 'enableManagement', fields: 'managementFields' },
+                { checkbox: 'enableOther', fields: 'otherFields' }
+            ];
+            
+            toggles.forEach(toggle => {
+                const checkbox = document.getElementById(toggle.checkbox);
+                const fields = document.getElementById(toggle.fields);
+                if (checkbox && fields) {
+                    checkbox.addEventListener('change', function() {
+                        fields.style.display = this.checked ? 'block' : 'none';
+                        saveAllInputs();
+                    });
+                    // 初始化顯示狀態
+                    fields.style.display = checkbox.checked ? 'block' : 'none';
                 }
             });
         }
@@ -673,6 +972,9 @@ ${record.electricityFee} + ${record.rent} + ${record.gasFee} = ${record.total}`;
             
             // 根據歷史紀錄自動填入「上期讀數」
             autoFillLastReading();
+            
+            // 設定費用開關功能
+            setupFeeToggles();
             
             // 設定自動儲存功能
             setupAutoSave();
