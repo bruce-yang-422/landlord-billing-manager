@@ -265,8 +265,20 @@ function generateReport(record, settings) {
 // 自動填入上期讀數 (找最近的一筆紀錄)
 function autoFillLastReading() {
     if (appData.records.length > 0) {
+        const latestRecord = appData.records[0];
         // 取最近一次的「本期」作為這次的「上期」
-        document.getElementById('lastReading').value = appData.records[0].currentReading;
+        if (latestRecord.currentReading !== undefined && latestRecord.currentReading !== null) {
+            const lastReadingInput = document.getElementById('lastReading');
+            // 如果上期讀數欄位為空，才自動填入
+            if (!lastReadingInput.value) {
+                lastReadingInput.value = latestRecord.currentReading;
+            }
+        }
+        // 如果本期讀數欄位為空，也填入最新記錄的本期讀數作為參考
+        const currentReadingInput = document.getElementById('currentReading');
+        if (!currentReadingInput.value && latestRecord.currentReading !== undefined && latestRecord.currentReading !== null) {
+            currentReadingInput.value = latestRecord.currentReading;
+        }
     }
 }
 
