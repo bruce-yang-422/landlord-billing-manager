@@ -519,11 +519,11 @@ ${record.electricityFee} + ${record.rent} + ${record.gasFee} = ${record.total}`;
                 const downloadAnchorNode = document.createElement('a');
                 downloadAnchorNode.setAttribute("href", dataStr);
                 // 使用固定檔名，每次匯出都會覆蓋同一個檔案，避免累積
-                downloadAnchorNode.setAttribute("download", "電費記錄備份.json");
+                downloadAnchorNode.setAttribute("download", "billing-records-backup.json");
                 document.body.appendChild(downloadAnchorNode);
                 downloadAnchorNode.click();
                 downloadAnchorNode.remove();
-                alert('✅ 資料已匯出！(檔名：電費記錄備份.json，已覆蓋舊檔案)');
+                alert('✅ 資料已匯出！(檔名：billing-records-backup.json，已覆蓋舊檔案)');
             } catch (e) {
                 alert('❌ 匯出失敗：' + e.message);
             }

@@ -15,7 +15,7 @@ A web tool for managing rent, electricity bills, and billing history for landlor
 
 ## 使用方式
 
-1. 直接在瀏覽器中開啟 `電費計算器.html`
+1. 直接在瀏覽器中開啟 `electricity-calculator.html`
 2. 填入帳單日期、電錶讀數、租金等資訊
 3. 點擊「計算並存檔」即可完成計算並保存記錄
 4. 使用「備份資料」功能匯出 JSON 備份檔
@@ -23,8 +23,8 @@ A web tool for managing rent, electricity bills, and billing history for landlor
 
 ## 檔案說明
 
-- `電費計算器.html` - 主要的電費計算器網頁應用
-- `電費記錄備份.json` - 資料備份檔案（包含設定與歷史記錄）
+- `electricity-calculator.html` - 主要的電費計算器網頁應用
+- `billing-records-backup.json` - 資料備份檔案（包含設定與歷史記錄）
 
 ## 技術說明
 
