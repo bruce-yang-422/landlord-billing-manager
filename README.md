@@ -3,6 +3,10 @@
 房東用的租金與電費計算管理工具，支援帳務歷史紀錄。  
 A web tool for managing rent, electricity bills, and billing history for landlords.
 
+## 🌐 線上使用
+
+**立即使用：** [https://bruce-yang-422.github.io/landlord-billing-manager/electricity-calculator.html](https://bruce-yang-422.github.io/landlord-billing-manager/electricity-calculator.html)
+
 ## 功能特色
 
 - ⚡ **電費計算**：自動計算用電度數與電費金額
@@ -15,7 +19,14 @@ A web tool for managing rent, electricity bills, and billing history for landlor
 
 ## 使用方式
 
-1. 直接在瀏覽器中開啟 `electricity-calculator.html`
+### 線上使用（推薦）
+
+直接透過 GitHub Pages 使用，無需下載：  
+👉 [https://bruce-yang-422.github.io/landlord-billing-manager/electricity-calculator.html](https://bruce-yang-422.github.io/landlord-billing-manager/electricity-calculator.html)
+
+### 本地使用
+
+1. 下載專案後，直接在瀏覽器中開啟 `electricity-calculator.html`
 2. 填入帳單日期、電錶讀數、租金等資訊
 3. 點擊「計算並存檔」即可完成計算並保存記錄
 4. 使用「備份資料」功能匯出 JSON 備份檔
