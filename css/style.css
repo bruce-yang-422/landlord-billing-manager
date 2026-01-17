@@ -45,6 +45,15 @@ h1 {
     gap: 16px;
 }
 
+/* 頂部區塊（帳單日期和租金） */
+.top-section .form-column-left {
+    order: 1;
+}
+
+.top-section .form-column-right {
+    order: 2;
+}
+
 /* 手機版時恢復單欄 */
 @media (max-width: 768px) {
     .form-columns {
@@ -55,6 +64,15 @@ h1 {
     .form-column-left,
     .form-column-right {
         width: 100%;
+    }
+    
+    /* 手機版時，日期優先顯示（order 值越小越先顯示） */
+    .top-section .form-column-left {
+        order: 1;
+    }
+    
+    .top-section .form-column-right {
+        order: 2;
     }
 }
 

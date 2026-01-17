@@ -10,10 +10,36 @@
     <div class="container">
         <h1>🏠 房東帳務管理工具</h1>
         
-        <!-- 帳單日期卡片（全寬） -->
-        <div class="info-card">
-            <label for="billDate">📅 帳單日期</label>
-            <input type="date" id="billDate" value="" placeholder="請選擇日期">
+        <!-- 帳單日期和租金（兩欄，PC版） -->
+        <div class="form-columns top-section">
+            <!-- 左欄：帳單日期 -->
+            <div class="form-column-left">
+                <div class="info-card">
+                    <label for="billDate">📅 帳單日期</label>
+                    <input type="date" id="billDate" value="" placeholder="請選擇日期">
+                </div>
+            </div>
+            
+            <!-- 右欄：租金 -->
+            <div class="form-column-right">
+                <div class="fee-section">
+                    <div class="fee-toggle-header">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enableRent" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <label for="enableRent" class="fee-label">🏠 租金</label>
+                    </div>
+                    <div id="rentFields" class="fee-fields">
+                        <div class="grid-row">
+                            <div>
+                                <label for="rent">🏠 租金（元）</label>
+                                <input type="number" id="rent" value="" placeholder="請輸入租金">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- 電費區塊（全寬） -->
@@ -109,25 +135,6 @@
         <div class="form-columns">
             <!-- 左欄 -->
             <div class="form-column-left">
-                <!-- 租金區塊 -->
-                <div class="fee-section">
-                    <div class="fee-toggle-header">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="enableRent" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <label for="enableRent" class="fee-label">🏠 租金</label>
-                    </div>
-                    <div id="rentFields" class="fee-fields">
-                        <div class="grid-row">
-                            <div>
-                                <label for="rent">🏠 租金（元）</label>
-                                <input type="number" id="rent" value="" placeholder="請輸入租金">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- 瓦斯費區塊 -->
                 <div class="fee-section">
                     <div class="fee-toggle-header">
