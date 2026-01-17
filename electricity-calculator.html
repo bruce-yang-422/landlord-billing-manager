@@ -149,6 +149,21 @@
                         <input type="number" id="gasFee" value="0" placeholder="請輸入瓦斯費">
                     </div>
                 </div>
+                
+                <!-- 管理費區塊 -->
+                <div class="fee-section">
+                    <div class="fee-toggle-header">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enableManagement">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <label for="enableManagement" class="fee-label">🏢 管理費</label>
+                    </div>
+                    <div id="managementFields" class="fee-fields" style="display: none;">
+                        <label for="managementFee">🏢 管理費（元）</label>
+                        <input type="number" id="managementFee" value="0" placeholder="請輸入管理費">
+                    </div>
+                </div>
             </div>
             
             <!-- 右欄 -->
@@ -165,21 +180,6 @@
                     <div id="waterFields" class="fee-fields" style="display: none;">
                         <label for="waterFee">💧 水費（元）</label>
                         <input type="number" id="waterFee" value="0" placeholder="請輸入水費">
-                    </div>
-                </div>
-                
-                <!-- 管理費區塊 -->
-                <div class="fee-section">
-                    <div class="fee-toggle-header">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="enableManagement">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <label for="enableManagement" class="fee-label">🏢 管理費</label>
-                    </div>
-                    <div id="managementFields" class="fee-fields" style="display: none;">
-                        <label for="managementFee">🏢 管理費（元）</label>
-                        <input type="number" id="managementFee" value="0" placeholder="請輸入管理費">
                     </div>
                 </div>
                 
@@ -209,6 +209,20 @@
                     <input type="text" id="payeeName" placeholder="戶名">
                 </div>
                 <input type="text" id="accountNumber" placeholder="銀行帳號">
+            </div>
+        </div>
+        
+        <!-- 備註欄位（全寬） -->
+        <div class="info-card notes-section">
+            <div class="notes-grid">
+                <div class="note-item">
+                    <label for="tenantNote" class="note-label">📝 租客備註（會顯示在LINE報表中）</label>
+                    <textarea id="tenantNote" rows="3" placeholder="此備註會顯示在LINE報表中給租客看到"></textarea>
+                </div>
+                <div class="note-item">
+                    <label for="landlordNote" class="note-label">🔒 房東備註（僅供記錄，不顯示給租客）</label>
+                    <textarea id="landlordNote" rows="3" placeholder="此備註僅供房東記錄，不會顯示在LINE報表中"></textarea>
+                </div>
             </div>
         </div>
         
@@ -260,6 +274,11 @@
         </div>
     </div>
 
+    <!-- JavaScript 模組 -->
+    <script src="js/data.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/calculation.js"></script>
+    <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
