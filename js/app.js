@@ -2,6 +2,10 @@
 
 // 頁面載入時初始化
 window.onload = function() {
+    // 先初始化主題（必須在其他初始化之前，確保主題正確應用）
+    initTheme();
+    setupThemeSelector();
+    
     // 設定今天的日期為預設值
     const today = new Date();
     const todayStr = today.getFullYear() + '-' + 

@@ -8,7 +8,17 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏠 房東帳務管理工具</h1>
+        <div class="header-section">
+            <h1>🏠 房東帳務管理工具</h1>
+            <div class="theme-selector">
+                <label for="themeSelect">🎨 主題：</label>
+                <select id="themeSelect" class="theme-select">
+                    <option value="light">Light（亮色）</option>
+                    <option value="dark">Dark（暗色）</option>
+                    <option value="auto">Auto（隨系統）</option>
+                </select>
+            </div>
+        </div>
         
         <!-- 帳單日期和租金（兩欄，PC版） -->
         <div class="form-columns top-section">
@@ -279,6 +289,7 @@
     <script src="js/storage.js"></script>
     <script src="js/calculation.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/theme.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

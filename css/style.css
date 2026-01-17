@@ -1,33 +1,130 @@
+/* CSS 變數定義 - 亮色主題（預設） */
+:root {
+    --bg-gradient-start: #f5f7fa;
+    --bg-gradient-end: #c3cfe2;
+    --container-bg: rgba(255, 255, 255, 0.95);
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --card-bg-hover: rgba(255, 255, 255, 0.9);
+    --text-primary: #1d1d1f;
+    --text-secondary: #666;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-color-hover: rgba(0, 0, 0, 0.12);
+    --input-bg: rgba(255, 255, 255, 0.8);
+    --input-bg-focus: #fff;
+    --shadow-sm: rgba(0, 0, 0, 0.04);
+    --shadow-md: rgba(0, 0, 0, 0.08);
+    --shadow-lg: rgba(0, 0, 0, 0.1);
+    --table-bg: white;
+    --table-header-bg: rgba(0, 0, 0, 0.02);
+    --table-hover: rgba(0, 122, 255, 0.04);
+    --result-bg-start: #f8f9fa;
+    --result-bg-end: #ffffff;
+    --report-bg: #f8f9fa;
+}
+
+/* 暗色主題 */
+[data-theme="dark"] {
+    --bg-gradient-start: #1a1a1a;
+    --bg-gradient-end: #2d2d2d;
+    --container-bg: rgba(28, 28, 30, 0.95);
+    --card-bg: rgba(44, 44, 46, 0.8);
+    --card-bg-hover: rgba(58, 58, 60, 0.9);
+    --text-primary: #f5f5f7;
+    --text-secondary: #a1a1a6;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-color-hover: rgba(255, 255, 255, 0.15);
+    --input-bg: rgba(44, 44, 46, 0.8);
+    --input-bg-focus: rgba(58, 58, 60, 0.9);
+    --shadow-sm: rgba(0, 0, 0, 0.3);
+    --shadow-md: rgba(0, 0, 0, 0.4);
+    --shadow-lg: rgba(0, 0, 0, 0.5);
+    --table-bg: rgba(44, 44, 46, 0.8);
+    --table-header-bg: rgba(255, 255, 255, 0.05);
+    --table-hover: rgba(0, 122, 255, 0.15);
+    --result-bg-start: #2d2d2d;
+    --result-bg-end: #1a1a1a;
+    --report-bg: #2d2d2d;
+}
+
 /* Apple 風格設計 */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', 'Helvetica Neue', Arial, sans-serif;
     max-width: 900px;
     margin: 0 auto;
     padding: 40px 20px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
     min-height: 100vh;
-    color: #1d1d1f;
+    color: var(--text-primary);
     line-height: 1.6;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--container-bg);
     backdrop-filter: blur(20px);
     padding: 40px;
     border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 20px 60px var(--shadow-lg), 0 0 0 1px var(--border-color);
     margin-bottom: 30px;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 標題區域 */
+.header-section {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.theme-selector {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+}
+
+.theme-selector label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.theme-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-select:hover {
+    border-color: var(--border-color-hover);
+    background: var(--input-bg-focus);
+}
+
+.theme-select:focus {
+    outline: none;
+    border-color: #007AFF;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
 h1 {
     text-align: center;
-    color: #1d1d1f;
+    color: var(--text-primary);
     margin-bottom: 40px;
     font-size: 32px;
     font-weight: 600;
     letter-spacing: -0.5px;
     padding-bottom: 20px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--border-color);
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 /* 兩欄布局容器（PC版） */
@@ -80,16 +177,17 @@ h1 {
 .info-card {
     margin-bottom: 16px;
     padding: 24px;
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--card-bg);
     border-radius: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px var(--shadow-sm);
     transition: all 0.2s ease;
 }
 
 .info-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 16px var(--shadow-md);
+    border-color: var(--border-color-hover);
+    background: var(--card-bg-hover);
 }
 
 .info-card label {
@@ -122,9 +220,10 @@ label {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    color: #1d1d1f;
+    color: var(--text-primary);
     font-size: 14px;
     letter-spacing: -0.2px;
+    transition: color 0.3s ease;
 }
 
 input[type="text"],
@@ -132,13 +231,13 @@ input[type="number"],
 input[type="date"] {
     width: 100%;
     padding: 14px 16px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     font-size: 16px;
     box-sizing: border-box;
     transition: all 0.2s ease;
-    background: rgba(255, 255, 255, 0.8);
-    color: #1d1d1f;
+    background: var(--input-bg);
+    color: var(--text-primary);
     font-family: inherit;
 }
 
@@ -148,13 +247,13 @@ input[type="date"]:focus {
     outline: none;
     border-color: #007AFF;
     box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
-    background: #fff;
+    background: var(--input-bg-focus);
 }
 
 input[type="text"]:hover,
 input[type="number"]:hover,
 input[type="date"]:hover {
-    border-color: rgba(0, 0, 0, 0.2);
+    border-color: var(--border-color-hover);
 }
 
 /* 按鈕群組 */
@@ -215,32 +314,35 @@ button:active {
 .result {
     margin-top: 32px;
     padding: 24px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--result-bg-start) 0%, var(--result-bg-end) 100%);
     border-radius: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 16px var(--shadow-sm);
+    transition: all 0.3s ease;
 }
 
 #reportSection h3 {
     font-size: 20px;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--text-primary);
     margin-bottom: 16px;
     letter-spacing: -0.3px;
+    transition: color 0.3s ease;
 }
 
 .report-area {
     margin-top: 20px;
     padding: 20px;
-    background: #f8f9fa;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--report-bg);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
     white-space: pre-wrap;
     min-height: 200px;
     font-size: 13px;
     line-height: 1.6;
-    color: #1d1d1f;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
 }
 
 .copy-btn {
@@ -273,24 +375,27 @@ button:active {
 .total-display {
     font-size: 28px;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--text-primary);
     margin: 20px 0;
     letter-spacing: -0.5px;
+    transition: color 0.3s ease;
 }
 
 /* 歷史紀錄表格 */
 .history-section {
     margin-top: 48px;
     padding-top: 32px;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--border-color);
+    transition: border-color 0.3s ease;
 }
 
 .history-section h3 {
     font-size: 24px;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--text-primary);
     margin-bottom: 20px;
     letter-spacing: -0.4px;
+    transition: color 0.3s ease;
 }
 
 table {
@@ -298,22 +403,24 @@ table {
     border-collapse: separate;
     border-spacing: 0;
     margin-top: 20px;
-    background: white;
+    background: var(--table-bg);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
 }
 
 th, td {
     padding: 16px;
     text-align: left;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
 }
 
 th {
-    background: rgba(0, 0, 0, 0.02);
-    color: #1d1d1f;
+    background: var(--table-header-bg);
+    color: var(--text-primary);
     font-weight: 600;
     font-size: 13px;
     text-transform: uppercase;
@@ -333,7 +440,7 @@ tr:last-child td {
 }
 
 tr:hover {
-    background: rgba(0, 122, 255, 0.04);
+    background: var(--table-hover);
 }
 
 .delete-record {
@@ -378,16 +485,17 @@ tr:hover {
 .fee-section {
     margin-bottom: 20px;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.6);
+    background: var(--card-bg);
     border-radius: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px var(--shadow-sm);
     transition: all 0.2s ease;
 }
 
 .fee-section:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 16px var(--shadow-md);
+    border-color: var(--border-color-hover);
+    background: var(--card-bg-hover);
 }
 
 .fee-fields {
@@ -468,15 +576,16 @@ tr:hover {
 .fee-label {
     margin: 0;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--text-primary);
     font-size: 16px;
     cursor: pointer;
     letter-spacing: -0.2px;
+    transition: color 0.3s ease;
 }
 
 /* 收款資訊區塊 */
 .payment-info-section {
-    background: rgba(248, 249, 250, 0.8);
+    background: var(--card-bg);
 }
 
 .payment-label {
@@ -506,7 +615,7 @@ tr:hover {
 
 /* 備註欄位樣式 */
 .notes-section {
-    background: rgba(248, 249, 250, 0.8);
+    background: var(--card-bg);
 }
 
 .notes-grid {
@@ -531,13 +640,13 @@ tr:hover {
 .notes-section textarea {
     width: 100%;
     padding: 12px 16px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     font-size: 14px;
     box-sizing: border-box;
     transition: all 0.2s ease;
-    background: rgba(255, 255, 255, 0.8);
-    color: #1d1d1f;
+    background: var(--input-bg);
+    color: var(--text-primary);
     font-family: inherit;
     resize: vertical;
     min-height: 80px;
@@ -547,11 +656,11 @@ tr:hover {
     outline: none;
     border-color: #007AFF;
     box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
-    background: #fff;
+    background: var(--input-bg-focus);
 }
 
 .notes-section textarea:hover {
-    border-color: rgba(0, 0, 0, 0.2);
+    border-color: var(--border-color-hover);
 }
 
 /* 手機版：銀行代碼和戶名改為垂直排列 */
@@ -564,6 +673,16 @@ tr:hover {
     .notes-grid {
         grid-template-columns: 1fr;
         gap: 16px;
+    }
+    
+    .theme-selector {
+        position: static;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    
+    .header-section {
+        margin-bottom: 30px;
     }
 }
 
