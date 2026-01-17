@@ -16,7 +16,7 @@
 
 ## 🌐 線上使用
 
-**立即使用：** [https://bruce-yang-422.github.io/landlord-billing-manager/electricity-calculator.html](https://bruce-yang-422.github.io/landlord-billing-manager/electricity-calculator.html)
+**立即使用：** [https://bruce-yang-422.github.io/landlord-billing-manager/](https://bruce-yang-422.github.io/landlord-billing-manager/)
 
 ## 📊 新舊制切換功能對照
 
@@ -69,11 +69,11 @@
 ### 線上使用（推薦）
 
 直接透過 GitHub Pages 使用，無需下載：  
-👉 [https://bruce-yang-422.github.io/landlord-billing-manager/electricity-calculator.html](https://bruce-yang-422.github.io/landlord-billing-manager/electricity-calculator.html)
+👉 [https://bruce-yang-422.github.io/landlord-billing-manager/](https://bruce-yang-422.github.io/landlord-billing-manager/)
 
 ### 本地使用
 
-1. 下載專案後，直接在瀏覽器中開啟 `electricity-calculator.html`
+1. 下載專案後，直接在瀏覽器中開啟 `index.html`
 2. 填入帳單日期、電錶讀數、租金等資訊
 3. （選填）開啟電費新制，填入台電帳單資訊
 4. （選填）填入租客備註和房東備註
@@ -84,7 +84,7 @@
 ## 檔案說明
 
 ### 主要檔案
-- `electricity-calculator.html` - 主要的帳務管理工具網頁應用
+- `index.html` - 主要的帳務管理工具網頁應用
 
 ### 樣式檔案
 - `css/style.css` - 統一樣式表（Apple 風格設計）
