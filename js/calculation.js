@@ -1,12 +1,8 @@
 // 計算並儲存
 function calculateAndSave() {
-    const billDate = document.getElementById('billDate').value;
-    const payeeName = document.getElementById('payeeName').value;
-    const bankCode = document.getElementById('bankCode').value;
-    const accountNumber = document.getElementById('accountNumber').value;
-    // 備註欄位：確保即使為空也儲存為空字串，以對齊未來匯入使用
-    const tenantNote = document.getElementById('tenantNote') ? (document.getElementById('tenantNote').value || '') : '';
-    const landlordNote = document.getElementById('landlordNote') ? (document.getElementById('landlordNote').value || '') : '';
+    // 安全取得元素值，避免元素不存在時出錯
+    const billDateInput = document.getElementById('billDate');
+    const billDate = billDateInput ? billDateInput.value : '';
     
     // 驗證
     if (!billDate) {
@@ -14,13 +10,32 @@ function calculateAndSave() {
         return;
     }
     
-    // 檢查各費用開關狀態
-    const enableElectricity = document.getElementById('enableElectricity').checked;
-    const enableRent = document.getElementById('enableRent').checked;
-    const enableWater = document.getElementById('enableWater').checked;
-    const enableGas = document.getElementById('enableGas').checked;
-    const enableManagement = document.getElementById('enableManagement').checked;
-    const enableOther = document.getElementById('enableOther').checked;
+    const payeeNameInput = document.getElementById('payeeName');
+    const payeeName = payeeNameInput ? payeeNameInput.value : '';
+    const bankCodeInput = document.getElementById('bankCode');
+    const bankCode = bankCodeInput ? bankCodeInput.value : '';
+    const accountNumberInput = document.getElementById('accountNumber');
+    const accountNumber = accountNumberInput ? accountNumberInput.value : '';
+    
+    // 備註欄位：確保即使為空也儲存為空字串，以對齊未來匯入使用
+    const tenantNoteInput = document.getElementById('tenantNote');
+    const tenantNote = tenantNoteInput ? (tenantNoteInput.value || '') : '';
+    const landlordNoteInput = document.getElementById('landlordNote');
+    const landlordNote = landlordNoteInput ? (landlordNoteInput.value || '') : '';
+    
+    // 檢查各費用開關狀態（安全檢查）
+    const enableElectricityInput = document.getElementById('enableElectricity');
+    const enableElectricity = enableElectricityInput ? enableElectricityInput.checked : false;
+    const enableRentInput = document.getElementById('enableRent');
+    const enableRent = enableRentInput ? enableRentInput.checked : false;
+    const enableWaterInput = document.getElementById('enableWater');
+    const enableWater = enableWaterInput ? enableWaterInput.checked : false;
+    const enableGasInput = document.getElementById('enableGas');
+    const enableGas = enableGasInput ? enableGasInput.checked : false;
+    const enableManagementInput = document.getElementById('enableManagement');
+    const enableManagement = enableManagementInput ? enableManagementInput.checked : false;
+    const enableOtherInput = document.getElementById('enableOther');
+    const enableOther = enableOtherInput ? enableOtherInput.checked : false;
     
     // 計算電費
     let electricityFee = 0;
@@ -29,15 +44,19 @@ function calculateAndSave() {
     let currentReading = 0;
     let pricePerUnit = 0;
     
-    // 新制法規相關變數
-    const enableNewRegulation = document.getElementById('enableNewRegulation').checked;
-    const hasIndependentMeter = document.getElementById('hasIndependentMeter').checked;
-    const taipowerBillAmount = parseFloat(document.getElementById('taipowerBillAmount').value) || 0;
-    const taipowerBillUsage = parseFloat(document.getElementById('taipowerBillUsage').value) || 0;
+    // 新制法規相關變數（安全取得，避免元素不存在時出錯）
+    const enableNewRegulation = document.getElementById('enableNewRegulation') ? document.getElementById('enableNewRegulation').checked : false;
+    const hasIndependentMeter = document.getElementById('hasIndependentMeter') ? document.getElementById('hasIndependentMeter').checked : false;
+    const taipowerBillAmountInput = document.getElementById('taipowerBillAmount');
+    const taipowerBillUsageInput = document.getElementById('taipowerBillUsage');
+    const taipowerBillAmount = taipowerBillAmountInput ? (parseFloat(taipowerBillAmountInput.value) || 0) : 0;
+    const taipowerBillUsage = taipowerBillUsageInput ? (parseFloat(taipowerBillUsageInput.value) || 0) : 0;
     
     if (enableElectricity) {
-        lastReading = parseFloat(document.getElementById('lastReading').value) || 0;
-        currentReading = parseFloat(document.getElementById('currentReading').value) || 0;
+        const lastReadingInput = document.getElementById('lastReading');
+        const currentReadingInput = document.getElementById('currentReading');
+        lastReading = lastReadingInput ? (parseFloat(lastReadingInput.value) || 0) : 0;
+        currentReading = currentReadingInput ? (parseFloat(currentReadingInput.value) || 0) : 0;
         
         // 新制模式：有獨立電表時，從台電帳單計算單價
         if (enableNewRegulation && hasIndependentMeter) {
@@ -46,9 +65,11 @@ function calculateAndSave() {
                 return;
             }
             pricePerUnit = Math.round((taipowerBillAmount / taipowerBillUsage) * 10) / 10;
-            document.getElementById('pricePerUnit').value = pricePerUnit;
+            const pricePerUnitInput = document.getElementById('pricePerUnit');
+            if (pricePerUnitInput) pricePerUnitInput.value = pricePerUnit;
         } else {
-            pricePerUnit = parseFloat(document.getElementById('pricePerUnit').value) || 0;
+            const pricePerUnitInput = document.getElementById('pricePerUnit');
+            pricePerUnit = pricePerUnitInput ? (parseFloat(pricePerUnitInput.value) || 0) : 0;
             
             if (enableNewRegulation && !hasIndependentMeter) {
                 if (pricePerUnit <= 0) {
@@ -76,12 +97,17 @@ function calculateAndSave() {
         }
     }
     
-    // 計算其他費用
-    const rent = enableRent ? (parseFloat(document.getElementById('rent').value) || 0) : 0;
-    const waterFee = enableWater ? (parseFloat(document.getElementById('waterFee').value) || 0) : 0;
-    const gasFee = enableGas ? (parseFloat(document.getElementById('gasFee').value) || 0) : 0;
-    const managementFee = enableManagement ? (parseFloat(document.getElementById('managementFee').value) || 0) : 0;
-    const otherFee = enableOther ? (parseFloat(document.getElementById('otherFee').value) || 0) : 0;
+    // 計算其他費用（安全取得元素值）
+    const rentInput = document.getElementById('rent');
+    const rent = enableRent && rentInput ? (parseFloat(rentInput.value) || 0) : 0;
+    const waterFeeInput = document.getElementById('waterFee');
+    const waterFee = enableWater && waterFeeInput ? (parseFloat(waterFeeInput.value) || 0) : 0;
+    const gasFeeInput = document.getElementById('gasFee');
+    const gasFee = enableGas && gasFeeInput ? (parseFloat(gasFeeInput.value) || 0) : 0;
+    const managementFeeInput = document.getElementById('managementFee');
+    const managementFee = enableManagement && managementFeeInput ? (parseFloat(managementFeeInput.value) || 0) : 0;
+    const otherFeeInput = document.getElementById('otherFee');
+    const otherFee = enableOther && otherFeeInput ? (parseFloat(otherFeeInput.value) || 0) : 0;
     
     const totalAmount = electricityFee + rent + waterFee + gasFee + managementFee + otherFee;
     
@@ -147,47 +173,94 @@ function calculateAndSave() {
 // 顯示計算結果
 function displayResult(record) {
     const resultDiv = document.getElementById('result');
+    if (!resultDiv) return;
     resultDiv.style.display = 'block';
     
     // 用電量顯示
     const usageDisplay = document.getElementById('usageDisplay');
-    if (record.enableElectricity && record.usage > 0) {
-        usageDisplay.style.display = 'block';
-        document.getElementById('usage').textContent = record.usage;
-    } else {
-        usageDisplay.style.display = 'none';
+    const usageElement = document.getElementById('usage');
+    if (usageDisplay && usageElement) {
+        if (record.enableElectricity && record.usage > 0) {
+            usageDisplay.style.display = 'block';
+            usageElement.textContent = record.usage;
+        } else {
+            usageDisplay.style.display = 'none';
+        }
     }
     
-    // 各項費用顯示
-    document.getElementById('electricityFeeDisplay').style.display = record.enableElectricity && record.electricityFee > 0 ? 'block' : 'none';
-    document.getElementById('electricityFee').textContent = record.electricityFee.toLocaleString();
+    // 各項費用顯示（安全檢查元素是否存在）
+    const electricityFeeDisplay = document.getElementById('electricityFeeDisplay');
+    const electricityFeeElement = document.getElementById('electricityFee');
+    if (electricityFeeDisplay && electricityFeeElement) {
+        electricityFeeDisplay.style.display = record.enableElectricity && record.electricityFee > 0 ? 'block' : 'none';
+        electricityFeeElement.textContent = record.electricityFee.toLocaleString();
+    }
     
-    document.getElementById('rentDisplayDiv').style.display = record.enableRent && record.rent > 0 ? 'block' : 'none';
-    document.getElementById('rentDisplay').textContent = record.rent.toLocaleString();
+    const rentDisplayDiv = document.getElementById('rentDisplayDiv');
+    const rentDisplayElement = document.getElementById('rentDisplay');
+    if (rentDisplayDiv && rentDisplayElement) {
+        rentDisplayDiv.style.display = record.enableRent && record.rent > 0 ? 'block' : 'none';
+        rentDisplayElement.textContent = record.rent.toLocaleString();
+    }
     
-    document.getElementById('waterFeeDisplay').style.display = record.enableWater && record.waterFee > 0 ? 'block' : 'none';
-    document.getElementById('waterFeeDisplayAmount').textContent = record.waterFee.toLocaleString();
+    const waterFeeDisplay = document.getElementById('waterFeeDisplay');
+    const waterFeeDisplayAmount = document.getElementById('waterFeeDisplayAmount');
+    if (waterFeeDisplay && waterFeeDisplayAmount) {
+        waterFeeDisplay.style.display = record.enableWater && record.waterFee > 0 ? 'block' : 'none';
+        waterFeeDisplayAmount.textContent = record.waterFee.toLocaleString();
+    }
     
-    document.getElementById('gasFeeDisplayDiv').style.display = record.enableGas && record.gasFee > 0 ? 'block' : 'none';
-    document.getElementById('gasFeeDisplay').textContent = record.gasFee.toLocaleString();
+    const gasFeeDisplayDiv = document.getElementById('gasFeeDisplayDiv');
+    const gasFeeDisplay = document.getElementById('gasFeeDisplay');
+    if (gasFeeDisplayDiv && gasFeeDisplay) {
+        gasFeeDisplayDiv.style.display = record.enableGas && record.gasFee > 0 ? 'block' : 'none';
+        gasFeeDisplay.textContent = record.gasFee.toLocaleString();
+    }
     
-    document.getElementById('managementFeeDisplay').style.display = record.enableManagement && record.managementFee > 0 ? 'block' : 'none';
-    document.getElementById('managementFeeDisplayAmount').textContent = record.managementFee.toLocaleString();
+    const managementFeeDisplay = document.getElementById('managementFeeDisplay');
+    const managementFeeDisplayAmount = document.getElementById('managementFeeDisplayAmount');
+    if (managementFeeDisplay && managementFeeDisplayAmount) {
+        managementFeeDisplay.style.display = record.enableManagement && record.managementFee > 0 ? 'block' : 'none';
+        managementFeeDisplayAmount.textContent = record.managementFee.toLocaleString();
+    }
     
-    document.getElementById('otherFeeDisplay').style.display = record.enableOther && record.otherFee > 0 ? 'block' : 'none';
-    document.getElementById('otherFeeDisplayAmount').textContent = record.otherFee.toLocaleString();
+    const otherFeeDisplay = document.getElementById('otherFeeDisplay');
+    const otherFeeDisplayAmount = document.getElementById('otherFeeDisplayAmount');
+    if (otherFeeDisplay && otherFeeDisplayAmount) {
+        otherFeeDisplay.style.display = record.enableOther && record.otherFee > 0 ? 'block' : 'none';
+        otherFeeDisplayAmount.textContent = record.otherFee.toLocaleString();
+    }
     
-    document.getElementById('totalAmount').textContent = record.total.toLocaleString();
+    const totalAmountElement = document.getElementById('totalAmount');
+    if (totalAmountElement) {
+        totalAmountElement.textContent = record.total.toLocaleString();
+    }
 }
 
 // 生成LINE報表（包含租客備註）
 function generateReport(record, settings) {
     let dateStr;
     if (record.date) {
-        const date = new Date(record.date);
-        dateStr = date.getFullYear() + '/' + 
-                 String(date.getMonth() + 1).padStart(2, '0') + '/' + 
-                 String(date.getDate()).padStart(2, '0');
+        try {
+            const date = new Date(record.date);
+            if (!isNaN(date.getTime())) {
+                dateStr = date.getFullYear() + '/' + 
+                         String(date.getMonth() + 1).padStart(2, '0') + '/' + 
+                         String(date.getDate()).padStart(2, '0');
+            } else {
+                // 日期無效，使用今天
+                const now = new Date();
+                dateStr = now.getFullYear() + '/' + 
+                         String(now.getMonth() + 1).padStart(2, '0') + '/' + 
+                         String(now.getDate()).padStart(2, '0');
+            }
+        } catch (e) {
+            // 日期解析失敗，使用今天
+            const now = new Date();
+            dateStr = now.getFullYear() + '/' + 
+                     String(now.getMonth() + 1).padStart(2, '0') + '/' + 
+                     String(now.getDate()).padStart(2, '0');
+        }
     } else {
         const now = new Date();
         dateStr = now.getFullYear() + '/' + 
@@ -268,8 +341,14 @@ function generateReport(record, settings) {
         report += feeParts.join(' + ') + ` = ${record.total}`;
     }
     
-    document.getElementById('reportText').textContent = report;
-    document.getElementById('reportSection').style.display = 'block';
+    const reportTextElement = document.getElementById('reportText');
+    const reportSectionElement = document.getElementById('reportSection');
+    if (reportTextElement) {
+        reportTextElement.textContent = report;
+    }
+    if (reportSectionElement) {
+        reportSectionElement.style.display = 'block';
+    }
 }
 
 // 自動填入上期讀數
@@ -279,12 +358,12 @@ function autoFillLastReading() {
         const lastReadingInput = document.getElementById('lastReading');
         const currentReadingInput = document.getElementById('currentReading');
         
-        if (latestRecord.currentReading && !lastReadingInput.value) {
+        if (latestRecord.currentReading && lastReadingInput && !lastReadingInput.value) {
             lastReadingInput.value = latestRecord.currentReading;
         }
         
         // 如果本期讀數為空，也填入最新記錄的讀數作為參考
-        if (latestRecord.currentReading && !currentReadingInput.value) {
+        if (latestRecord.currentReading && currentReadingInput && !currentReadingInput.value) {
             currentReadingInput.value = latestRecord.currentReading;
         }
     }
@@ -292,7 +371,12 @@ function autoFillLastReading() {
 
 // 複製報表
 function copyReport() {
-    const reportText = document.getElementById('reportText').textContent;
+    const reportTextElement = document.getElementById('reportText');
+    if (!reportTextElement) {
+        alert('❌ 找不到報表內容');
+        return;
+    }
+    const reportText = reportTextElement.textContent;
     
     if (navigator.clipboard) {
         navigator.clipboard.writeText(reportText).then(() => {

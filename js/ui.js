@@ -10,10 +10,20 @@ function renderHistory() {
     
     appData.records.forEach(record => {
         const tr = document.createElement('tr');
-        const date = new Date(record.date);
-        const dateStr = date.getFullYear() + '/' + 
-                      String(date.getMonth() + 1).padStart(2, '0') + '/' + 
-                      String(date.getDate()).padStart(2, '0');
+        // 安全處理日期，避免無效日期格式
+        let dateStr = '無日期';
+        if (record.date) {
+            try {
+                const date = new Date(record.date);
+                if (!isNaN(date.getTime())) {
+                    dateStr = date.getFullYear() + '/' + 
+                             String(date.getMonth() + 1).padStart(2, '0') + '/' + 
+                             String(date.getDate()).padStart(2, '0');
+                }
+            } catch (e) {
+                console.error('日期格式錯誤:', record.date, e);
+            }
+        }
         
         const usageText = (record.enableElectricity && record.usage > 0) ? `${record.usage} 度` : '-';
         
@@ -52,7 +62,10 @@ function loadRecord(id) {
     const record = appData.records.find(r => r.id === id);
     if(record) {
         generateReport(record, appData.settings);
-        document.getElementById('reportSection').scrollIntoView({behavior: 'smooth'});
+        const reportSection = document.getElementById('reportSection');
+        if (reportSection) {
+            reportSection.scrollIntoView({behavior: 'smooth'});
+        }
     }
 }
 

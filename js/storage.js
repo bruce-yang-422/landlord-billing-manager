@@ -17,52 +17,61 @@ function loadFromLocalStorage() {
             appData = normalizeData(parsedData);
             
             // 還原設定值到 UI
-            if (appData.settings.pricePerUnit) {
-                document.getElementById('pricePerUnit').value = appData.settings.pricePerUnit;
+            if (appData.settings.pricePerUnit !== undefined && appData.settings.pricePerUnit !== null) {
+                const priceInput = document.getElementById('pricePerUnit');
+                if (priceInput) priceInput.value = appData.settings.pricePerUnit;
             }
-            if (appData.settings.rent) {
-                document.getElementById('rent').value = appData.settings.rent;
+            if (appData.settings.rent !== undefined && appData.settings.rent !== null) {
+                const rentInput = document.getElementById('rent');
+                if (rentInput) rentInput.value = appData.settings.rent;
             }
-            if (appData.settings.bankCode) {
-                document.getElementById('bankCode').value = appData.settings.bankCode;
+            if (appData.settings.bankCode !== undefined && appData.settings.bankCode !== null) {
+                const bankCodeInput = document.getElementById('bankCode');
+                if (bankCodeInput) bankCodeInput.value = appData.settings.bankCode;
             }
-            if (appData.settings.payeeName) {
-                document.getElementById('payeeName').value = appData.settings.payeeName;
+            if (appData.settings.payeeName !== undefined && appData.settings.payeeName !== null) {
+                const payeeNameInput = document.getElementById('payeeName');
+                if (payeeNameInput) payeeNameInput.value = appData.settings.payeeName;
             }
-            if (appData.settings.accountNumber) {
-                document.getElementById('accountNumber').value = appData.settings.accountNumber;
-            }
-            
-            // 載入備註欄位（新版功能）
-            if (appData.settings.tenantNote && document.getElementById('tenantNote')) {
-                document.getElementById('tenantNote').value = appData.settings.tenantNote;
-            }
-            if (appData.settings.landlordNote && document.getElementById('landlordNote')) {
-                document.getElementById('landlordNote').value = appData.settings.landlordNote;
+            if (appData.settings.accountNumber !== undefined && appData.settings.accountNumber !== null) {
+                const accountInput = document.getElementById('accountNumber');
+                if (accountInput) accountInput.value = appData.settings.accountNumber;
             }
             
-            // 載入開關狀態
-            if (appData.settings.enableElectricity !== undefined) {
-                document.getElementById('enableElectricity').checked = appData.settings.enableElectricity;
-            } else {
-                document.getElementById('enableElectricity').checked = true;
+            // 載入備註欄位（新版功能，即使為空也載入以確保一致性）
+            const tenantNoteInput = document.getElementById('tenantNote');
+            if (tenantNoteInput && appData.settings.tenantNote !== undefined) {
+                tenantNoteInput.value = appData.settings.tenantNote || '';
             }
-            if (appData.settings.enableRent !== undefined) {
-                document.getElementById('enableRent').checked = appData.settings.enableRent;
-            } else {
-                document.getElementById('enableRent').checked = true;
+            const landlordNoteInput = document.getElementById('landlordNote');
+            if (landlordNoteInput && appData.settings.landlordNote !== undefined) {
+                landlordNoteInput.value = appData.settings.landlordNote || '';
             }
-            if (appData.settings.enableWater !== undefined) {
-                document.getElementById('enableWater').checked = appData.settings.enableWater;
+            
+            // 載入開關狀態（安全檢查元素是否存在）
+            const enableElectricityInput = document.getElementById('enableElectricity');
+            if (enableElectricityInput) {
+                enableElectricityInput.checked = appData.settings.enableElectricity !== undefined ? appData.settings.enableElectricity : true;
             }
-            if (appData.settings.enableGas !== undefined) {
-                document.getElementById('enableGas').checked = appData.settings.enableGas;
+            const enableRentInput = document.getElementById('enableRent');
+            if (enableRentInput) {
+                enableRentInput.checked = appData.settings.enableRent !== undefined ? appData.settings.enableRent : true;
             }
-            if (appData.settings.enableManagement !== undefined) {
-                document.getElementById('enableManagement').checked = appData.settings.enableManagement;
+            const enableWaterInput = document.getElementById('enableWater');
+            if (enableWaterInput && appData.settings.enableWater !== undefined) {
+                enableWaterInput.checked = appData.settings.enableWater;
             }
-            if (appData.settings.enableOther !== undefined) {
-                document.getElementById('enableOther').checked = appData.settings.enableOther;
+            const enableGasInput = document.getElementById('enableGas');
+            if (enableGasInput && appData.settings.enableGas !== undefined) {
+                enableGasInput.checked = appData.settings.enableGas;
+            }
+            const enableManagementInput = document.getElementById('enableManagement');
+            if (enableManagementInput && appData.settings.enableManagement !== undefined) {
+                enableManagementInput.checked = appData.settings.enableManagement;
+            }
+            const enableOtherInput = document.getElementById('enableOther');
+            if (enableOtherInput && appData.settings.enableOther !== undefined) {
+                enableOtherInput.checked = appData.settings.enableOther;
             }
             
             // 儲存標準化後的資料
@@ -125,32 +134,42 @@ function importData(input) {
 // 儲存所有輸入值到 localStorage（即時記憶）
 function saveAllInputs() {
     try {
+        // 安全取得元素值，避免元素不存在時出錯
+        const getValue = (id) => {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        };
+        const getChecked = (id) => {
+            const el = document.getElementById(id);
+            return el ? el.checked : false;
+        };
+        
         const inputs = {
-            lastReading: document.getElementById('lastReading').value,
-            currentReading: document.getElementById('currentReading').value,
-            pricePerUnit: document.getElementById('pricePerUnit').value,
-            rent: document.getElementById('rent').value,
-            waterFee: document.getElementById('waterFee').value,
-            gasFee: document.getElementById('gasFee').value,
-            managementFee: document.getElementById('managementFee').value,
-            otherFee: document.getElementById('otherFee').value,
-            billDate: document.getElementById('billDate').value,
-            payeeName: document.getElementById('payeeName').value,
-            bankCode: document.getElementById('bankCode').value,
-            accountNumber: document.getElementById('accountNumber').value,
-            enableElectricity: document.getElementById('enableElectricity').checked,
-            enableRent: document.getElementById('enableRent').checked,
-            enableWater: document.getElementById('enableWater').checked,
-            enableGas: document.getElementById('enableGas').checked,
-            enableManagement: document.getElementById('enableManagement').checked,
-            enableOther: document.getElementById('enableOther').checked,
-            enableNewRegulation: document.getElementById('enableNewRegulation') ? document.getElementById('enableNewRegulation').checked : false,
-            hasIndependentMeter: document.getElementById('hasIndependentMeter') ? document.getElementById('hasIndependentMeter').checked : false,
-            taipowerBillAmount: document.getElementById('taipowerBillAmount') ? document.getElementById('taipowerBillAmount').value : '',
-            taipowerBillUsage: document.getElementById('taipowerBillUsage') ? document.getElementById('taipowerBillUsage').value : '',
+            lastReading: getValue('lastReading'),
+            currentReading: getValue('currentReading'),
+            pricePerUnit: getValue('pricePerUnit'),
+            rent: getValue('rent'),
+            waterFee: getValue('waterFee'),
+            gasFee: getValue('gasFee'),
+            managementFee: getValue('managementFee'),
+            otherFee: getValue('otherFee'),
+            billDate: getValue('billDate'),
+            payeeName: getValue('payeeName'),
+            bankCode: getValue('bankCode'),
+            accountNumber: getValue('accountNumber'),
+            enableElectricity: getChecked('enableElectricity'),
+            enableRent: getChecked('enableRent'),
+            enableWater: getChecked('enableWater'),
+            enableGas: getChecked('enableGas'),
+            enableManagement: getChecked('enableManagement'),
+            enableOther: getChecked('enableOther'),
+            enableNewRegulation: getChecked('enableNewRegulation'),
+            hasIndependentMeter: getChecked('hasIndependentMeter'),
+            taipowerBillAmount: getValue('taipowerBillAmount'),
+            taipowerBillUsage: getValue('taipowerBillUsage'),
             // 備註欄位：確保即使為空也儲存為空字串，以對齊未來匯入使用
-            tenantNote: document.getElementById('tenantNote') ? (document.getElementById('tenantNote').value || '') : '',
-            landlordNote: document.getElementById('landlordNote') ? (document.getElementById('landlordNote').value || '') : ''
+            tenantNote: getValue('tenantNote') || '',
+            landlordNote: getValue('landlordNote') || ''
         };
         localStorage.setItem('electricityCalculator_inputs', JSON.stringify(inputs));
     } catch (e) {
@@ -165,18 +184,43 @@ function loadAllInputs() {
         if (saved) {
             const inputs = JSON.parse(saved);
             
-            if (inputs.lastReading) document.getElementById('lastReading').value = inputs.lastReading;
-            if (inputs.currentReading) document.getElementById('currentReading').value = inputs.currentReading;
-            if (inputs.pricePerUnit) document.getElementById('pricePerUnit').value = inputs.pricePerUnit;
-            if (inputs.rent) document.getElementById('rent').value = inputs.rent;
+            // 使用 !== undefined 檢查，避免值為0或空字串時無法載入
+            if (inputs.lastReading !== undefined && inputs.lastReading !== null) {
+                const lastReadingInput = document.getElementById('lastReading');
+                if (lastReadingInput) lastReadingInput.value = inputs.lastReading;
+            }
+            if (inputs.currentReading !== undefined && inputs.currentReading !== null) {
+                const currentReadingInput = document.getElementById('currentReading');
+                if (currentReadingInput) currentReadingInput.value = inputs.currentReading;
+            }
+            if (inputs.pricePerUnit !== undefined && inputs.pricePerUnit !== null) {
+                const priceInput = document.getElementById('pricePerUnit');
+                if (priceInput) priceInput.value = inputs.pricePerUnit;
+            }
+            if (inputs.rent !== undefined && inputs.rent !== null) {
+                const rentInput = document.getElementById('rent');
+                if (rentInput) rentInput.value = inputs.rent;
+            }
             if (inputs.waterFee !== undefined) document.getElementById('waterFee').value = inputs.waterFee;
             if (inputs.gasFee !== undefined) document.getElementById('gasFee').value = inputs.gasFee;
             if (inputs.managementFee !== undefined) document.getElementById('managementFee').value = inputs.managementFee;
             if (inputs.otherFee !== undefined) document.getElementById('otherFee').value = inputs.otherFee;
-            if (inputs.billDate) document.getElementById('billDate').value = inputs.billDate;
-            if (inputs.payeeName) document.getElementById('payeeName').value = inputs.payeeName;
-            if (inputs.bankCode) document.getElementById('bankCode').value = inputs.bankCode;
-            if (inputs.accountNumber) document.getElementById('accountNumber').value = inputs.accountNumber;
+            if (inputs.billDate !== undefined && inputs.billDate !== null) {
+                const billDateInput = document.getElementById('billDate');
+                if (billDateInput) billDateInput.value = inputs.billDate;
+            }
+            if (inputs.payeeName !== undefined && inputs.payeeName !== null) {
+                const payeeNameInput = document.getElementById('payeeName');
+                if (payeeNameInput) payeeNameInput.value = inputs.payeeName;
+            }
+            if (inputs.bankCode !== undefined && inputs.bankCode !== null) {
+                const bankCodeInput = document.getElementById('bankCode');
+                if (bankCodeInput) bankCodeInput.value = inputs.bankCode;
+            }
+            if (inputs.accountNumber !== undefined && inputs.accountNumber !== null) {
+                const accountInput = document.getElementById('accountNumber');
+                if (accountInput) accountInput.value = inputs.accountNumber;
+            }
             
             // 載入開關狀態
             if (inputs.enableElectricity !== undefined) document.getElementById('enableElectricity').checked = inputs.enableElectricity;
@@ -187,25 +231,31 @@ function loadAllInputs() {
             if (inputs.enableOther !== undefined) document.getElementById('enableOther').checked = inputs.enableOther;
             
             // 載入新制法規相關欄位
-            if (inputs.enableNewRegulation !== undefined && document.getElementById('enableNewRegulation')) {
-                document.getElementById('enableNewRegulation').checked = inputs.enableNewRegulation;
+            const newRegInput = document.getElementById('enableNewRegulation');
+            if (newRegInput && inputs.enableNewRegulation !== undefined) {
+                newRegInput.checked = inputs.enableNewRegulation;
             }
-            if (inputs.hasIndependentMeter !== undefined && document.getElementById('hasIndependentMeter')) {
-                document.getElementById('hasIndependentMeter').checked = inputs.hasIndependentMeter;
+            const hasMeterInput = document.getElementById('hasIndependentMeter');
+            if (hasMeterInput && inputs.hasIndependentMeter !== undefined) {
+                hasMeterInput.checked = inputs.hasIndependentMeter;
             }
-            if (inputs.taipowerBillAmount && document.getElementById('taipowerBillAmount')) {
-                document.getElementById('taipowerBillAmount').value = inputs.taipowerBillAmount;
+            const taipowerAmountInput = document.getElementById('taipowerBillAmount');
+            if (taipowerAmountInput && inputs.taipowerBillAmount !== undefined && inputs.taipowerBillAmount !== null) {
+                taipowerAmountInput.value = inputs.taipowerBillAmount;
             }
-            if (inputs.taipowerBillUsage && document.getElementById('taipowerBillUsage')) {
-                document.getElementById('taipowerBillUsage').value = inputs.taipowerBillUsage;
+            const taipowerUsageInput = document.getElementById('taipowerBillUsage');
+            if (taipowerUsageInput && inputs.taipowerBillUsage !== undefined && inputs.taipowerBillUsage !== null) {
+                taipowerUsageInput.value = inputs.taipowerBillUsage;
             }
             
-            // 載入備註欄位
-            if (inputs.tenantNote && document.getElementById('tenantNote')) {
-                document.getElementById('tenantNote').value = inputs.tenantNote;
+            // 載入備註欄位（即使為空也載入以確保一致性）
+            const tenantNoteInput = document.getElementById('tenantNote');
+            if (tenantNoteInput && inputs.tenantNote !== undefined) {
+                tenantNoteInput.value = inputs.tenantNote || '';
             }
-            if (inputs.landlordNote && document.getElementById('landlordNote')) {
-                document.getElementById('landlordNote').value = inputs.landlordNote;
+            const landlordNoteInput = document.getElementById('landlordNote');
+            if (landlordNoteInput && inputs.landlordNote !== undefined) {
+                landlordNoteInput.value = inputs.landlordNote || '';
             }
             
             // 觸發新制 UI 更新
