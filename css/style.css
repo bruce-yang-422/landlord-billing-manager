@@ -1,25 +1,26 @@
 /* CSS 變數定義 - 亮色主題（預設） */
 :root {
-    --bg-gradient-start: #f5f7fa;
-    --bg-gradient-end: #c3cfe2;
-    --container-bg: rgba(255, 255, 255, 0.95);
-    --card-bg: rgba(255, 255, 255, 0.8);
-    --card-bg-hover: rgba(255, 255, 255, 0.9);
+    --bg-gradient-start: #e8f0f8;
+    --bg-gradient-end: #d0d9e8;
+    --container-bg: rgba(255, 255, 255, 0.7);
+    --card-bg: rgba(255, 255, 255, 0.5);
+    --card-bg-hover: rgba(255, 255, 255, 0.65);
     --text-primary: #1d1d1f;
     --text-secondary: #666;
-    --border-color: rgba(0, 0, 0, 0.08);
-    --border-color-hover: rgba(0, 0, 0, 0.12);
-    --input-bg: rgba(255, 255, 255, 0.8);
-    --input-bg-focus: #fff;
-    --shadow-sm: rgba(0, 0, 0, 0.04);
-    --shadow-md: rgba(0, 0, 0, 0.08);
-    --shadow-lg: rgba(0, 0, 0, 0.1);
-    --table-bg: white;
-    --table-header-bg: rgba(0, 0, 0, 0.02);
-    --table-hover: rgba(0, 122, 255, 0.04);
-    --result-bg-start: #f8f9fa;
-    --result-bg-end: #ffffff;
-    --report-bg: #f8f9fa;
+    --border-color: rgba(255, 255, 255, 0.18);
+    --border-color-hover: rgba(255, 255, 255, 0.25);
+    --input-bg: rgba(255, 255, 255, 0.6);
+    --input-bg-focus: rgba(255, 255, 255, 0.85);
+    --shadow-sm: rgba(0, 0, 0, 0.06);
+    --shadow-md: rgba(0, 0, 0, 0.12);
+    --shadow-lg: rgba(0, 0, 0, 0.2);
+    --glass-blur: blur(40px) saturate(180%);
+    --table-bg: rgba(255, 255, 255, 0.5);
+    --table-header-bg: rgba(255, 255, 255, 0.3);
+    --table-hover: rgba(0, 122, 255, 0.08);
+    --result-bg-start: rgba(255, 255, 255, 0.5);
+    --result-bg-end: rgba(255, 255, 255, 0.7);
+    --report-bg: rgba(255, 255, 255, 0.5);
     --btn-calculate-start: #667eea;
     --btn-calculate-end: #764ba2;
     --btn-export-start: #007AFF;
@@ -45,26 +46,27 @@
 
 /* 暗色主題 */
 [data-theme="dark"] {
-    --bg-gradient-start: #1a1a1a;
-    --bg-gradient-end: #2d2d2d;
-    --container-bg: rgba(28, 28, 30, 0.95);
-    --card-bg: rgba(44, 44, 46, 0.8);
-    --card-bg-hover: rgba(58, 58, 60, 0.9);
+    --bg-gradient-start: #0f0f0f;
+    --bg-gradient-end: #1f1f1f;
+    --container-bg: rgba(28, 28, 30, 0.6);
+    --card-bg: rgba(44, 44, 46, 0.4);
+    --card-bg-hover: rgba(58, 58, 60, 0.55);
     --text-primary: #f5f5f7;
     --text-secondary: #a1a1a6;
-    --border-color: rgba(255, 255, 255, 0.1);
-    --border-color-hover: rgba(255, 255, 255, 0.15);
-    --input-bg: rgba(44, 44, 46, 0.8);
-    --input-bg-focus: rgba(58, 58, 60, 0.9);
-    --shadow-sm: rgba(0, 0, 0, 0.3);
-    --shadow-md: rgba(0, 0, 0, 0.4);
-    --shadow-lg: rgba(0, 0, 0, 0.5);
-    --table-bg: rgba(44, 44, 46, 0.8);
-    --table-header-bg: rgba(255, 255, 255, 0.05);
-    --table-hover: rgba(0, 122, 255, 0.15);
-    --result-bg-start: #2d2d2d;
-    --result-bg-end: #1a1a1a;
-    --report-bg: #2d2d2d;
+    --border-color: rgba(255, 255, 255, 0.12);
+    --border-color-hover: rgba(255, 255, 255, 0.18);
+    --input-bg: rgba(44, 44, 46, 0.5);
+    --input-bg-focus: rgba(58, 58, 60, 0.7);
+    --shadow-sm: rgba(0, 0, 0, 0.4);
+    --shadow-md: rgba(0, 0, 0, 0.5);
+    --shadow-lg: rgba(0, 0, 0, 0.6);
+    --glass-blur: blur(40px) saturate(180%);
+    --table-bg: rgba(44, 44, 46, 0.4);
+    --table-header-bg: rgba(255, 255, 255, 0.08);
+    --table-hover: rgba(0, 122, 255, 0.2);
+    --result-bg-start: rgba(44, 44, 46, 0.4);
+    --result-bg-end: rgba(28, 28, 30, 0.6);
+    --report-bg: rgba(44, 44, 46, 0.4);
     --btn-calculate-start: #9dabff;
     --btn-calculate-end: #b88fe8;
     --btn-export-start: #1a8cff;
@@ -103,12 +105,32 @@ body {
 
 .container {
     background: var(--container-bg);
-    backdrop-filter: blur(20px);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px var(--shadow-lg), 0 0 0 1px var(--border-color);
+    border-radius: 24px;
+    box-shadow: 
+        0 8px 32px var(--shadow-lg),
+        0 0 0 1px var(--border-color),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     margin-bottom: 30px;
-    transition: background 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3) 50%, 
+        transparent);
+    pointer-events: none;
 }
 
 /* 標題區域 */
@@ -137,24 +159,36 @@ body {
 .theme-select {
     padding: 8px 12px;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 12px;
     background: var(--input-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     color: var(--text-primary);
     font-size: 14px;
     font-family: inherit;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 2px 8px var(--shadow-sm),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .theme-select:hover {
     border-color: var(--border-color-hover);
     background: var(--input-bg-focus);
+    box-shadow: 
+        0 4px 12px var(--shadow-md),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
 }
 
 .theme-select:focus {
     outline: none;
-    border-color: #007AFF;
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    border-color: rgba(0, 122, 255, 0.5);
+    box-shadow: 
+        0 0 0 3px rgba(0, 122, 255, 0.15),
+        0 4px 12px var(--shadow-md),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 h1 {
@@ -215,21 +249,44 @@ h1 {
     }
 }
 
-/* 卡片設計 */
+/* 卡片設計 - 玻璃風格 */
 .info-card {
     margin-bottom: 16px;
     padding: 24px;
     background: var(--card-bg);
-    border-radius: 16px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: 20px;
     border: 1px solid var(--border-color);
-    box-shadow: 0 2px 8px var(--shadow-sm);
-    transition: all 0.2s ease;
+    box-shadow: 
+        0 4px 16px var(--shadow-sm),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        transparent);
+    pointer-events: none;
 }
 
 .info-card:hover {
-    box-shadow: 0 4px 16px var(--shadow-md);
+    box-shadow: 
+        0 8px 24px var(--shadow-md),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
     border-color: var(--border-color-hover);
     background: var(--card-bg-hover);
+    transform: translateY(-2px);
 }
 
 .info-card label {
@@ -274,22 +331,31 @@ input[type="date"] {
     width: 100%;
     padding: 14px 16px;
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 14px;
     font-size: 16px;
     box-sizing: border-box;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: var(--input-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     color: var(--text-primary);
     font-family: inherit;
+    box-shadow: 
+        0 2px 8px var(--shadow-sm),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 input[type="text"]:focus,
 input[type="number"]:focus,
 input[type="date"]:focus {
     outline: none;
-    border-color: #007AFF;
-    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+    border-color: rgba(0, 122, 255, 0.5);
+    box-shadow: 
+        0 0 0 4px rgba(0, 122, 255, 0.15),
+        0 4px 12px var(--shadow-md),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     background: var(--input-bg-focus);
+    transform: translateY(-1px);
 }
 
 input[type="text"]:hover,
@@ -309,24 +375,46 @@ input[type="date"]:hover {
 button {
     padding: 14px 28px;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     font-size: 16px;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: inherit;
     letter-spacing: -0.2px;
-    box-shadow: 0 2px 8px var(--btn-shadow);
+    box-shadow: 
+        0 4px 16px var(--btn-shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3) 50%, 
+        transparent);
+    pointer-events: none;
 }
 
 button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px var(--btn-shadow-hover);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 24px var(--btn-shadow-hover),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 button:active {
     transform: translateY(0);
-    box-shadow: 0 2px 6px var(--btn-shadow);
+    box-shadow: 
+        0 2px 8px var(--btn-shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .calculate-btn {
@@ -357,10 +445,30 @@ button:active {
     margin-top: 32px;
     padding: 24px;
     background: linear-gradient(135deg, var(--result-bg-start) 0%, var(--result-bg-end) 100%);
-    border-radius: 16px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: 20px;
     border: 1px solid var(--border-color);
-    box-shadow: 0 4px 16px var(--shadow-sm);
+    box-shadow: 
+        0 8px 24px var(--shadow-md),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.result::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        transparent);
+    pointer-events: none;
 }
 
 #reportSection h3 {
@@ -376,8 +484,10 @@ button:active {
     margin-top: 20px;
     padding: 20px;
     background: var(--report-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 16px;
     font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
     white-space: pre-wrap;
     min-height: 200px;
@@ -385,6 +495,9 @@ button:active {
     line-height: 1.6;
     color: var(--text-primary);
     transition: all 0.3s ease;
+    box-shadow: 
+        0 4px 16px var(--shadow-sm),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .copy-btn {
@@ -447,9 +560,13 @@ table {
     border-spacing: 0;
     margin-top: 20px;
     background: var(--table-bg);
-    border-radius: 12px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 2px 8px var(--shadow-sm);
+    box-shadow: 
+        0 4px 16px var(--shadow-sm),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
 }
@@ -524,21 +641,44 @@ tr:hover {
     display: none;
 }
 
-/* 費用區塊樣式 - Apple 風格 */
+/* 費用區塊樣式 - 玻璃風格 */
 .fee-section {
     margin-bottom: 20px;
     padding: 20px;
     background: var(--card-bg);
-    border-radius: 16px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: 20px;
     border: 1px solid var(--border-color);
-    box-shadow: 0 2px 8px var(--shadow-sm);
-    transition: all 0.2s ease;
+    box-shadow: 
+        0 4px 16px var(--shadow-sm),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.fee-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        transparent);
+    pointer-events: none;
 }
 
 .fee-section:hover {
-    box-shadow: 0 4px 16px var(--shadow-md);
+    box-shadow: 
+        0 8px 24px var(--shadow-md),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
     border-color: var(--border-color-hover);
     background: var(--card-bg-hover);
+    transform: translateY(-2px);
 }
 
 .fee-fields {
@@ -687,22 +827,31 @@ tr:hover {
     width: 100%;
     padding: 12px 16px;
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 14px;
     font-size: 14px;
     box-sizing: border-box;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: var(--input-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     color: var(--text-primary);
     font-family: inherit;
     resize: vertical;
     min-height: 80px;
+    box-shadow: 
+        0 2px 8px var(--shadow-sm),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .notes-section textarea:focus {
     outline: none;
-    border-color: #007AFF;
-    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+    border-color: rgba(0, 122, 255, 0.5);
+    box-shadow: 
+        0 0 0 4px rgba(0, 122, 255, 0.15),
+        0 4px 12px var(--shadow-md),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     background: var(--input-bg-focus);
+    transform: translateY(-1px);
 }
 
 .notes-section textarea:hover {
