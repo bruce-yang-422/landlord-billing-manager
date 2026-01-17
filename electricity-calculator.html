@@ -19,9 +19,9 @@
         
         <!-- 電費區塊 -->
         <div class="fee-section">
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <input type="checkbox" id="enableElectricity" checked style="width: auto; margin-right: 10px; cursor: pointer;">
-                <label for="enableElectricity" style="margin: 0; font-weight: bold; color: #2c3e50;">⚡ 電費</label>
+            <div class="fee-toggle-header">
+                <input type="checkbox" id="enableElectricity" checked>
+                <label for="enableElectricity" class="fee-label">⚡ 電費</label>
             </div>
             <div id="electricityFields" class="fee-fields">
                 <div class="grid-row">
@@ -45,9 +45,9 @@
         
         <!-- 租金區塊 -->
         <div class="fee-section">
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <input type="checkbox" id="enableRent" checked style="width: auto; margin-right: 10px; cursor: pointer;">
-                <label for="enableRent" style="margin: 0; font-weight: bold; color: #2c3e50;">🏠 租金</label>
+            <div class="fee-toggle-header">
+                <input type="checkbox" id="enableRent" checked>
+                <label for="enableRent" class="fee-label">🏠 租金</label>
             </div>
             <div id="rentFields" class="fee-fields">
                 <div class="grid-row">
@@ -62,9 +62,9 @@
         <!-- 水費、瓦斯費 -->
         <div class="grid-row">
             <div class="fee-section">
-                <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <input type="checkbox" id="enableWater" style="width: auto; margin-right: 10px; cursor: pointer;">
-                    <label for="enableWater" style="margin: 0; font-weight: bold; color: #2c3e50;">💧 水費</label>
+                <div class="fee-toggle-header">
+                    <input type="checkbox" id="enableWater">
+                    <label for="enableWater" class="fee-label">💧 水費</label>
                 </div>
                 <div id="waterFields" class="fee-fields" style="display: none;">
                     <label for="waterFee">💧 水費（元）</label>
@@ -72,9 +72,9 @@
                 </div>
             </div>
             <div class="fee-section">
-                <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <input type="checkbox" id="enableGas" style="width: auto; margin-right: 10px; cursor: pointer;">
-                    <label for="enableGas" style="margin: 0; font-weight: bold; color: #2c3e50;">🔥 瓦斯費</label>
+                <div class="fee-toggle-header">
+                    <input type="checkbox" id="enableGas">
+                    <label for="enableGas" class="fee-label">🔥 瓦斯費</label>
                 </div>
                 <div id="gasFields" class="fee-fields" style="display: none;">
                     <label for="gasFee">🔥 瓦斯費（元）</label>
@@ -86,9 +86,9 @@
         <!-- 管理費、其他費用 -->
         <div class="grid-row">
             <div class="fee-section">
-                <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <input type="checkbox" id="enableManagement" style="width: auto; margin-right: 10px; cursor: pointer;">
-                    <label for="enableManagement" style="margin: 0; font-weight: bold; color: #2c3e50;">🏢 管理費</label>
+                <div class="fee-toggle-header">
+                    <input type="checkbox" id="enableManagement">
+                    <label for="enableManagement" class="fee-label">🏢 管理費</label>
                 </div>
                 <div id="managementFields" class="fee-fields" style="display: none;">
                     <label for="managementFee">🏢 管理費（元）</label>
@@ -96,9 +96,9 @@
                 </div>
             </div>
             <div class="fee-section">
-                <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <input type="checkbox" id="enableOther" style="width: auto; margin-right: 10px; cursor: pointer;">
-                    <label for="enableOther" style="margin: 0; font-weight: bold; color: #2c3e50;">📝 其他費用</label>
+                <div class="fee-toggle-header">
+                    <input type="checkbox" id="enableOther">
+                    <label for="enableOther" class="fee-label">📝 其他費用</label>
                 </div>
                 <div id="otherFields" class="fee-fields" style="display: none;">
                     <label for="otherFee">📝 其他費用（元）</label>
@@ -107,11 +107,11 @@
             </div>
         </div>
         
-        <div class="full-row" style="background: #f9f9f9; padding: 15px; border-radius: 8px;">
-            <label style="color:#2980b9;">🏦 收款資訊</label>
-            <div class="grid-row" style="margin-bottom: 0;">
-                <input type="text" id="bankCode" placeholder="銀行代碼" style="margin-bottom: 5px;">
-                <input type="text" id="payeeName" placeholder="戶名" style="margin-bottom: 5px;">
+        <div class="full-row payment-info-section">
+            <label class="payment-label">🏦 收款資訊</label>
+            <div class="grid-row payment-grid">
+                <input type="text" id="bankCode" placeholder="銀行代碼">
+                <input type="text" id="payeeName" placeholder="戶名">
             </div>
             <input type="text" id="accountNumber" placeholder="銀行帳號">
         </div>
@@ -141,9 +141,10 @@
         </div>
         
         <div class="history-section">
-            <h3>📜 歷史帳單紀錄 
-                <button onclick="clearHistory()" style="float:right; font-size:12px; padding:5px 10px; background:#95a5a6; color:white; border:none; border-radius:4px; cursor:pointer;">清空紀錄</button>
-            </h3>
+            <div class="history-header">
+                <h3>📜 歷史帳單紀錄</h3>
+                <button class="btn-clear-history" onclick="clearHistory()">清空紀錄</button>
+            </div>
             <div style="overflow-x: auto;">
                 <table id="historyTable">
                     <thead>
