@@ -59,10 +59,11 @@ function normalizeData(data) {
         }
         
         // 備註欄位（新版功能，舊版沒有）
-        if (data.settings.tenantNote === undefined) {
+        // 確保即使為空也初始化為空字串，以對齊未來匯入使用
+        if (data.settings.tenantNote === undefined || data.settings.tenantNote === null) {
             data.settings.tenantNote = '';
         }
-        if (data.settings.landlordNote === undefined) {
+        if (data.settings.landlordNote === undefined || data.settings.landlordNote === null) {
             data.settings.landlordNote = '';
         }
     }
@@ -142,10 +143,11 @@ function normalizeData(data) {
             }
             
             // 備註欄位（新版功能，舊版沒有）
-            if (record.tenantNote === undefined) {
+            // 確保即使為空也初始化為空字串，以對齊未來匯入使用
+            if (record.tenantNote === undefined || record.tenantNote === null) {
                 record.tenantNote = '';
             }
-            if (record.landlordNote === undefined) {
+            if (record.landlordNote === undefined || record.landlordNote === null) {
                 record.landlordNote = '';
             }
             

@@ -148,8 +148,9 @@ function saveAllInputs() {
             hasIndependentMeter: document.getElementById('hasIndependentMeter') ? document.getElementById('hasIndependentMeter').checked : false,
             taipowerBillAmount: document.getElementById('taipowerBillAmount') ? document.getElementById('taipowerBillAmount').value : '',
             taipowerBillUsage: document.getElementById('taipowerBillUsage') ? document.getElementById('taipowerBillUsage').value : '',
-            tenantNote: document.getElementById('tenantNote') ? document.getElementById('tenantNote').value : '',
-            landlordNote: document.getElementById('landlordNote') ? document.getElementById('landlordNote').value : ''
+            // 備註欄位：確保即使為空也儲存為空字串，以對齊未來匯入使用
+            tenantNote: document.getElementById('tenantNote') ? (document.getElementById('tenantNote').value || '') : '',
+            landlordNote: document.getElementById('landlordNote') ? (document.getElementById('landlordNote').value || '') : ''
         };
         localStorage.setItem('electricityCalculator_inputs', JSON.stringify(inputs));
     } catch (e) {

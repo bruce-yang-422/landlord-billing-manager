@@ -4,8 +4,9 @@ function calculateAndSave() {
     const payeeName = document.getElementById('payeeName').value;
     const bankCode = document.getElementById('bankCode').value;
     const accountNumber = document.getElementById('accountNumber').value;
-    const tenantNote = document.getElementById('tenantNote') ? document.getElementById('tenantNote').value : '';
-    const landlordNote = document.getElementById('landlordNote') ? document.getElementById('landlordNote').value : '';
+    // 備註欄位：確保即使為空也儲存為空字串，以對齊未來匯入使用
+    const tenantNote = document.getElementById('tenantNote') ? (document.getElementById('tenantNote').value || '') : '';
+    const landlordNote = document.getElementById('landlordNote') ? (document.getElementById('landlordNote').value || '') : '';
     
     // 驗證
     if (!billDate) {
