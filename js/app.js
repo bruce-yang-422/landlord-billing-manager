@@ -37,10 +37,42 @@ function calculateAndSave() {
     let currentReading = 0;
     let pricePerUnit = 0;
     
+    // 新制法規相關變數
+    const enableNewRegulation = document.getElementById('enableNewRegulation').checked;
+    const hasIndependentMeter = document.getElementById('hasIndependentMeter').checked;
+    const taipowerBillAmount = parseFloat(document.getElementById('taipowerBillAmount').value) || 0;
+    const taipowerBillUsage = parseFloat(document.getElementById('taipowerBillUsage').value) || 0;
+    
     if (enableElectricity) {
         lastReading = parseFloat(document.getElementById('lastReading').value) || 0;
         currentReading = parseFloat(document.getElementById('currentReading').value) || 0;
-        pricePerUnit = parseFloat(document.getElementById('pricePerUnit').value) || 0;
+        
+        // 新制模式：有獨立電表時，從台電帳單計算單價
+        if (enableNewRegulation && hasIndependentMeter) {
+            if (taipowerBillAmount <= 0 || taipowerBillUsage <= 0) {
+                alert('請輸入台電帳單總金額和總度數！');
+                return;
+            }
+            // 計算平均單價（四捨五入至小數點後第一位）
+            pricePerUnit = Math.round((taipowerBillAmount / taipowerBillUsage) * 10) / 10;
+            // 更新單價欄位（唯讀）
+            document.getElementById('pricePerUnit').value = pricePerUnit;
+        } else {
+            // 舊制模式或新制無電表：手動輸入單價
+            pricePerUnit = parseFloat(document.getElementById('pricePerUnit').value) || 0;
+            
+            // 新制模式但無電表：驗證總額不超過台電帳單
+            if (enableNewRegulation && !hasIndependentMeter) {
+                if (pricePerUnit <= 0) {
+                    alert('請輸入電費單價！');
+                    return;
+                }
+                // 這裡可以添加總額驗證邏輯（如果需要的話）
+            } else if (!enableNewRegulation && pricePerUnit <= 0) {
+                alert('請輸入電費單價！');
+                return;
+            }
+        }
         
         if (currentReading <= lastReading) {
             alert('本期電錶讀數必須大於上期讀數！');
@@ -49,6 +81,14 @@ function calculateAndSave() {
         
         usage = currentReading - lastReading;
         electricityFee = Math.round(usage * pricePerUnit);
+        
+        // 新制模式：驗證電費總額不超過台電帳單（無電表情況）
+        if (enableNewRegulation && !hasIndependentMeter && taipowerBillAmount > 0) {
+            if (electricityFee > taipowerBillAmount) {
+                alert(`⚠️ 警告：計算出的電費總額（${electricityFee}元）超過台電帳單總額（${taipowerBillAmount}元）。\n\n請確認單價是否正確，違規超收最高可處 50 萬元罰鍰。`);
+                // 不阻止計算，但提醒用戶
+            }
+        }
     }
     
     // 計算其他費用
@@ -72,7 +112,11 @@ function calculateAndSave() {
         enableWater: enableWater,
         enableGas: enableGas,
         enableManagement: enableManagement,
-        enableOther: enableOther
+        enableOther: enableOther,
+        enableNewRegulation: enableNewRegulation,
+        hasIndependentMeter: hasIndependentMeter,
+        taipowerBillAmount: taipowerBillAmount,
+        taipowerBillUsage: taipowerBillUsage
     };
     
     // 新增一筆紀錄
@@ -95,7 +139,11 @@ function calculateAndSave() {
         enableWater: enableWater,
         enableGas: enableGas,
         enableManagement: enableManagement,
-        enableOther: enableOther
+        enableOther: enableOther,
+        enableNewRegulation: enableNewRegulation,
+        hasIndependentMeter: hasIndependentMeter,
+        taipowerBillAmount: taipowerBillAmount,
+        taipowerBillUsage: taipowerBillUsage
     };
     
     // 把新紀錄加到最前面
@@ -375,6 +423,20 @@ function normalizeData(data) {
         if (data.settings.enableOther === undefined) {
             data.settings.enableOther = false; // 預設關閉
         }
+        
+        // 新制法規相關欄位（預設為舊制）
+        if (data.settings.enableNewRegulation === undefined) {
+            data.settings.enableNewRegulation = false;
+        }
+        if (data.settings.hasIndependentMeter === undefined) {
+            data.settings.hasIndependentMeter = false;
+        }
+        if (data.settings.taipowerBillAmount === undefined) {
+            data.settings.taipowerBillAmount = 0;
+        }
+        if (data.settings.taipowerBillUsage === undefined) {
+            data.settings.taipowerBillUsage = 0;
+        }
     }
     
     // 確保有 records 陣列
@@ -436,6 +498,20 @@ function normalizeData(data) {
             }
             if (record.pricePerUnit === undefined) {
                 record.pricePerUnit = data.settings?.pricePerUnit || 0;
+            }
+            
+            // 新制法規相關欄位（預設為舊制）
+            if (record.enableNewRegulation === undefined) {
+                record.enableNewRegulation = false;
+            }
+            if (record.hasIndependentMeter === undefined) {
+                record.hasIndependentMeter = false;
+            }
+            if (record.taipowerBillAmount === undefined) {
+                record.taipowerBillAmount = 0;
+            }
+            if (record.taipowerBillUsage === undefined) {
+                record.taipowerBillUsage = 0;
             }
             
             return record;
@@ -615,7 +691,11 @@ function saveAllInputs() {
             enableWater: document.getElementById('enableWater').checked,
             enableGas: document.getElementById('enableGas').checked,
             enableManagement: document.getElementById('enableManagement').checked,
-            enableOther: document.getElementById('enableOther').checked
+            enableOther: document.getElementById('enableOther').checked,
+            enableNewRegulation: document.getElementById('enableNewRegulation') ? document.getElementById('enableNewRegulation').checked : false,
+            hasIndependentMeter: document.getElementById('hasIndependentMeter') ? document.getElementById('hasIndependentMeter').checked : false,
+            taipowerBillAmount: document.getElementById('taipowerBillAmount') ? document.getElementById('taipowerBillAmount').value : '',
+            taipowerBillUsage: document.getElementById('taipowerBillUsage') ? document.getElementById('taipowerBillUsage').value : ''
         };
         localStorage.setItem('electricityCalculator_inputs', JSON.stringify(inputs));
     } catch (e) {
@@ -650,6 +730,31 @@ function loadAllInputs() {
             if (inputs.enableGas !== undefined) document.getElementById('enableGas').checked = inputs.enableGas;
             if (inputs.enableManagement !== undefined) document.getElementById('enableManagement').checked = inputs.enableManagement;
             if (inputs.enableOther !== undefined) document.getElementById('enableOther').checked = inputs.enableOther;
+            
+            // 載入新制法規相關欄位
+            if (inputs.enableNewRegulation !== undefined && document.getElementById('enableNewRegulation')) {
+                document.getElementById('enableNewRegulation').checked = inputs.enableNewRegulation;
+            }
+            if (inputs.hasIndependentMeter !== undefined && document.getElementById('hasIndependentMeter')) {
+                document.getElementById('hasIndependentMeter').checked = inputs.hasIndependentMeter;
+            }
+            if (inputs.taipowerBillAmount && document.getElementById('taipowerBillAmount')) {
+                document.getElementById('taipowerBillAmount').value = inputs.taipowerBillAmount;
+            }
+            if (inputs.taipowerBillUsage && document.getElementById('taipowerBillUsage')) {
+                document.getElementById('taipowerBillUsage').value = inputs.taipowerBillUsage;
+            }
+            
+            // 觸發新制 UI 更新
+            if (document.getElementById('enableNewRegulation')) {
+                setTimeout(() => {
+                    const event = new Event('change');
+                    document.getElementById('enableNewRegulation').dispatchEvent(event);
+                    if (document.getElementById('hasIndependentMeter')) {
+                        document.getElementById('hasIndependentMeter').dispatchEvent(event);
+                    }
+                }, 100);
+            }
         }
     } catch (e) {
         console.error('載入失敗:', e);
@@ -658,7 +763,7 @@ function loadAllInputs() {
 
 // 為所有輸入欄位添加自動儲存功能
 function setupAutoSave() {
-    const inputIds = ['lastReading', 'currentReading', 'pricePerUnit', 'rent', 'gasFee', 'waterFee', 'managementFee', 'otherFee', 'billDate', 'payeeName', 'bankCode', 'accountNumber'];
+    const inputIds = ['lastReading', 'currentReading', 'pricePerUnit', 'rent', 'gasFee', 'waterFee', 'managementFee', 'otherFee', 'billDate', 'payeeName', 'bankCode', 'accountNumber', 'taipowerBillAmount', 'taipowerBillUsage'];
     
     inputIds.forEach(id => {
         const input = document.getElementById(id);
@@ -667,6 +772,17 @@ function setupAutoSave() {
                 saveAllInputs();
             });
             input.addEventListener('change', function() {
+                saveAllInputs();
+            });
+        }
+    });
+    
+    // 新制相關 checkbox
+    const checkboxIds = ['enableNewRegulation', 'hasIndependentMeter'];
+    checkboxIds.forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.addEventListener('change', function() {
                 saveAllInputs();
             });
         }
@@ -698,6 +814,108 @@ function setupFeeToggles() {
     });
 }
 
+// 新制法規 UI 控制
+function setupNewRegulationToggles() {
+    const newRegCheckbox = document.getElementById('enableNewRegulation');
+    const newRegFields = document.getElementById('newRegulationFields');
+    const hasMeterCheckbox = document.getElementById('hasIndependentMeter');
+    const taipowerFields = document.getElementById('taipowerBillFields');
+    const noMeterNotice = document.getElementById('noMeterNotice');
+    const pricePerUnitInput = document.getElementById('pricePerUnit');
+    const pricePerUnitNotice = document.getElementById('pricePerUnitNotice');
+    
+    // 新制開關切換
+    if (newRegCheckbox && newRegFields) {
+        newRegCheckbox.addEventListener('change', function() {
+            newRegFields.style.display = this.checked ? 'block' : 'none';
+            updatePricePerUnitReadOnly();
+            saveAllInputs();
+        });
+        // 初始化顯示狀態
+        newRegFields.style.display = newRegCheckbox.checked ? 'block' : 'none';
+    }
+    
+    // 是否有獨立電表切換
+    if (hasMeterCheckbox) {
+        hasMeterCheckbox.addEventListener('change', function() {
+            updateNewRegulationFields();
+            calculateTaipowerPrice();
+            saveAllInputs();
+        });
+    }
+    
+    // 台電帳單金額和度數變更時，自動計算單價
+    const taipowerAmountInput = document.getElementById('taipowerBillAmount');
+    const taipowerUsageInput = document.getElementById('taipowerBillUsage');
+    
+    if (taipowerAmountInput) {
+        taipowerAmountInput.addEventListener('input', function() {
+            calculateTaipowerPrice();
+            saveAllInputs();
+        });
+    }
+    
+    if (taipowerUsageInput) {
+        taipowerUsageInput.addEventListener('input', function() {
+            calculateTaipowerPrice();
+            saveAllInputs();
+        });
+    }
+    
+    // 更新新制相關欄位顯示
+    function updateNewRegulationFields() {
+        if (newRegCheckbox && newRegCheckbox.checked) {
+            if (hasMeterCheckbox && hasMeterCheckbox.checked) {
+                // 有獨立電表：顯示台電帳單欄位
+                if (taipowerFields) taipowerFields.style.display = 'block';
+                if (noMeterNotice) noMeterNotice.style.display = 'none';
+            } else {
+                // 無獨立電表：顯示提醒
+                if (taipowerFields) taipowerFields.style.display = 'none';
+                if (noMeterNotice) noMeterNotice.style.display = 'block';
+            }
+        }
+        updatePricePerUnitReadOnly();
+    }
+    
+    // 計算台電平均單價
+    function calculateTaipowerPrice() {
+        if (newRegCheckbox && newRegCheckbox.checked && 
+            hasMeterCheckbox && hasMeterCheckbox.checked) {
+            const amount = parseFloat(taipowerAmountInput.value) || 0;
+            const usage = parseFloat(taipowerUsageInput.value) || 0;
+            
+            if (amount > 0 && usage > 0) {
+                // 計算平均單價（四捨五入至小數點後第一位）
+                const avgPrice = Math.round((amount / usage) * 10) / 10;
+                pricePerUnitInput.value = avgPrice;
+                updatePricePerUnitReadOnly();
+            }
+        }
+    }
+    
+    // 更新單價欄位唯讀狀態
+    function updatePricePerUnitReadOnly() {
+        if (newRegCheckbox && newRegCheckbox.checked && 
+            hasMeterCheckbox && hasMeterCheckbox.checked) {
+            // 新制 + 有電表：唯讀
+            pricePerUnitInput.readOnly = true;
+            pricePerUnitInput.style.backgroundColor = '#f5f5f5';
+            pricePerUnitInput.style.cursor = 'not-allowed';
+            if (pricePerUnitNotice) pricePerUnitNotice.style.display = 'block';
+        } else {
+            // 舊制或新制無電表：可編輯
+            pricePerUnitInput.readOnly = false;
+            pricePerUnitInput.style.backgroundColor = '';
+            pricePerUnitInput.style.cursor = '';
+            if (pricePerUnitNotice) pricePerUnitNotice.style.display = 'none';
+        }
+    }
+    
+    // 初始化
+    updateNewRegulationFields();
+}
+
 // 頁面載入時初始化
 window.onload = function() {
     // 設定今天的日期為預設值
@@ -722,6 +940,9 @@ window.onload = function() {
     
     // 設定費用開關功能
     setupFeeToggles();
+    
+    // 設定新制法規功能
+    setupNewRegulationToggles();
     
     // 設定自動儲存功能
     setupAutoSave();

@@ -45,12 +45,72 @@
                 <label for="enableElectricity" class="fee-label">⚡ 電費</label>
             </div>
             <div id="electricityFields" class="fee-fields">
-                <div class="grid-row">
+                <!-- 電費新制開關 -->
+                <div class="regulation-section">
+                    <div class="fee-toggle-header" style="margin-bottom: 12px;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enableNewRegulation">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <label for="enableNewRegulation" class="fee-label">📋 電費新制（113年7月15日起）</label>
+                    </div>
+                    
+                    <!-- 新制模式下的選項 -->
+                    <div id="newRegulationFields" style="display: none;">
+                        <div class="fee-toggle-header" style="margin-bottom: 12px;">
+                            <input type="checkbox" id="hasIndependentMeter" style="width: 20px; height: 20px; margin-right: 8px;">
+                            <label for="hasIndependentMeter" style="margin: 0; font-weight: 500; cursor: pointer;">是否有房客獨立電表</label>
+                        </div>
+                        
+                        <!-- 有獨立電表：台電帳單資訊 -->
+                        <div id="taipowerBillFields" style="display: none; margin-bottom: 16px;">
+                            <div class="grid-row">
+                                <div>
+                                    <label for="taipowerBillAmount">💵 台電帳單總金額（元）</label>
+                                    <input type="number" id="taipowerBillAmount" value="" step="0.01" placeholder="請輸入台電帳單總金額">
+                                </div>
+                                <div>
+                                    <label for="taipowerBillUsage">⚡ 台電帳單總度數（度）</label>
+                                    <input type="number" id="taipowerBillUsage" value="" step="0.1" placeholder="請輸入台電帳單總度數">
+                                </div>
+                            </div>
+                            <div class="regulation-notice" style="margin-top: 12px; padding: 12px; background: rgba(0, 122, 255, 0.1); border-radius: 8px; border-left: 3px solid #007AFF;">
+                                <div style="font-size: 14px; color: #007AFF; line-height: 1.6;">
+                                    💡 <strong>依法規</strong>，每度電費已為您限制在台電帳單之平均單價。
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 無獨立電表：提醒 -->
+                        <div id="noMeterNotice" style="display: none; margin-bottom: 16px;">
+                            <div class="regulation-notice" style="padding: 12px; background: rgba(255, 149, 0, 0.1); border-radius: 8px; border-left: 3px solid #FF9500;">
+                                <div style="font-size: 14px; color: #FF9500; line-height: 1.6;">
+                                    ⚠️ <strong>提醒：</strong>向租客收取的電費總額（含公電），不得超過台電帳單總額。
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 通用警語 -->
+                        <div class="regulation-warning" style="margin-top: 12px; padding: 12px; background: rgba(255, 59, 48, 0.1); border-radius: 8px; border-left: 3px solid #FF3B30;">
+                            <div style="font-size: 13px; color: #FF3B30; line-height: 1.6;">
+                                🚨 <strong>違規超收電費，最高可處 50 萬元罰鍰。</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 電費單價欄位 -->
+                <div class="grid-row" style="margin-top: 16px;">
                     <div>
                         <label for="pricePerUnit">💰 電費單價（元/度）</label>
                         <input type="number" id="pricePerUnit" value="" step="0.1" placeholder="請輸入每度電費">
+                        <div id="pricePerUnitNotice" style="margin-top: 6px; font-size: 12px; color: #666; display: none;">
+                            （由台電帳單自動計算）
+                        </div>
                     </div>
                 </div>
+                
+                <!-- 電表讀數 -->
                 <div class="grid-row">
                     <div>
                         <label for="lastReading">🔢 上期電錶讀數</label>
