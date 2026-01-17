@@ -10,17 +10,19 @@
     <div class="container">
         <h1>🏠 房東帳務管理工具</h1>
         
-        <div class="grid-row">
-            <div>
-                <label for="billDate">📅 帳單日期</label>
-                <input type="date" id="billDate" value="" placeholder="請選擇日期">
-            </div>
+        <!-- 帳單日期卡片 -->
+        <div class="info-card">
+            <label for="billDate">📅 帳單日期</label>
+            <input type="date" id="billDate" value="" placeholder="請選擇日期">
         </div>
         
         <!-- 電費區塊 -->
         <div class="fee-section">
             <div class="fee-toggle-header">
-                <input type="checkbox" id="enableElectricity" checked>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="enableElectricity" checked>
+                    <span class="toggle-slider"></span>
+                </label>
                 <label for="enableElectricity" class="fee-label">⚡ 電費</label>
             </div>
             <div id="electricityFields" class="fee-fields">
@@ -46,7 +48,10 @@
         <!-- 租金區塊 -->
         <div class="fee-section">
             <div class="fee-toggle-header">
-                <input type="checkbox" id="enableRent" checked>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="enableRent" checked>
+                    <span class="toggle-slider"></span>
+                </label>
                 <label for="enableRent" class="fee-label">🏠 租金</label>
             </div>
             <div id="rentFields" class="fee-fields">
@@ -59,61 +64,74 @@
             </div>
         </div>
         
-        <!-- 水費、瓦斯費 -->
-        <div class="grid-row">
-            <div class="fee-section">
-                <div class="fee-toggle-header">
+        <!-- 水費區塊 -->
+        <div class="fee-section">
+            <div class="fee-toggle-header">
+                <label class="toggle-switch">
                     <input type="checkbox" id="enableWater">
-                    <label for="enableWater" class="fee-label">💧 水費</label>
-                </div>
-                <div id="waterFields" class="fee-fields" style="display: none;">
-                    <label for="waterFee">💧 水費（元）</label>
-                    <input type="number" id="waterFee" value="0" placeholder="請輸入水費">
-                </div>
+                    <span class="toggle-slider"></span>
+                </label>
+                <label for="enableWater" class="fee-label">💧 水費</label>
             </div>
-            <div class="fee-section">
-                <div class="fee-toggle-header">
+            <div id="waterFields" class="fee-fields" style="display: none;">
+                <label for="waterFee">💧 水費（元）</label>
+                <input type="number" id="waterFee" value="0" placeholder="請輸入水費">
+            </div>
+        </div>
+        
+        <!-- 瓦斯費區塊 -->
+        <div class="fee-section">
+            <div class="fee-toggle-header">
+                <label class="toggle-switch">
                     <input type="checkbox" id="enableGas">
-                    <label for="enableGas" class="fee-label">🔥 瓦斯費</label>
-                </div>
-                <div id="gasFields" class="fee-fields" style="display: none;">
-                    <label for="gasFee">🔥 瓦斯費（元）</label>
-                    <input type="number" id="gasFee" value="0" placeholder="請輸入瓦斯費">
-                </div>
+                    <span class="toggle-slider"></span>
+                </label>
+                <label for="enableGas" class="fee-label">🔥 瓦斯費</label>
+            </div>
+            <div id="gasFields" class="fee-fields" style="display: none;">
+                <label for="gasFee">🔥 瓦斯費（元）</label>
+                <input type="number" id="gasFee" value="0" placeholder="請輸入瓦斯費">
             </div>
         </div>
         
-        <!-- 管理費、其他費用 -->
-        <div class="grid-row">
-            <div class="fee-section">
-                <div class="fee-toggle-header">
+        <!-- 管理費區塊 -->
+        <div class="fee-section">
+            <div class="fee-toggle-header">
+                <label class="toggle-switch">
                     <input type="checkbox" id="enableManagement">
-                    <label for="enableManagement" class="fee-label">🏢 管理費</label>
-                </div>
-                <div id="managementFields" class="fee-fields" style="display: none;">
-                    <label for="managementFee">🏢 管理費（元）</label>
-                    <input type="number" id="managementFee" value="0" placeholder="請輸入管理費">
-                </div>
+                    <span class="toggle-slider"></span>
+                </label>
+                <label for="enableManagement" class="fee-label">🏢 管理費</label>
             </div>
-            <div class="fee-section">
-                <div class="fee-toggle-header">
-                    <input type="checkbox" id="enableOther">
-                    <label for="enableOther" class="fee-label">📝 其他費用</label>
-                </div>
-                <div id="otherFields" class="fee-fields" style="display: none;">
-                    <label for="otherFee">📝 其他費用（元）</label>
-                    <input type="number" id="otherFee" value="0" placeholder="請輸入其他費用">
-                </div>
+            <div id="managementFields" class="fee-fields" style="display: none;">
+                <label for="managementFee">🏢 管理費（元）</label>
+                <input type="number" id="managementFee" value="0" placeholder="請輸入管理費">
             </div>
         </div>
         
-        <div class="full-row payment-info-section">
+        <!-- 其他費用區塊 -->
+        <div class="fee-section">
+            <div class="fee-toggle-header">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="enableOther">
+                    <span class="toggle-slider"></span>
+                </label>
+                <label for="enableOther" class="fee-label">📝 其他費用</label>
+            </div>
+            <div id="otherFields" class="fee-fields" style="display: none;">
+                <label for="otherFee">📝 其他費用（元）</label>
+                <input type="number" id="otherFee" value="0" placeholder="請輸入其他費用">
+            </div>
+        </div>
+        
+        <!-- 收款資訊卡片 -->
+        <div class="info-card payment-info-section">
             <label class="payment-label">🏦 收款資訊</label>
-            <div class="grid-row payment-grid">
+            <div class="payment-grid">
                 <input type="text" id="bankCode" placeholder="銀行代碼">
                 <input type="text" id="payeeName" placeholder="戶名">
+                <input type="text" id="accountNumber" placeholder="銀行帳號">
             </div>
-            <input type="text" id="accountNumber" placeholder="銀行帳號">
         </div>
         
         <div class="btn-group">
@@ -143,6 +161,8 @@
         <div class="history-section">
             <div class="history-header">
                 <h3>📜 歷史帳單紀錄</h3>
+            </div>
+            <div class="history-actions">
                 <button class="btn-clear-history" onclick="clearHistory()">清空紀錄</button>
             </div>
             <div style="overflow-x: auto;">
