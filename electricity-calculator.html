@@ -16,6 +16,25 @@
             <input type="date" id="billDate" value="" placeholder="請選擇日期">
         </div>
         
+        <!-- 租金區塊 -->
+        <div class="fee-section">
+            <div class="fee-toggle-header">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="enableRent" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+                <label for="enableRent" class="fee-label">🏠 租金</label>
+            </div>
+            <div id="rentFields" class="fee-fields">
+                <div class="grid-row">
+                    <div>
+                        <label for="rent">🏠 租金（元）</label>
+                        <input type="number" id="rent" value="" placeholder="請輸入租金">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- 電費區塊 -->
         <div class="fee-section">
             <div class="fee-toggle-header">
@@ -40,25 +59,6 @@
                     <div>
                         <label for="currentReading">🔢 本期電錶讀數</label>
                         <input type="number" id="currentReading" value="" placeholder="請輸入本期讀數">
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 租金區塊 -->
-        <div class="fee-section">
-            <div class="fee-toggle-header">
-                <label class="toggle-switch">
-                    <input type="checkbox" id="enableRent" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-                <label for="enableRent" class="fee-label">🏠 租金</label>
-            </div>
-            <div id="rentFields" class="fee-fields">
-                <div class="grid-row">
-                    <div>
-                        <label for="rent">🏠 租金（元）</label>
-                        <input type="number" id="rent" value="" placeholder="請輸入租金">
                     </div>
                 </div>
             </div>
