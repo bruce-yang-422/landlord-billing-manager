@@ -493,9 +493,23 @@ tr:hover {
     gap: 12px;
 }
 
+.payment-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
 .payment-grid input {
     width: 100%;
     margin-bottom: 0;
+}
+
+/* 手機版：銀行代碼和戶名改為垂直排列 */
+@media (max-width: 768px) {
+    .payment-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 }
 
 /* 歷史紀錄標題 */
