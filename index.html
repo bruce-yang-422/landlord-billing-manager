@@ -7,289 +7,343 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header-section">
-            <h1>🏠 房東帳務管理工具</h1>
+<div class="container">
+
+    <!-- 標題 -->
+    <div class="header-section">
+        <h1>🏠 房東帳務管理工具</h1>
+        <div class="header-actions">
+            <button class="btn-settings" onclick="toggleSettings()">⚙️ 房客設定</button>
             <div class="theme-selector">
-                <label for="themeSelect">🎨 主題：</label>
+                <label for="themeSelect">🎨</label>
                 <select id="themeSelect" class="theme-select">
-                    <option value="light">Light（亮色）</option>
-                    <option value="dark">Dark（暗色）</option>
-                    <option value="auto">Auto（隨系統）</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="auto">Auto</option>
                 </select>
-            </div>
-        </div>
-        
-        <!-- 帳單日期和租金（兩欄，PC版） -->
-        <div class="form-columns top-section">
-            <!-- 左欄：帳單日期 -->
-            <div class="form-column-left">
-                <div class="info-card">
-                    <label for="billDate">📅 帳單日期</label>
-                    <input type="date" id="billDate" value="" placeholder="請選擇日期">
-                </div>
-            </div>
-            
-            <!-- 右欄：租金 -->
-            <div class="form-column-right">
-                <div class="fee-section">
-                    <div class="fee-toggle-header">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="enableRent" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <label for="enableRent" class="fee-label">🏠 租金</label>
-                    </div>
-                    <div id="rentFields" class="fee-fields">
-                        <div class="grid-row">
-                            <div>
-                                <label for="rent">🏠 租金（元）</label>
-                                <input type="number" id="rent" value="" placeholder="請輸入租金">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 電費區塊（全寬） -->
-        <div class="fee-section">
-            <div class="fee-toggle-header">
-                <label class="toggle-switch">
-                    <input type="checkbox" id="enableElectricity" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-                <label for="enableElectricity" class="fee-label">⚡ 電費</label>
-            </div>
-            <div id="electricityFields" class="fee-fields">
-                <!-- 電費新制開關 -->
-                <div class="regulation-section">
-                    <div class="fee-toggle-header" style="margin-bottom: 12px;">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="enableNewRegulation">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <label for="enableNewRegulation" class="fee-label">📋 電費新制（113年7月15日起）</label>
-                    </div>
-                    
-                    <!-- 新制模式下的選項 -->
-                    <div id="newRegulationFields" style="display: none;">
-                        <div class="fee-toggle-header" style="margin-bottom: 12px;">
-                            <input type="checkbox" id="hasIndependentMeter" style="width: 20px; height: 20px; margin-right: 8px;">
-                            <label for="hasIndependentMeter" style="margin: 0; font-weight: 500; cursor: pointer;">是否有房客獨立電表</label>
-                        </div>
-                        
-                        <!-- 有獨立電表：台電帳單資訊 -->
-                        <div id="taipowerBillFields" style="display: none; margin-bottom: 16px;">
-                            <div class="grid-row">
-                                <div>
-                                    <label for="taipowerBillAmount">💵 台電帳單總金額（元）</label>
-                                    <input type="number" id="taipowerBillAmount" value="" step="0.01" placeholder="請輸入台電帳單總金額">
-                                </div>
-                                <div>
-                                    <label for="taipowerBillUsage">⚡ 台電帳單總度數（度）</label>
-                                    <input type="number" id="taipowerBillUsage" value="" step="0.1" placeholder="請輸入台電帳單總度數">
-                                </div>
-                            </div>
-                            <div class="regulation-notice" style="margin-top: 12px; padding: 12px; background: rgba(0, 122, 255, 0.1); border-radius: 8px; border-left: 3px solid #007AFF;">
-                                <div style="font-size: 14px; color: #007AFF; line-height: 1.6;">
-                                    💡 <strong>依法規</strong>，每度電費已為您限制在台電帳單之平均單價。
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 無獨立電表：提醒 -->
-                        <div id="noMeterNotice" style="display: none; margin-bottom: 16px;">
-                            <div class="regulation-notice" style="padding: 12px; background: rgba(255, 149, 0, 0.1); border-radius: 8px; border-left: 3px solid #FF9500;">
-                                <div style="font-size: 14px; color: #FF9500; line-height: 1.6;">
-                                    ⚠️ <strong>提醒：</strong>向租客收取的電費總額（含公電），不得超過台電帳單總額。
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 通用警語 -->
-                        <div class="regulation-warning" style="margin-top: 12px; padding: 12px; background: rgba(255, 59, 48, 0.1); border-radius: 8px; border-left: 3px solid #FF3B30;">
-                            <div style="font-size: 13px; color: #FF3B30; line-height: 1.6;">
-                                🚨 <strong>違規超收電費，最高可處 50 萬元罰鍰。</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 電費單價欄位 -->
-                <div class="grid-row" style="margin-top: 16px;">
-                    <div>
-                        <label for="pricePerUnit">💰 電費單價（元/度）</label>
-                        <input type="number" id="pricePerUnit" value="" step="0.1" placeholder="請輸入每度電費">
-                        <div id="pricePerUnitNotice" style="margin-top: 6px; font-size: 12px; color: #666; display: none;">
-                            （由台電帳單自動計算）
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 電表讀數 -->
-                <div class="grid-row">
-                    <div>
-                        <label for="lastReading">🔢 上期電錶讀數</label>
-                        <input type="number" id="lastReading" value="" placeholder="請輸入上期讀數">
-                    </div>
-                    <div>
-                        <label for="currentReading">🔢 本期電錶讀數</label>
-                        <input type="number" id="currentReading" value="" placeholder="請輸入本期讀數">
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 兩欄布局容器（PC版） -->
-        <div class="form-columns">
-            <!-- 左欄 -->
-            <div class="form-column-left">
-                <!-- 瓦斯費區塊 -->
-                <div class="fee-section">
-                    <div class="fee-toggle-header">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="enableGas">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <label for="enableGas" class="fee-label">🔥 瓦斯費</label>
-                    </div>
-                    <div id="gasFields" class="fee-fields" style="display: none;">
-                        <label for="gasFee">🔥 瓦斯費（元）</label>
-                        <input type="number" id="gasFee" value="0" placeholder="請輸入瓦斯費">
-                    </div>
-                </div>
-                
-                <!-- 管理費區塊 -->
-                <div class="fee-section">
-                    <div class="fee-toggle-header">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="enableManagement">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <label for="enableManagement" class="fee-label">🏢 管理費</label>
-                    </div>
-                    <div id="managementFields" class="fee-fields" style="display: none;">
-                        <label for="managementFee">🏢 管理費（元）</label>
-                        <input type="number" id="managementFee" value="0" placeholder="請輸入管理費">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 右欄 -->
-            <div class="form-column-right">
-                <!-- 水費區塊 -->
-                <div class="fee-section">
-                    <div class="fee-toggle-header">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="enableWater">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <label for="enableWater" class="fee-label">💧 水費</label>
-                    </div>
-                    <div id="waterFields" class="fee-fields" style="display: none;">
-                        <label for="waterFee">💧 水費（元）</label>
-                        <input type="number" id="waterFee" value="0" placeholder="請輸入水費">
-                    </div>
-                </div>
-                
-                <!-- 其他費用區塊 -->
-                <div class="fee-section">
-                    <div class="fee-toggle-header">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="enableOther">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <label for="enableOther" class="fee-label">📝 其他費用</label>
-                    </div>
-                    <div id="otherFields" class="fee-fields" style="display: none;">
-                        <label for="otherFee">📝 其他費用（元）</label>
-                        <input type="number" id="otherFee" value="0" placeholder="請輸入其他費用">
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 收款資訊卡片（全寬） -->
-        <div class="info-card payment-info-section">
-            <label class="payment-label">🏦 收款資訊</label>
-            <div class="payment-grid">
-                <div class="payment-row">
-                    <input type="text" id="bankCode" placeholder="銀行代碼">
-                    <input type="text" id="payeeName" placeholder="戶名">
-                </div>
-                <input type="text" id="accountNumber" placeholder="銀行帳號">
-            </div>
-        </div>
-        
-        <!-- 備註欄位（全寬） -->
-        <div class="info-card notes-section">
-            <div class="notes-grid">
-                <div class="note-item">
-                    <label for="tenantNote" class="note-label">📝 租客備註（選填，會顯示在LINE報表中）</label>
-                    <textarea id="tenantNote" rows="3" placeholder="選填：此備註會顯示在LINE報表中給租客看到"></textarea>
-                </div>
-                <div class="note-item">
-                    <label for="landlordNote" class="note-label">🔒 房東備註（選填，僅供記錄，不顯示給租客）</label>
-                    <textarea id="landlordNote" rows="3" placeholder="選填：此備註僅供房東記錄，不會顯示在LINE報表中"></textarea>
-                </div>
-            </div>
-        </div>
-        
-        <div class="btn-group">
-            <button class="calculate-btn" onclick="calculateAndSave()">💾 計算並存檔</button>
-            <button class="btn-export" onclick="exportData()">📤 備份資料 (JSON)</button>
-            <button class="btn-import" onclick="document.getElementById('fileInput').click()">📥 匯入資料</button>
-            <input type="file" id="fileInput" accept=".json" onchange="importData(this)">
-        </div>
-        
-        <div id="result" class="result" style="display: none;">
-            <div id="usageDisplay" class="usage-display" style="display: none;">用電量：<span id="usage"></span> 度</div>
-            <div id="electricityFeeDisplay" style="display: none;">電費：$<span id="electricityFee"></span></div>
-            <div id="rentDisplayDiv" style="display: none;">租金：$<span id="rentDisplay"></span></div>
-            <div id="waterFeeDisplay" style="display: none;">水費：$<span id="waterFeeDisplayAmount"></span></div>
-            <div id="gasFeeDisplayDiv" style="display: none;">瓦斯費：$<span id="gasFeeDisplay"></span></div>
-            <div id="managementFeeDisplay" style="display: none;">管理費：$<span id="managementFeeDisplayAmount"></span></div>
-            <div id="otherFeeDisplay" style="display: none;">其他費用：$<span id="otherFeeDisplayAmount"></span></div>
-            <div class="total-display">本期應付總金額：$<span id="totalAmount"></span></div>
-        </div>
-        
-        <div id="reportSection" style="display: none;">
-            <h3>📋 LINE 報表</h3>
-            <div id="reportText" class="report-area"></div>
-            <button class="copy-btn" onclick="copyReport()">📋 複製報表</button>
-        </div>
-        
-        <div class="history-section">
-            <div class="history-header">
-                <h3>📜 歷史帳單紀錄</h3>
-            </div>
-            <div class="history-actions">
-                <button class="btn-clear-history" onclick="clearHistory()">清空紀錄</button>
-            </div>
-            <div style="overflow-x: auto;">
-                <table id="historyTable">
-                    <thead>
-                        <tr>
-                            <th>日期</th>
-                            <th>用電量</th>
-                            <th>總金額</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyBody">
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript 模組 -->
-    <script src="js/data.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/calculation.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/app.js"></script>
+    <!-- 房客設定面板（預設隱藏） -->
+    <div id="settingsPanel" class="settings-panel" style="display:none;">
+        <h3>⚙️ 房客設定（長期記憶）</h3>
+        <div class="units-grid">
+
+            <!-- 5F 設定 -->
+            <div class="unit-settings-card">
+                <div class="unit-settings-title unit-5F">🏠 5 樓</div>
+                <div class="settings-tabs">
+                    <button class="settings-tab active" onclick="switchSettingsTab(this,'5F','basic')">基本資料</button>
+                    <button class="settings-tab" onclick="switchSettingsTab(this,'5F','notes')">備註</button>
+                </div>
+                <!-- 基本資料 -->
+                <div id="5F_tab_basic" class="settings-tab-panel">
+                    <div class="grid-row">
+                        <div>
+                            <label>租金（元）</label>
+                            <input type="number" id="5F_rent" placeholder="每月租金">
+                        </div>
+                        <div>
+                            <label>居住人數</label>
+                            <input type="number" id="5F_persons" value="1" min="1" placeholder="水費分攤人數">
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <div>
+                            <label>銀行代碼</label>
+                            <input type="text" id="5F_bankCode" placeholder="例：007">
+                        </div>
+                        <div>
+                            <label>戶名</label>
+                            <input type="text" id="5F_payeeName" placeholder="收款人姓名">
+                        </div>
+                    </div>
+                    <div>
+                        <label>銀行帳號</label>
+                        <input type="text" id="5F_accountNumber" placeholder="銀行帳號">
+                    </div>
+                </div>
+                <!-- 備註 -->
+                <div id="5F_tab_notes" class="settings-tab-panel" style="display:none;">
+                    <div>
+                        <label>📝 租客備註（會顯示在 LINE 報表中）</label>
+                        <textarea id="5F_tenantNote" rows="6" placeholder="例：請於每月5日前匯款，謝謝。"></textarea>
+                    </div>
+                    <div style="margin-top:14px;">
+                        <label>🔒 房東備註（僅供自己記錄，不顯示給租客）</label>
+                        <textarea id="5F_landlordNote" rows="6" placeholder="例：租約到期日 2026/12/31，押金 2 個月。"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6F 設定 -->
+            <div class="unit-settings-card">
+                <div class="unit-settings-title unit-6F">🏠 6 樓</div>
+                <div class="settings-tabs">
+                    <button class="settings-tab active" onclick="switchSettingsTab(this,'6F','basic')">基本資料</button>
+                    <button class="settings-tab" onclick="switchSettingsTab(this,'6F','notes')">備註</button>
+                </div>
+                <!-- 基本資料 -->
+                <div id="6F_tab_basic" class="settings-tab-panel">
+                    <div class="grid-row">
+                        <div>
+                            <label>租金（元）</label>
+                            <input type="number" id="6F_rent" placeholder="每月租金">
+                        </div>
+                        <div>
+                            <label>居住人數</label>
+                            <input type="number" id="6F_persons" value="1" min="1" placeholder="水費分攤人數">
+                        </div>
+                    </div>
+                    <div class="grid-row">
+                        <div>
+                            <label>銀行代碼</label>
+                            <input type="text" id="6F_bankCode" placeholder="例：007">
+                        </div>
+                        <div>
+                            <label>戶名</label>
+                            <input type="text" id="6F_payeeName" placeholder="收款人姓名">
+                        </div>
+                    </div>
+                    <div>
+                        <label>銀行帳號</label>
+                        <input type="text" id="6F_accountNumber" placeholder="銀行帳號">
+                    </div>
+                </div>
+                <!-- 備註 -->
+                <div id="6F_tab_notes" class="settings-tab-panel" style="display:none;">
+                    <div>
+                        <label>📝 租客備註（會顯示在 LINE 報表中）</label>
+                        <textarea id="6F_tenantNote" rows="6" placeholder="例：請於每月5日前匯款，謝謝。"></textarea>
+                    </div>
+                    <div style="margin-top:14px;">
+                        <label>🔒 房東備註（僅供自己記錄，不顯示給租客）</label>
+                        <textarea id="6F_landlordNote" rows="6" placeholder="例：租約到期日 2026/12/31，押金 2 個月。"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="settings-actions">
+            <button class="btn-save-settings" onclick="saveUnitSettings()">💾 儲存房客設定</button>
+        </div>
+    </div>
+
+    <!-- 帳單日期 -->
+    <div class="info-card">
+        <label for="billDate">📅 帳單日期</label>
+        <input type="date" id="billDate">
+    </div>
+
+    <!-- 台電帳單資訊（共用） -->
+    <div class="fee-section">
+        <div class="section-title">⚡ 台電帳單資訊（共用電號）</div>
+        <div class="grid-row">
+            <div>
+                <label for="season">季節</label>
+                <select id="season" class="season-select">
+                    <option value="summer">☀️ 夏月（6～9 月）</option>
+                    <option value="other">🌙 非夏月（其餘月份）</option>
+                </select>
+            </div>
+        </div>
+        <div class="grid-row">
+            <div>
+                <label for="taipowerBill">💵 台電帳單金額（元）</label>
+                <input type="number" id="taipowerBill" placeholder="例：1258">
+            </div>
+            <div>
+                <label for="taipowerUnits">📊 台電總度數（度）</label>
+                <input type="number" id="taipowerUnits" placeholder="例：566">
+            </div>
+        </div>
+        <div class="grid-row">
+            <div>
+                <label for="reading6Prev">🔢 6F 上期電表讀數</label>
+                <input type="number" id="reading6Prev" placeholder="上期讀數">
+            </div>
+            <div>
+                <label for="reading6Curr">🔢 6F 本期電表讀數</label>
+                <input type="number" id="reading6Curr" placeholder="本期讀數">
+            </div>
+        </div>
+        <!-- 電費分攤預覽 -->
+        <div class="split-preview">
+            <div class="split-preview-row">
+                <span class="split-label unit-5F-text">5F 用電</span>
+                <span id="usage5F" class="split-value">—</span>
+                <span class="split-arrow">→</span>
+                <span class="split-label">電費</span>
+                <span id="elecFee5F" class="split-value split-amount">—</span>
+            </div>
+            <div class="split-preview-row">
+                <span class="split-label unit-6F-text">6F 用電</span>
+                <span id="usage6F" class="split-value">—</span>
+                <span class="split-arrow">→</span>
+                <span class="split-label">電費</span>
+                <span id="elecFee6F" class="split-value split-amount">—</span>
+            </div>
+        </div>
+        <div class="regulation-notice" style="margin-top:12px;">
+            <div style="font-size:13px;color:#FF3B30;line-height:1.6;">
+                🚨 <strong>113年7月15日起新制：</strong>向租客收取電費不得超過台電帳單平均單價，違規最高罰 50 萬元。
+            </div>
+        </div>
+    </div>
+
+    <!-- 水費（共用） -->
+    <div class="fee-section">
+        <div class="section-title">💧 水費（按人數分攤）</div>
+        <div class="grid-row">
+            <div>
+                <label for="totalWater">💧 本期水費總額（元）</label>
+                <input type="number" id="totalWater" placeholder="請輸入水費總額">
+            </div>
+        </div>
+        <div class="split-preview">
+            <div class="split-preview-row">
+                <span class="split-label unit-5F-text">5F 水費</span>
+                <span id="waterFee5F" class="split-value split-amount">—</span>
+            </div>
+            <div class="split-preview-row">
+                <span class="split-label unit-6F-text">6F 水費</span>
+                <span id="waterFee6F" class="split-value split-amount">—</span>
+            </div>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
+            人數設定請至「⚙️ 房客設定」修改
+        </div>
+    </div>
+
+    <!-- 兩戶帳單卡 -->
+    <div class="units-grid">
+
+        <!-- 5F 帳單 -->
+        <div class="unit-bill-card unit-bill-5F">
+            <div class="unit-bill-title unit-5F">🏠 5 樓帳單</div>
+            <div class="unit-bill-preview">
+                <div class="preview-row">
+                    <span>租金</span>
+                    <span class="preview-rent-5F preview-from-settings">（設定值）</span>
+                </div>
+                <div class="preview-row">
+                    <span>電費</span>
+                    <span id="elecFee5F_card" class="preview-from-calc">—</span>
+                </div>
+                <div class="preview-row">
+                    <span>水費</span>
+                    <span id="waterFee5F_card" class="preview-from-calc">—</span>
+                </div>
+            </div>
+            <div class="unit-extra-fees">
+                <div class="grid-row">
+                    <div>
+                        <label>🔥 瓦斯費（元）</label>
+                        <input type="number" id="5F_gas" value="0" placeholder="0">
+                    </div>
+                    <div>
+                        <label>🏢 管理費（元）</label>
+                        <input type="number" id="5F_management" value="0" placeholder="0">
+                    </div>
+                </div>
+                <div>
+                    <label>📝 其他費用（元）</label>
+                    <input type="number" id="5F_other" value="0" placeholder="0">
+                </div>
+            </div>
+            <button class="btn-save-bill btn-5F" onclick="saveBill('5F')">💾 存檔 5F 帳單</button>
+        </div>
+
+        <!-- 6F 帳單 -->
+        <div class="unit-bill-card unit-bill-6F">
+            <div class="unit-bill-title unit-6F">🏠 6 樓帳單</div>
+            <div class="unit-bill-preview">
+                <div class="preview-row">
+                    <span>租金</span>
+                    <span class="preview-rent-6F preview-from-settings">（設定值）</span>
+                </div>
+                <div class="preview-row">
+                    <span>電費</span>
+                    <span id="elecFee6F_card" class="preview-from-calc">—</span>
+                </div>
+                <div class="preview-row">
+                    <span>水費</span>
+                    <span id="waterFee6F_card" class="preview-from-calc">—</span>
+                </div>
+            </div>
+            <div class="unit-extra-fees">
+                <div class="grid-row">
+                    <div>
+                        <label>🔥 瓦斯費（元）</label>
+                        <input type="number" id="6F_gas" value="0" placeholder="0">
+                    </div>
+                    <div>
+                        <label>🏢 管理費（元）</label>
+                        <input type="number" id="6F_management" value="0" placeholder="0">
+                    </div>
+                </div>
+                <div>
+                    <label>📝 其他費用（元）</label>
+                    <input type="number" id="6F_other" value="0" placeholder="0">
+                </div>
+            </div>
+            <button class="btn-save-bill btn-6F" onclick="saveBill('6F')">💾 存檔 6F 帳單</button>
+        </div>
+
+    </div>
+
+    <!-- 備份匯入匯出 -->
+    <div class="btn-group">
+        <button class="btn-export" onclick="exportData()">📤 備份資料 (JSON)</button>
+        <button class="btn-import" onclick="document.getElementById('fileInput').click()">📥 匯入資料</button>
+        <input type="file" id="fileInput" accept=".json" onchange="importData(this)">
+    </div>
+
+    <!-- LINE 報表 -->
+    <div id="reportSection" style="display:none;" class="fee-section">
+        <h3>📋 LINE 報表</h3>
+        <div id="reportText" class="report-area"></div>
+        <button class="copy-btn" onclick="copyReport()">📋 複製報表</button>
+    </div>
+
+    <!-- 歷史帳單記錄 -->
+    <div class="history-section">
+        <div class="history-header">
+            <h3>📜 歷史帳單紀錄</h3>
+            <div class="filter-row">
+                <button class="filter-btn active" data-filter="all" onclick="setHistoryFilter('all')">全部</button>
+                <button class="filter-btn" data-filter="5F" onclick="setHistoryFilter('5F')">5 樓</button>
+                <button class="filter-btn" data-filter="6F" onclick="setHistoryFilter('6F')">6 樓</button>
+            </div>
+        </div>
+        <div class="history-actions">
+            <button class="btn-clear-history" onclick="clearHistory()">清空紀錄</button>
+        </div>
+        <div style="overflow-x:auto;">
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>樓層</th>
+                        <th>用電量</th>
+                        <th>總金額</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/units.js"></script>
+<script src="js/calculation.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\npm-cache\\\\_npx\\\\\" 2>/dev/null || dir \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\npm-cache\\\\_npx\" 2>&1 | head -10)",
+      "Read(//c/Users/User/AppData/Local/npm-cache/_npx\" 2>/dev/**)",
+      "Read(//c/Users/User/AppData/Local/npm-cache/_npx/**)",
+      "Bash(node \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--Tools-landlord-billing-manager\\\\5969486e-d5fb-4708-b6c0-a8c988f7323e\\\\scratchpad\\\\capture.js\")",
+      "Bash(node \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--Tools-landlord-billing-manager\\\\5969486e-d5fb-4708-b6c0-a8c988f7323e\\\\scratchpad\\\\capture_mobile.js\")"
+    ]
+  }
+}

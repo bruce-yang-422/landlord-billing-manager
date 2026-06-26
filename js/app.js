@@ -1,44 +1,55 @@
-// 主入口文件 - 初始化應用程式
+window.onload = function () {
+  initTheme();
+  setupThemeSelector();
 
-// 頁面載入時初始化
-window.onload = function() {
-    // 先初始化主題（必須在其他初始化之前，確保主題正確應用）
-    initTheme();
-    setupThemeSelector();
-    
-    // 設定今天的日期為預設值
-    const today = new Date();
-    const todayStr = today.getFullYear() + '-' + 
-                   String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-                   String(today.getDate()).padStart(2, '0');
-    
-    // 先載入歷史記錄資料庫
-    loadFromLocalStorage();
-    
-    // 載入儲存的輸入值（即時記憶）
-    loadAllInputs();
-    
-    // 如果沒有儲存的日期，設定今天的日期為預設值
-    if (!document.getElementById('billDate').value) {
-        document.getElementById('billDate').value = todayStr;
-    }
-    
-    // 根據歷史紀錄自動填入「上期讀數」
-    autoFillLastReading();
-    
-    // 設定費用開關功能
-    setupFeeToggles();
-    
-    // 設定新制法規功能
-    setupNewRegulationToggles();
-    
-    // 設定自動儲存功能
-    setupAutoSave();
+  // 載入資料
+  loadUnits();
+  loadRecords();
+
+  // 設定今天日期
+  const today = new Date();
+  const todayStr = today.getFullYear() + '-' +
+    String(today.getMonth() + 1).padStart(2, '0') + '-' +
+    String(today.getDate()).padStart(2, '0');
+  const billDateEl = document.getElementById('billDate');
+  if (billDateEl) billDateEl.value = todayStr;
+
+  // 載入即時輸入記憶
+  loadInputs();
+
+  // 填入設定面板
+  fillUnitSettingsForm();
+
+  // 自動填入 6F 上期讀數
+  autoFillLastReading();
+
+  // 渲染歷史記錄
+  renderHistory();
+
+  // 監聽所有影響電費/水費預覽的輸入
+  const elecInputIds = ['taipowerBill', 'taipowerUnits', 'reading6Prev', 'reading6Curr', 'season'];
+  elecInputIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => { updateElectricityPreview(); saveInputs(); });
+    if (el) el.addEventListener('change', () => { updateElectricityPreview(); saveInputs(); });
+  });
+
+  const waterInputEl = document.getElementById('totalWater');
+  if (waterInputEl) {
+    waterInputEl.addEventListener('input', () => { updateWaterPreview(); saveInputs(); });
+  }
+
+  // 各戶額外費用自動儲存
+  const extraIds = ['5F_gas', '5F_management', '5F_other', '6F_gas', '6F_management', '6F_other'];
+  extraIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', saveInputs);
+  });
+
+  // 帳單日期自動儲存
+  if (billDateEl) billDateEl.addEventListener('change', saveInputs);
+
+  // 初始預覽
+  updateElectricityPreview();
+  updateWaterPreview();
 };
-
-// 按Enter鍵時計算
-document.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        calculateAndSave();
-    }
-});
