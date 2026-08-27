@@ -3,20 +3,23 @@
   'use strict';
 
   const DISMISS_KEY = 'landlord_pwa_install_dismissed_at';
+  const DECLINE_KEY = 'landlord_pwa_install_declined_at';
   const VISIT_KEY = 'landlord_pwa_visit_count';
   const SESSION_KEY = 'landlord_pwa_install_hidden';
   const DISMISS_DURATION = 30 * 24 * 60 * 60 * 1000;
+  const DECLINE_DURATION = 60 * 24 * 60 * 60 * 1000;
 
   const card = document.getElementById('pwaInstallCard');
   const title = document.getElementById('pwaInstallTitle');
   const description = document.getElementById('pwaInstallDescription');
   const actionButton = document.getElementById('pwaInstallActionBtn');
   const dismissButton = document.getElementById('pwaInstallDismissBtn');
+  const declineButton = document.getElementById('pwaInstallDeclineBtn');
   const iosDialog = document.getElementById('pwaIosDialog');
   const iosCloseButton = document.getElementById('pwaIosDialogCloseBtn');
   const iosDoneButton = document.getElementById('pwaIosDialogDoneBtn');
 
-  if (!card || !actionButton || !dismissButton) return;
+  if (!card || !actionButton || !dismissButton || !declineButton) return;
 
   let deferredPrompt = null;
   let hasEngagement = false;
@@ -62,6 +65,11 @@
     return dismissedAt > 0 && Date.now() - dismissedAt < DISMISS_DURATION;
   }
 
+  function isDeclined() {
+    const declinedAt = Number.parseInt(readStorage(localStorage, DECLINE_KEY, '0'), 10) || 0;
+    return declinedAt > 0 && Date.now() - declinedAt < DECLINE_DURATION;
+  }
+
   function isHiddenForSession() {
     return readStorage(sessionStorage, SESSION_KEY, '0') === '1';
   }
@@ -91,6 +99,7 @@
     return platformCanInstall &&
       !isStandalone() &&
       !isDismissed() &&
+      !isDeclined() &&
       !isHiddenForSession();
   }
 
@@ -116,6 +125,12 @@
 
   function dismissPromotion() {
     writeStorage(localStorage, DISMISS_KEY, String(Date.now()));
+    writeStorage(sessionStorage, SESSION_KEY, '1');
+    hideCard();
+  }
+
+  function declinePromotion() {
+    writeStorage(localStorage, DECLINE_KEY, String(Date.now()));
     writeStorage(sessionStorage, SESSION_KEY, '1');
     hideCard();
   }
@@ -162,6 +177,7 @@
   });
 
   dismissButton.addEventListener('click', dismissPromotion);
+  declineButton.addEventListener('click', declinePromotion);
   actionButton.addEventListener('click', () => {
     if (isIosDevice()) {
       openIosInstructions();

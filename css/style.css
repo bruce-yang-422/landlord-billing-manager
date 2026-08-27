@@ -1524,6 +1524,7 @@ tr:hover {
 }
 
 .pwa-install-dismiss,
+.pwa-install-decline,
 .pwa-install-action,
 .pwa-ios-done {
     padding: 9px 16px;
@@ -1535,6 +1536,18 @@ tr:hover {
     color: var(--text-secondary);
     background: var(--input-bg);
     border: 1px solid var(--border-color);
+}
+
+.pwa-install-decline {
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.pwa-install-decline:hover {
+    color: var(--text-primary);
+    background: var(--input-bg);
+    border-color: var(--border-color);
 }
 
 .pwa-install-action,
