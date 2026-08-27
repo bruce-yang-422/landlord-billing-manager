@@ -43,10 +43,14 @@
 - 支援安裝至 iPhone、iPad、Android 與桌面裝置
 - 從主畫面圖示以獨立視窗開啟，使用體驗接近原生 App
 - 首次成功載入後，可在沒有網路時繼續使用主要功能
+- 支援情境式安裝提示：完成帳單存檔或再次造訪時才顯示，不干擾首次操作
+- Android／Windows 可直接叫出系統安裝視窗，iPhone／iPad 則提供加入主畫面步驟
 
 ## 🌐 線上使用
 
 **立即使用：** [https://bruce-yang-422.github.io/landlord-billing-manager/](https://bruce-yang-422.github.io/landlord-billing-manager/)
+
+![房東帳務管理工具桌面版](./screenshots/app-desktop-wide.png)
 
 ### 安裝到裝置
 
@@ -66,6 +70,8 @@
 **桌面版 Chrome／Edge：**
 
 開啟上方網址後，點擊網址列右側的安裝圖示，或從瀏覽器選單選擇安裝。
+
+符合安裝條件時，網站也會在完成帳單存檔後或第二次造訪時顯示安裝提示。選擇「稍後再說」後，30 天內不會再次主動提示。
 
 > [!IMPORTANT]
 > 帳務資料儲存在目前執行環境的 localStorage。iPhone／iPad 加入主畫面後，獨立 Web App 不一定會自動帶入 Safari 中既有的資料。若已在 Safari 使用本工具，請先匯出 JSON 備份，再從主畫面版本匯入。清除瀏覽器網站資料或移除相關網站資料也可能刪除帳務內容，請定期匯出備份。
@@ -152,7 +158,12 @@ landlord-billing-manager/
 │   ├── storage.js      # 帳單 CRUD、匯入匯出、輸入記憶
 │   ├── ui.js           # 即時預覽、LINE 報表、歷史記錄
 │   ├── theme.js        # 主題切換（亮色/暗色/Auto）
+│   ├── pwa-install.js  # 跨平台安裝提示與 iOS 加入主畫面教學
 │   └── app.js          # 初始化入口
+├── screenshots/
+│   ├── app-desktop-wide.png     # 桌面版 PWA 安裝預覽
+│   ├── app-desktop.png          # 桌面版完整頁面截圖
+│   └── app-mobile.jpg           # 手機版 PWA 安裝預覽
 ├── index.html                   # 主頁面與 PWA 註冊
 ├── manifest.webmanifest         # PWA 名稱、配色與圖示設定
 └── service-worker.js            # 離線快取與版本更新

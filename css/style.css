@@ -1459,3 +1459,196 @@ tr:hover {
     border-radius: 8px;
     border-left: 3px solid #FF3B30;
 }
+
+/* ── PWA 安裝提示 ── */
+.pwa-install-card {
+    box-sizing: border-box;
+    position: fixed;
+    right: max(20px, env(safe-area-inset-right));
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: 1000;
+    width: min(430px, calc(100vw - 40px));
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 14px;
+    align-items: center;
+    padding: 18px;
+    color: var(--text-primary);
+    background: var(--container-bg);
+    border: 1px solid var(--border-color-hover);
+    border-radius: 20px;
+    box-shadow: 0 16px 48px var(--shadow-lg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    animation: pwa-install-enter 0.28s ease-out;
+}
+
+.pwa-install-card[hidden] {
+    display: none;
+}
+
+.pwa-install-icon {
+    grid-row: 1;
+    border-radius: 13px;
+    box-shadow: 0 4px 12px var(--shadow-md);
+}
+
+.pwa-install-copy {
+    min-width: 0;
+}
+
+.pwa-install-copy strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 16px;
+    line-height: 1.35;
+}
+
+.pwa-install-copy p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.pwa-install-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.pwa-install-actions button,
+.pwa-ios-dialog button {
+    box-shadow: none;
+}
+
+.pwa-install-dismiss,
+.pwa-install-action,
+.pwa-ios-done {
+    padding: 9px 16px;
+    border-radius: 11px;
+    font-size: 14px;
+}
+
+.pwa-install-dismiss {
+    color: var(--text-secondary);
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+}
+
+.pwa-install-action,
+.pwa-ios-done {
+    color: #fff;
+    background: linear-gradient(135deg, #007AFF, #0051D5);
+}
+
+.pwa-ios-dialog {
+    box-sizing: border-box;
+    width: min(460px, calc(100vw - 32px));
+    padding: 22px;
+    color: var(--text-primary);
+    background: var(--container-bg);
+    border: 1px solid var(--border-color-hover);
+    border-radius: 22px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+}
+
+.pwa-ios-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+.pwa-ios-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.pwa-ios-eyebrow {
+    color: var(--link-color);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.pwa-ios-dialog h2 {
+    margin: 2px 0 14px;
+    font-size: 24px;
+}
+
+.pwa-ios-close {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: var(--text-secondary);
+    background: var(--input-bg);
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.pwa-ios-steps {
+    margin: 0 0 16px;
+    padding-left: 24px;
+}
+
+.pwa-ios-steps li {
+    margin-bottom: 9px;
+}
+
+.pwa-ios-backup-note {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    color: var(--text-secondary);
+    background: rgba(255, 149, 0, 0.1);
+    border-left: 3px solid #FF9500;
+    border-radius: 9px;
+    font-size: 13px;
+}
+
+.pwa-ios-done {
+    width: 100%;
+}
+
+@keyframes pwa-install-enter {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 600px) {
+    .pwa-install-card {
+        left: 12px;
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        width: auto;
+        padding: 16px;
+    }
+
+    .pwa-install-actions {
+        justify-content: stretch;
+    }
+
+    .pwa-install-actions button {
+        flex: 1;
+    }
+
+    .pwa-ios-dialog {
+        margin-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pwa-install-card {
+        animation: none;
+    }
+}

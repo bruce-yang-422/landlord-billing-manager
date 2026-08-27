@@ -351,12 +351,46 @@
 
 </div>
 
+<!-- PWA 安裝提示 -->
+<aside id="pwaInstallCard" class="pwa-install-card" aria-labelledby="pwaInstallTitle" hidden>
+    <img class="pwa-install-icon" src="./icons/icon-192.png" alt="" width="52" height="52">
+    <div class="pwa-install-copy">
+        <strong id="pwaInstallTitle">安裝房東帳務 App</strong>
+        <p id="pwaInstallDescription">從桌面快速開啟，也能離線記帳。</p>
+    </div>
+    <div class="pwa-install-actions">
+        <button id="pwaInstallDismissBtn" class="pwa-install-dismiss" type="button">稍後再說</button>
+        <button id="pwaInstallActionBtn" class="pwa-install-action" type="button">安裝 App</button>
+    </div>
+</aside>
+
+<!-- iPhone / iPad 安裝說明 -->
+<dialog id="pwaIosDialog" class="pwa-ios-dialog" aria-labelledby="pwaIosDialogTitle">
+    <div class="pwa-ios-dialog-header">
+        <div>
+            <span class="pwa-ios-eyebrow">iPhone／iPad</span>
+            <h2 id="pwaIosDialogTitle">加入主畫面</h2>
+        </div>
+        <button id="pwaIosDialogCloseBtn" class="pwa-ios-close" type="button" aria-label="關閉安裝說明">×</button>
+    </div>
+    <ol class="pwa-ios-steps">
+        <li>點擊瀏覽器工具列的「分享」按鈕（方框上箭頭）。</li>
+        <li>在分享選單中選擇「加入主畫面」。</li>
+        <li>確認名稱後點擊「新增」，再從主畫面開啟。</li>
+    </ol>
+    <p class="pwa-ios-backup-note">
+        若 Safari 內已有帳務資料，請先匯出 JSON 備份，再於主畫面版本匯入。
+    </p>
+    <button id="pwaIosDialogDoneBtn" class="pwa-ios-done" type="button">我知道了</button>
+</dialog>
+
 <script src="js/data.js"></script>
 <script src="js/units.js"></script>
 <script src="js/calculation.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/theme.js"></script>
+<script src="js/pwa-install.js"></script>
 <script src="js/app.js"></script>
 
 <!-- PWA Service Worker -->

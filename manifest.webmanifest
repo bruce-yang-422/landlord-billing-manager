@@ -9,6 +9,11 @@
   "display": "standalone",
   "background_color": "#e8f0f8",
   "theme_color": "#e8f0f8",
+  "categories": [
+    "finance",
+    "productivity",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "./icons/icon-192.png",
@@ -33,6 +38,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./screenshots/app-mobile.jpg",
+      "sizes": "717x1280",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "手機版帳務輸入與電費分攤畫面"
+    },
+    {
+      "src": "./screenshots/app-desktop-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "桌面版房東帳務管理畫面"
     }
   ]
 }

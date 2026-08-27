@@ -103,6 +103,7 @@ function saveBill(unitId) {
   renderHistory();
   generateReport(record);
   alert(`✅ ${getUnit(unitId).label} 帳單已存檔！`);
+  window.PWAInstall?.showAfterEngagement();
 }
 
 // ── LINE 報表 ──────────────────────────────────────────────

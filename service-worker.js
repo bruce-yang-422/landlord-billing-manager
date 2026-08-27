@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "landlord-billing-";
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
 
 const APP_FILES = [
     "./",
@@ -11,13 +11,16 @@ const APP_FILES = [
     "./js/storage.js",
     "./js/ui.js",
     "./js/theme.js",
+    "./js/pwa-install.js",
     "./js/app.js",
     "./manifest.webmanifest",
     "./icons/icon.ico",
     "./icons/icon-192.png",
     "./icons/icon-512.png",
     "./icons/icon-maskable-192.png",
-    "./icons/icon-maskable-512.png"
+    "./icons/icon-maskable-512.png",
+    "./screenshots/app-mobile.jpg",
+    "./screenshots/app-desktop-wide.png"
 ];
 
 self.addEventListener("install", (event) => {
