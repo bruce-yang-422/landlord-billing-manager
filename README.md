@@ -1,6 +1,7 @@
 # 🏠 房東帳務管理工具
 
 ![純前端](https://img.shields.io/badge/技術-純前端應用-blue)
+![PWA](https://img.shields.io/badge/PWA-可安裝與離線使用-5A0FC8)
 ![法規符合](https://img.shields.io/badge/法規-113年7月新制合規-brightgreen)
 ![MIT License](https://img.shields.io/badge/授權-MIT-green)
 
@@ -37,9 +38,37 @@
 - 支援 JSON 匯出備份、匯入還原
 - 輸入值自動記憶，下次開啟不需重填
 
+### 📱 PWA 應用程式
+
+- 支援安裝至 iPhone、iPad、Android 與桌面裝置
+- 從主畫面圖示以獨立視窗開啟，使用體驗接近原生 App
+- 首次成功載入後，可在沒有網路時繼續使用主要功能
+
 ## 🌐 線上使用
 
 **立即使用：** [https://bruce-yang-422.github.io/landlord-billing-manager/](https://bruce-yang-422.github.io/landlord-billing-manager/)
+
+### 安裝到裝置
+
+**iPhone／iPad（Safari）：**
+
+1. 使用 Safari 開啟上方網址
+2. 點擊「分享」
+3. 選擇「加入主畫面」
+4. 從主畫面的「房東帳務」圖示開啟
+
+**Android（Chrome）：**
+
+1. 使用 Chrome 開啟上方網址
+2. 開啟瀏覽器選單
+3. 選擇「安裝應用程式」或「加入主畫面」
+
+**桌面版 Chrome／Edge：**
+
+開啟上方網址後，點擊網址列右側的安裝圖示，或從瀏覽器選單選擇安裝。
+
+> [!IMPORTANT]
+> 帳務資料儲存在目前執行環境的 localStorage。iPhone／iPad 加入主畫面後，獨立 Web App 不一定會自動帶入 Safari 中既有的資料。若已在 Safari 使用本工具，請先匯出 JSON 備份，再從主畫面版本匯入。清除瀏覽器網站資料或移除相關網站資料也可能刪除帳務內容，請定期匯出備份。
 
 ## 📖 使用方式
 
@@ -108,17 +137,25 @@
 
 ```text
 landlord-billing-manager/
-├── index.html          # 主頁面
 ├── css/
 │   └── style.css       # 樣式（Apple 玻璃風格，支援亮色/暗色/Auto 主題）
-└── js/
-    ├── data.js         # 台電費率常數、appData 全域狀態
-    ├── units.js        # 房客設定讀寫（租金、人數、銀行資訊）
-    ├── calculation.js  # 累進分攤、水費分攤計算邏輯
-    ├── storage.js      # 帳單 CRUD、匯入匯出、輸入記憶
-    ├── ui.js           # 即時預覽、LINE 報表、歷史記錄
-    ├── theme.js        # 主題切換（亮色/暗色/Auto）
-    └── app.js          # 初始化入口
+├── icons/
+│   ├── icon.ico                 # 瀏覽器分頁圖示
+│   ├── icon-192.png             # PWA 一般圖示（192×192）
+│   ├── icon-512.png             # PWA 一般圖示（512×512）
+│   ├── icon-maskable-192.png    # PWA 可遮罩圖示（192×192）
+│   └── icon-maskable-512.png    # PWA 可遮罩圖示（512×512）
+├── js/
+│   ├── data.js         # 台電費率常數、appData 全域狀態
+│   ├── units.js        # 房客設定讀寫（租金、人數、銀行資訊）
+│   ├── calculation.js  # 累進分攤、水費分攤計算邏輯
+│   ├── storage.js      # 帳單 CRUD、匯入匯出、輸入記憶
+│   ├── ui.js           # 即時預覽、LINE 報表、歷史記錄
+│   ├── theme.js        # 主題切換（亮色/暗色/Auto）
+│   └── app.js          # 初始化入口
+├── index.html                   # 主頁面與 PWA 註冊
+├── manifest.webmanifest         # PWA 名稱、配色與圖示設定
+└── service-worker.js            # 離線快取與版本更新
 ```
 
 ## 📦 資料結構（localStorage）

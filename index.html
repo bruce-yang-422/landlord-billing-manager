@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>房東帳務管理工具</title>
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#e8f0f8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" type="image/x-icon" href="./icons/icon.ico">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+    <!-- iPhone 加入主畫面 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="房東帳務">
+
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -345,5 +358,16 @@
 <script src="js/ui.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/app.js"></script>
+
+<!-- PWA Service Worker -->
+<script>
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+            navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+                console.error("Service Worker registration failed:", error);
+            });
+        });
+    }
+</script>
 </body>
 </html>
