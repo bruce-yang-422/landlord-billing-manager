@@ -107,3 +107,20 @@ test('per-bill notes are separate per unit, cleared only after successful save, 
   h.ctx.saveBill('6F');
   assert.equal(h.elements['6F_currentNote'].value, '本期補收瓦斯');
 });
+
+
+test('bank names survive CSV and appear with bank code in tenant reports', () => {
+  const h = setup(false);
+  Object.assign(h.ctx.testUnits[0], { bankName: '第一銀行', branchName: '台北分行', bankCode: '007', accountNumber: '00123456', payeeName: '測試房東' });
+  h.ctx.saveBill('5F');
+  const restored = h.ctx.backupFromCsv(h.ctx.backupToCsv({ units: h.ctx.testUnits, records: h.records }));
+  assert.equal(restored.units[0].bankName, '第一銀行');
+  assert.equal(restored.units[0].branchName, '台北分行');
+  assert.equal(restored.units[0].bankCode, '007');
+  h.elements.reportText = { textContent: '' };
+  h.generateReport(h.records[0]);
+  assert.match(h.elements.reportText.textContent, /銀行名稱：第一銀行\n分行名稱：台北分行\n銀行代號：007\n戶名：測試房東\n帳號：00123456/);
+  h.ctx.testUnits[0].bankCode = '';
+  h.generateReport(h.records[0]);
+  assert.match(h.elements.reportText.textContent, /銀行名稱：第一銀行\n分行名稱：台北分行\n戶名：測試房東\n帳號：00123456/);
+});

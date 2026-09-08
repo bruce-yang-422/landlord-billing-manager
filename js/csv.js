@@ -16,14 +16,16 @@ const BACKUP_COLUMNS = [
   ['電費差額', 'splitInfo.deltaC', 'number'],
   ['5F分攤比例', 'splitInfo.ratio5', 'number'], ['6F分攤比例', 'splitInfo.ratio6', 'number'],
   ['樓層名稱', 'label', 'text'], ['居住人數', 'persons', 'number'],
-  ['銀行代碼', 'bankCode', 'text'], ['戶名', 'payeeName', 'text'],
-  ['銀行帳號', 'accountNumber', 'text'], ['租客備註', 'tenantNote', 'text'],
+  ['銀行代號', 'bankCode', 'text'], ['戶名', 'payeeName', 'text'],
+  ['帳號', 'accountNumber', 'text'], ['租客備註', 'tenantNote', 'text'],
   ['房東備註', 'landlordNote', 'text'],
   ['起始抄表日期', 'electricity.prevDate', 'text'],
   ['結束抄表日期', 'electricity.currDate', 'text'],
   ['台電用電起日', 'electricity.periodStart', 'text'],
   ['台電用電迄日', 'electricity.periodEnd', 'text'],
-  ['當期備註', 'currentNote', 'text']
+  ['當期備註', 'currentNote', 'text'],
+  ['銀行名稱', 'bankName', 'text'],
+  ['分行名稱', 'branchName', 'text']
 ];
 
 function backupValue(object, key) {
@@ -82,6 +84,10 @@ function parseCsv(text) {
 
 function backupFromCsv(text) {
   const [headers, ...rows] = parseCsv(text);
+  if (headers) {
+    const aliases = { '銀行代碼': '銀行代號', '帳戶名稱': '戶名', '銀行帳號': '帳號' };
+    headers.forEach((label, i) => { headers[i] = aliases[label] || label; });
+  }
   if (!headers || new Set(headers).size !== headers.length || headers.some(label => !BACKUP_COLUMNS.some(column => column[0] === label)) ||
       BACKUP_COLUMNS.slice(0, 31).some(([label]) => !headers.includes(label))) throw new Error('請使用本工具匯出的 CSV，並保留完整中文欄名');
   if (rows.length === 0) throw new Error('CSV 沒有備份資料');
@@ -109,7 +115,7 @@ function backupFromCsv(text) {
       object.id = object.unitId;
       delete object.unitId;
       for (const [, key, type] of BACKUP_COLUMNS) {
-        if (type === 'text' && !key.includes('.') && !['kind', 'unitId', 'date', 'currentNote'].includes(key)) object[key] ??= '';
+        if (type === 'text' && !key.includes('.') && !['kind', 'unitId', 'date', 'currentNote', 'bankName', 'branchName'].includes(key)) object[key] ??= '';
       }
       data.units.push(object);
     } else if (kind === '帳單') data.records.push(object);
@@ -142,7 +148,7 @@ function validateBackup(data) {
   for (const unit of data.units || []) {
     if (!unit || !validUnit(unit.id) || unitIds.has(unit.id) || !numeric(unit.rent) || !numeric(unit.persons)) throw new Error('房客設定格式錯誤或樓層重複');
     unitIds.add(unit.id);
-    for (const key of ['label', 'bankCode', 'payeeName', 'accountNumber', 'tenantNote', 'landlordNote']) {
+    for (const key of ['label', 'bankName', 'branchName', 'bankCode', 'payeeName', 'accountNumber', 'tenantNote', 'landlordNote']) {
       if (unit[key] !== undefined && typeof unit[key] !== 'string') throw new Error(`${key}必須是文字`);
     }
   }

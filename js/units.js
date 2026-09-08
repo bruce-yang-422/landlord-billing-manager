@@ -55,6 +55,8 @@ function saveUnitSettings() {
     updateUnit(unit.id, {
       rent:          getNum('rent'),
       persons:       getNum('persons'),
+      bankName:      get('bankName'),
+      branchName:    get('branchName'),
       bankCode:      get('bankCode'),
       payeeName:     get('payeeName'),
       accountNumber: get('accountNumber'),
@@ -76,6 +78,8 @@ function fillUnitSettingsForm() {
     };
     set('rent',          unit.rent);
     set('persons',       unit.persons);
+    set('bankName',      unit.bankName);
+    set('branchName',    unit.branchName);
     set('bankCode',      unit.bankCode);
     set('payeeName',     unit.payeeName);
     set('accountNumber', unit.accountNumber);

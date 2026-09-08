@@ -205,10 +205,13 @@ function generateReport(record) {
   r += `──────────────\n`;
   r += `總計：$${record.total.toLocaleString()}\n\n`;
 
-  if (unit.bankCode && unit.accountNumber) {
+  if (unit.accountNumber) {
     r += `🏦 匯款資訊\n`;
-    r += `(${unit.bankCode}) ${unit.accountNumber}\n`;
-    r += `戶名：${unit.payeeName}\n\n`;
+    if (unit.bankName?.trim()) r += `銀行名稱：${unit.bankName}\n`;
+    if (unit.branchName?.trim()) r += `分行名稱：${unit.branchName}\n`;
+    if (unit.bankCode) r += `銀行代號：${unit.bankCode}\n`;
+    r += `戶名：${unit.payeeName || ''}\n`;
+    r += `帳號：${unit.accountNumber}\n\n`;
   }
 
   const fixedNote = record.tenantNote ?? unit.tenantNote;
