@@ -48,6 +48,8 @@ function saveInputs() {
     const get = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
     const inputs = {
       billDate:        get('billDate'),
+      currentNote5F: get('5F_currentNote'),
+      currentNote6F: get('6F_currentNote'),
       taipowerStartDate: get('taipowerStartDate'),
       taipowerEndDate: get('taipowerEndDate'),
       meterMatchDays: get('meterMatchDays'),
@@ -86,6 +88,8 @@ function loadInputs() {
       if (el) el.value = val;
     };
     set('billDate',      inputs.billDate);
+    set('5F_currentNote', inputs.currentNote5F);
+    set('6F_currentNote', inputs.currentNote6F);
     set('taipowerStartDate', inputs.taipowerStartDate);
     set('taipowerEndDate', inputs.taipowerEndDate);
     set('meterMatchDays', inputs.meterMatchDays);

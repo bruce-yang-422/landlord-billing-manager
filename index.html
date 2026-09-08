@@ -152,6 +152,11 @@
                 <div class="preview-row"><span>其他費用</span><span id="otherFee5F_card">$0</span></div>
                 <div class="bill-total-row"><strong>應收總額</strong><strong id="total5F_card">—</strong></div>
             </div>
+            <div class="bill-current-note">
+                <label for="5F_currentNote">當期備註</label>
+                <textarea id="5F_currentNote" rows="3" aria-describedby="5F_currentNoteHint" placeholder="例如：本期其他費用為更換門鎖 350 元"></textarea>
+                <p id="5F_currentNoteHint" class="screen-hint">僅此帳單提供給租客，存檔或換日期後清空。固定備註請至設定。</p>
+            </div>
             <button class="btn-save-bill btn-5F" onclick="saveBill('5F')">💾 存檔 5F 帳單</button>
         </div>
 
@@ -177,6 +182,11 @@
                 <div class="preview-row"><span>管理費</span><span id="managementFee6F_card">$0</span></div>
                 <div class="preview-row"><span>其他費用</span><span id="otherFee6F_card">$0</span></div>
                 <div class="bill-total-row"><strong>應收總額</strong><strong id="total6F_card">—</strong></div>
+            </div>
+            <div class="bill-current-note">
+                <label for="6F_currentNote">當期備註</label>
+                <textarea id="6F_currentNote" rows="3" aria-describedby="6F_currentNoteHint" placeholder="例如：本期其他費用為更換門鎖 350 元"></textarea>
+                <p id="6F_currentNoteHint" class="screen-hint">僅此帳單提供給租客，存檔或換日期後清空。固定備註請至設定。</p>
             </div>
             <button class="btn-save-bill btn-6F" onclick="saveBill('6F')">💾 存檔 6F 帳單</button>
         </div>
@@ -338,7 +348,7 @@
                 <!-- 備註 -->
                 <div id="5F_tab_notes" class="settings-tab-panel" style="display:none;">
                     <div>
-                        <label>📝 租客備註（會顯示在 LINE 報表中）</label>
+                        <label>📝 固定備註（每期提供給租客）</label>
                         <textarea id="5F_tenantNote" rows="6" placeholder="例：請於每月5日前匯款，謝謝。"></textarea>
                     </div>
                     <div style="margin-top:14px;">
@@ -385,7 +395,7 @@
                 <!-- 備註 -->
                 <div id="6F_tab_notes" class="settings-tab-panel" style="display:none;">
                     <div>
-                        <label>📝 租客備註（會顯示在 LINE 報表中）</label>
+                        <label>📝 固定備註（每期提供給租客）</label>
                         <textarea id="6F_tenantNote" rows="6" placeholder="例：請於每月5日前匯款，謝謝。"></textarea>
                     </div>
                     <div style="margin-top:14px;">

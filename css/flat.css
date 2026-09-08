@@ -107,7 +107,7 @@ button::before {
 .section-title, .unit-bill-title, .unit-settings-title { letter-spacing: 0.3px; }
 
 input[type="text"], input[type="number"], input[type="date"],
-.season-select, .theme-select, .unit-settings-card textarea, .notes-section textarea {
+.season-select, .theme-select, .unit-settings-card textarea, .notes-section textarea, .bill-current-note textarea {
     min-width: 0;
     max-width: 100%;
     background: var(--field-bg);
@@ -122,7 +122,7 @@ input::placeholder, textarea::placeholder { color: var(--text-secondary); opacit
 .theme-select { border-radius: 10px; }
 input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus,
 .season-select:focus, .theme-select:focus,
-.unit-settings-card textarea:focus, .notes-section textarea:focus {
+.unit-settings-card textarea:focus, .notes-section textarea:focus, .bill-current-note textarea:focus {
     background: var(--surface);
     border-color: var(--link-color);
     outline: 2px solid var(--link-color);
@@ -390,3 +390,12 @@ tr:hover { background: var(--accent-soft); }
 .history-section .filter-row { flex-wrap: nowrap; gap: 6px; padding: 6px; }
 .history-section .filter-btn { min-width: 0; padding: 8px 12px; font-size: 12px; line-height: 20px; white-space: nowrap; }
 .history-section .btn-clear-history { font-size: 12px; line-height: 20px; white-space: nowrap; }
+
+.bill-current-note { margin: 16px 0; }
+.bill-current-note label { font-size: 12px; }
+.bill-note-details dd { white-space: pre-wrap; }
+
+.bill-current-note label { display: block; margin-bottom: 8px; font-weight: 500; }
+.bill-current-note textarea { display: block; box-sizing: border-box; width: 100%; min-height: 96px; padding: 12px 14px; font-family: inherit; font-size: 14px; font-weight: 400; line-height: 1.6; letter-spacing: normal; resize: vertical; }
+.bill-current-note .screen-hint { margin: 8px 0 0; font-size: 11px; line-height: 1.6; }
+@media (max-width: 768px) { .bill-current-note textarea { font-size: 16px; } }

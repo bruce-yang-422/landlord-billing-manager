@@ -50,7 +50,13 @@ window.onload = function () {
   document.getElementById('includeElectricity')?.addEventListener('change', () => { updateElectricityPreview(); saveInputs(); });
 
   // 帳單日期自動儲存
-  if (billDateEl) billDateEl.addEventListener('change', () => { saveInputs(); });
+  ['5F_currentNote', '6F_currentNote'].forEach(id => {
+    document.getElementById(id).addEventListener('input', saveInputs);
+  });
+  if (billDateEl) billDateEl.addEventListener('change', () => {
+    ['5F_currentNote', '6F_currentNote'].forEach(id => { document.getElementById(id).value = ''; });
+    saveInputs();
+  });
 
   // 初始預覽
   updateElectricityPreview();

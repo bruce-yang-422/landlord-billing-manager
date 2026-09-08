@@ -22,7 +22,8 @@ const BACKUP_COLUMNS = [
   ['起始抄表日期', 'electricity.prevDate', 'text'],
   ['結束抄表日期', 'electricity.currDate', 'text'],
   ['台電用電起日', 'electricity.periodStart', 'text'],
-  ['台電用電迄日', 'electricity.periodEnd', 'text']
+  ['台電用電迄日', 'electricity.periodEnd', 'text'],
+  ['當期備註', 'currentNote', 'text']
 ];
 
 function backupValue(object, key) {
@@ -40,6 +41,7 @@ function backupToCsv(data) {
           : key === 'id' && kind === '房客設定' ? undefined : backupValue(object, key);
         if (value === undefined || value === null) return '';
         if (key === 'electricity.season') value = value === 'summer' ? '夏月' : value === 'other' ? '非夏月' : value;
+        if (kind === '帳單' && ['tenantNote', 'currentNote'].includes(key) && value === '') return "'";
         const text = String(value);
         // 單引號保護 Excel 的前導零、長編號與公式文字；匯入時移除一層。
         return type !== 'number' && (type === 'id' || key === 'bankCode' || key === 'accountNumber' || /^[\s]*[=+\-@\t\r\n']/.test(text))
@@ -107,7 +109,7 @@ function backupFromCsv(text) {
       object.id = object.unitId;
       delete object.unitId;
       for (const [, key, type] of BACKUP_COLUMNS) {
-        if (type === 'text' && !key.includes('.') && !['kind', 'unitId', 'date'].includes(key)) object[key] ??= '';
+        if (type === 'text' && !key.includes('.') && !['kind', 'unitId', 'date', 'currentNote'].includes(key)) object[key] ??= '';
       }
       data.units.push(object);
     } else if (kind === '帳單') data.records.push(object);
@@ -149,6 +151,9 @@ function validateBackup(data) {
         typeof record.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(record.date) ||
         !['rent', 'waterFee', 'gasFee', 'managementFee', 'otherFee', 'total', 'electricity.fee', 'electricity.usage'].every(key => numeric(backupValue(record, key)))) throw new Error('帳單格式錯誤、必要欄位缺漏或編號重複');
     recordIds.add(String(record.id));
+    for (const key of ['tenantNote', 'currentNote']) {
+      if (record[key] !== undefined && typeof record[key] !== 'string') throw new Error('帳單備註必須是文字');
+    }
     for (const [, key, type] of BACKUP_COLUMNS) {
       const value = backupValue(record, key);
       if (type === 'number' && value !== undefined && !numeric(value)) throw new Error('帳單包含無效數字');

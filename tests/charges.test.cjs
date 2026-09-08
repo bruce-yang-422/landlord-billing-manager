@@ -21,9 +21,10 @@ function setup(includeElectricity) {
   for (const file of ['data.js', 'calculation.js', 'csv.js', 'ui.js']) vm.runInContext(fs.readFileSync(path.join(__dirname, '../js', file), 'utf8'), ctx);
   ctx.testUnits = units;
   vm.runInContext('appData.units = testUnits', ctx);
+  const generateReport = ctx.generateReport;
   ctx.renderHistory = () => {};
   ctx.generateReport = () => {};
-  return { ctx, elements, records, alerts };
+  return { ctx, elements, records, alerts, generateReport };
 }
 
 test('monthly bills include water, individual gas and other fees without a Taipower bill', () => {
@@ -78,4 +79,31 @@ test('CSV preserves requested Taipower period separately from matched meter date
   assert.equal(record.electricity.prevDate, '2026-07-08');
   const restored = h.ctx.backupFromCsv(h.ctx.backupToCsv({ units: [], records: [record] }));
   assert.deepEqual(JSON.parse(JSON.stringify(restored.records[0])), JSON.parse(JSON.stringify(record)));
+});
+
+
+test('per-bill notes are separate per unit, cleared only after successful save, and preserved in CSV', () => {
+  const h = setup(false);
+  h.elements['5F_currentNote'] = { value: '本期維修, "門鎖"\n=測試文字' };
+  h.elements['6F_currentNote'] = { value: '本期補收瓦斯' };
+  h.ctx.testUnits[0].tenantNote = '每月 5 日前繳款';
+  h.ctx.testUnits[0].landlordNote = '私人租約備忘';
+  h.ctx.saveBill('5F');
+  const record = h.records[0];
+  assert.equal(record.currentNote, '本期維修, "門鎖"\n=測試文字');
+  assert.equal(record.tenantNote, '每月 5 日前繳款');
+  assert.equal(h.elements['5F_currentNote'].value, '');
+  assert.equal(h.elements['6F_currentNote'].value, '本期補收瓦斯');
+  h.ctx.testUnits[0].tenantNote = '已修改固定備註';
+  const restored = h.ctx.backupFromCsv(h.ctx.backupToCsv({ units: [], records: [record] }));
+  assert.equal(restored.records[0].tenantNote, '每月 5 日前繳款');
+  assert.equal(restored.records[0].currentNote, record.currentNote);
+  h.elements.reportText = { textContent: '' };
+  h.generateReport(record);
+  assert.match(h.elements.reportText.textContent, /每月 5 日前繳款/);
+  assert.match(h.elements.reportText.textContent, /本期維修/);
+  assert.doesNotMatch(h.elements.reportText.textContent, /私人租約備忘|已修改固定備註/);
+  h.ctx.addRecord = () => { throw new Error('storage full'); };
+  h.ctx.saveBill('6F');
+  assert.equal(h.elements['6F_currentNote'].value, '本期補收瓦斯');
 });

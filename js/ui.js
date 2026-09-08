@@ -135,6 +135,8 @@ function saveBill(unitId) {
   const unit = draft.units.find(row => row.id === unitId);
   if (!unit) return;
   const record = buildRecord(unitId, billDate, unit.fee, unit.usage, unit.water, unit.extras);
+  record.currentNote = document.getElementById(`${unitId}_currentNote`)?.value || '';
+  record.tenantNote = getUnit(unitId).tenantNote || '';
   if (draft.includeElectricity) {
     if (unitId === '6F') {
       record.electricity.prevReading = draft.previous;
@@ -151,6 +153,9 @@ function saveBill(unitId) {
       c5Theory: s.c5Theory, c6Theory: s.c6Theory, deltaC: s.deltaC, ratio5: s.ratio5, ratio6: s.ratio6 };
   }
   try { addRecord(record); } catch (error) { alert('帳單未儲存：' + error.message); return; }
+  const noteInput = document.getElementById(`${unitId}_currentNote`);
+  if (noteInput) noteInput.value = '';
+  if (typeof saveInputs === 'function') saveInputs();
   renderHistory();
   renderMeterHistory();
   generateReport(record);
@@ -206,9 +211,9 @@ function generateReport(record) {
     r += `戶名：${unit.payeeName}\n\n`;
   }
 
-  if (unit.tenantNote?.trim()) {
-    r += `📝 備註\n${unit.tenantNote}\n\n`;
-  }
+  const fixedNote = record.tenantNote ?? unit.tenantNote;
+  if (fixedNote?.trim()) r += `📝 固定備註\n${fixedNote}\n\n`;
+  if (record.currentNote?.trim()) r += `📝 當期備註\n${record.currentNote}\n\n`;
 
   const reportText = document.getElementById('reportText');
   const reportSection = document.getElementById('reportSection');
@@ -326,7 +331,7 @@ function renderHistory() {
     for (const [label, value] of [['租金', record.rent], ['電費', record.electricity?.fee], ['水費', record.waterFee], ['瓦斯費', record.gasFee], ['管理費', record.managementFee], ['其他費用', record.otherFee]]) row(fees, label, amount(value));
     card.append(fees);
     const details = node('details', 'bill-note-details');
-    details.append(node('summary', '', '用電與計算明細'));
+    details.append(node('summary', '', '用電、計算與備註'));
     const list = node('dl');
     const e = record.electricity || {};
     row(list, '本戶用電', e.usage == null ? '未記錄' : number(e.usage) + ' 度');
@@ -350,6 +355,8 @@ function renderHistory() {
         ['6F 分攤比例', 'ratio6', v => v == null ? '未記錄' : (v * 100).toFixed(2) + '%']
       ]) row(list, label, format(split[key]));
     }
+    row(list, '固定備註（存檔內容）', record.tenantNote === undefined ? '舊帳單未保存，報表沿用目前設定' : record.tenantNote || '無');
+    row(list, '當期備註', record.currentNote || '無');
     row(list, '帳單編號', String(record.id));
     details.append(list);
     card.append(details);
