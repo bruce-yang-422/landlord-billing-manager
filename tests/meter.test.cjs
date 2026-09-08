@@ -8,10 +8,13 @@ const plain = value => JSON.parse(JSON.stringify(value));
 
 function harness() {
   const elements = new Map();
-  for (const id of ['billDate','meterDate','meterCurrent','meterSaveStatus','meterPreviousValue','meterPreviousDate','meterUsageHint','billingStartReading','billingEndReading','reading6Prev','reading6Curr','billingPeriodHint']) {
+  for (const id of ['taipowerStartDate','taipowerEndDate','meterMatchDays','billDate','meterDate','meterCurrent','meterSaveStatus','meterPreviousValue','meterPreviousDate','meterUsageHint','billingStartReading','billingEndReading','reading6Prev','reading6Curr','billingPeriodHint']) {
     elements.set(id, { value: '', textContent: '', options: [], replaceChildren(...options) { this.options = options; }, add(option) { this.options.push(option); } });
   }
   elements.get('billDate').value = '2026-09-08';
+  elements.get('taipowerStartDate').value = '2026-07-08';
+  elements.get('taipowerEndDate').value = '2026-09-08';
+  elements.get('meterMatchDays').value = '3';
   const stored = new Map();
   const ctx = vm.createContext({
     console, Date, appData: { units: [], records: [], meterReadings: [] },
@@ -49,7 +52,7 @@ test('legacy bills use current reading, explicit reading date, and manual readin
   assert.equal(ctx.meterTimeline([{ id: 15, date: '2026-07-08', reading: 1010 }], bills).at(-1).reading, 1010);
 });
 
-test('two-month settlement uses both monthly intervals and excludes readings after billing date', () => {
+test('settlement uses explicit period and keeps manual selections within search range', () => {
   const { ctx, elements } = harness();
   ctx.appData.meterReadings = [...rows, { id: 5, date: '2026-10-08', reading: 1500 }];
   ctx.refreshBillingReadings();
@@ -57,6 +60,7 @@ test('two-month settlement uses both monthly intervals and excludes readings aft
   assert.equal(elements.get('billingEndReading').value, '2026-09-08');
   assert.equal(elements.get('reading6Curr').value - elements.get('reading6Prev').value, 300);
   assert.ok(!elements.get('billingEndReading').options.some(option => option.value === '2026-10-08'));
+  elements.get('meterMatchDays').value = '31';
   elements.get('billingStartReading').value = '2026-06-08';
   ctx.refreshBillingReadings();
   assert.equal(elements.get('reading6Prev').value, 900);
@@ -134,5 +138,45 @@ test('zero usage for either household still allocates the full Taipower bill', (
     const result = ctx.calcProgressiveSplit(1500, 600, usage6, 'summer');
     assert.equal(result.fee5 + result.fee6, 1500);
     assert.equal(result.e5 + result.e6, 600);
+  }
+});
+
+
+test('irregular readings use closest dates on either side, with earlier ties', () => {
+  const {ctx, elements} = harness();
+  ctx.appData.meterReadings = [
+    {id: 1, date: '2026-07-06', reading: 1000},
+    {id: 2, date: '2026-07-10', reading: 1020},
+    {id: 3, date: '2026-08-05', reading: 1150},
+    {id: 4, date: '2026-09-03', reading: 1300}
+  ];
+  elements.get('billDate').value = '2026-08-31';
+  elements.get('taipowerEndDate').value = '2026-09-01';
+  ctx.refreshBillingReadings(true);
+  assert.equal(elements.get('billingStartReading').value, '2026-07-06');
+  assert.equal(elements.get('billingEndReading').value, '2026-09-03');
+  assert.equal(elements.get('reading6Curr').value - elements.get('reading6Prev').value, 300);
+  assert.match(elements.get('billingPeriodHint').textContent, /日期與台電區間不同/);
+  elements.get('billingStartReading').value = '2026-07-10';
+  ctx.refreshBillingReadings();
+  assert.equal(elements.get('reading6Prev').value, 1020);
+  ctx.refreshBillingReadings(true);
+  assert.equal(elements.get('reading6Prev').value, 1000);
+});
+
+test('invalid periods, out-of-range readings and same reading pair cannot settle', () => {
+  const {ctx, elements} = harness(); ctx.appData.meterReadings = rows;
+  for (const [from, to, days] of [
+    ['2026-09-08','2026-07-08','7'], ['', '2026-09-08','7'],
+    ['2026-07-08','2026-09-08','-1'], ['2026-07-08','2026-09-08','1.5'],
+    ['2026-07-08','2026-09-08','32'], ['2026-07-09','2026-09-08','0'],
+    ['2026-07-07','2026-07-09','7']
+  ]) {
+    elements.get('taipowerStartDate').value = from;
+    elements.get('taipowerEndDate').value = to;
+    elements.get('meterMatchDays').value = days;
+    ctx.refreshBillingReadings(true);
+    assert.equal(elements.get('reading6Prev').value, '');
+    assert.equal(elements.get('reading6Curr').value, '');
   }
 });

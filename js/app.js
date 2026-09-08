@@ -50,7 +50,7 @@ window.onload = function () {
   document.getElementById('includeElectricity')?.addEventListener('change', () => { updateElectricityPreview(); saveInputs(); });
 
   // 帳單日期自動儲存
-  if (billDateEl) billDateEl.addEventListener('change', () => { refreshBillingReadings(true); saveInputs(); });
+  if (billDateEl) billDateEl.addEventListener('change', () => { saveInputs(); });
 
   // 初始預覽
   updateElectricityPreview();

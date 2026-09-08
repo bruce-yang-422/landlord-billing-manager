@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 function setup(includeElectricity) {
-  const values = { billDate: '2026-09-08', totalWater: '600', '5F_gas': '250', '6F_gas': '400',
+  const values = { taipowerStartDate: '2026-07-06', taipowerEndDate: '2026-09-06', billDate: '2026-09-08', totalWater: '600', '5F_gas': '250', '6F_gas': '400',
     '5F_management': '100', '6F_management': '50', '5F_other': '20', '6F_other': '30',
     taipowerBill: '1500', taipowerUnits: '600', reading6Prev: '1000', reading6Curr: '1300',
     season: 'summer', billingStartReading: '2026-07-08', billingEndReading: '2026-09-08' };
@@ -66,4 +66,16 @@ test('invalid utility amounts and missing required electricity prevent saving', 
   h.elements.reading6Prev.value = ''; h.ctx.saveBill('5F');
   assert.equal(h.records.length, 0);
   assert.match(h.alerts.at(-1), /起始與結束/);
+});
+
+
+test('CSV preserves requested Taipower period separately from matched meter dates', () => {
+  const h = setup(true);
+  h.ctx.saveBill('6F');
+  const record = h.records[0];
+  assert.equal(record.electricity.periodStart, '2026-07-06');
+  assert.equal(record.electricity.periodEnd, '2026-09-06');
+  assert.equal(record.electricity.prevDate, '2026-07-08');
+  const restored = h.ctx.backupFromCsv(h.ctx.backupToCsv({ units: [], records: [record] }));
+  assert.deepEqual(JSON.parse(JSON.stringify(restored.records[0])), JSON.parse(JSON.stringify(record)));
 });

@@ -76,6 +76,11 @@ function currentBillDraft() {
   const previous = includeElectricity ? number('reading6Prev') : 0;
   const current = includeElectricity ? number('reading6Curr') : 0;
   if (includeElectricity) {
+    if (typeof refreshBillingReadings === 'function') {
+      const from = document.getElementById('taipowerStartDate').value;
+      const to = document.getElementById('taipowerEndDate').value;
+      if (!validBillingDate(from) || !validBillingDate(to) || from >= to) throw new Error('請填寫有效的台電帳單區間。');
+    }
     if (totalBill <= 0 || totalUnits <= 0) throw new Error('請填入台電帳單金額與總度數；本次不收電費可取消勾選。');
     if (!document.getElementById('reading6Prev')?.value || !document.getElementById('reading6Curr')?.value) throw new Error('請選擇台電計費期間的起始與結束抄表紀錄。');
     const usage = current - previous;
@@ -122,6 +127,7 @@ function updateBillTotals() {
 }
 
 function saveBill(unitId) {
+  if (typeof refreshBillingReadings === 'function') refreshBillingReadings();
   const billDate = document.getElementById('billDate')?.value;
   if (!billDate) { alert('請選擇帳單日期！'); return; }
   let draft;
@@ -135,6 +141,9 @@ function saveBill(unitId) {
       record.electricity.currReading = draft.current;
     }
     record.electricity.season = draft.season;
+    const periodStart = document.getElementById('taipowerStartDate')?.value;
+    const periodEnd = document.getElementById('taipowerEndDate')?.value;
+    if (periodStart && periodEnd) Object.assign(record.electricity, { periodStart, periodEnd });
     record.electricity.prevDate = document.getElementById('billingStartReading').value;
     record.electricity.currDate = document.getElementById('billingEndReading').value;
     const s = draft.split;
@@ -164,6 +173,11 @@ function fmtDate(dateStr) {
 function generateReport(record) {
   const unit = getUnit(record.unitId);
   let r = `📅 ${fmtDate(record.date)} 房租費用通知（${unit.label}）\n\n`;
+
+  if (record.electricity?.periodStart && record.electricity?.periodEnd) {
+    r += `台電用電區間：${record.electricity.periodStart}～${record.electricity.periodEnd}\n`;
+    if (record.electricity.prevDate && record.electricity.currDate) r += `採用抄表區間：${record.electricity.prevDate}～${record.electricity.currDate}\n\n`;
+  }
 
   // 電費計算說明
   if (record.electricity?.fee > 0 && record.splitInfo) {
@@ -317,6 +331,8 @@ function renderHistory() {
     const e = record.electricity || {};
     row(list, '本戶用電', e.usage == null ? '未記錄' : number(e.usage) + ' 度');
     row(list, '計費季節', ({ summer: '夏月', other: '非夏月' })[e.season] || '未記錄');
+    row(list, '台電用電起日', e.periodStart ? fmtDate(e.periodStart) : '未記錄');
+    row(list, '台電用電迄日', e.periodEnd ? fmtDate(e.periodEnd) : '未記錄');
     row(list, '起始抄表日期', e.prevDate ? fmtDate(e.prevDate) : '未記錄');
     row(list, '結束抄表日期', e.currDate ? fmtDate(e.currDate) : '未記錄');
     if (record.unitId === '6F') {

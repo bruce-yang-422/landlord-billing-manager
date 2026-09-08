@@ -20,7 +20,9 @@ const BACKUP_COLUMNS = [
   ['銀行帳號', 'accountNumber', 'text'], ['租客備註', 'tenantNote', 'text'],
   ['房東備註', 'landlordNote', 'text'],
   ['起始抄表日期', 'electricity.prevDate', 'text'],
-  ['結束抄表日期', 'electricity.currDate', 'text']
+  ['結束抄表日期', 'electricity.currDate', 'text'],
+  ['台電用電起日', 'electricity.periodStart', 'text'],
+  ['台電用電迄日', 'electricity.periodEnd', 'text']
 ];
 
 function backupValue(object, key) {
@@ -152,7 +154,7 @@ function validateBackup(data) {
       if (type === 'number' && value !== undefined && !numeric(value)) throw new Error('帳單包含無效數字');
     }
     if (record.electricity.season !== undefined && !['summer', 'other'].includes(record.electricity.season)) throw new Error('季節格式錯誤');
-    for (const key of ['prevDate', 'currDate']) {
+    for (const key of ['prevDate', 'currDate', 'periodStart', 'periodEnd']) {
       const date = record.electricity[key];
       if (date !== undefined && (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date)) throw new Error('帳單抄表日期格式錯誤');
     }

@@ -88,30 +88,47 @@ function saveMeterReading() {
   } catch (error) { status.textContent = `未儲存：${error.message}`; }
 }
 
+function validBillingDate(date) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isFinite(Date.parse(date)) && new Date(date).toISOString().slice(0, 10) === date;
+}
+
+function meterDateOffset(date, target) { return Math.round((Date.parse(date) - Date.parse(target)) / 86400000); }
+
+function nearestMeterReadings(rows, target, days) {
+  return rows.filter(row => Math.abs(meterDateOffset(row.date, target)) <= days)
+    .sort((a, b) => Math.abs(meterDateOffset(a.date, target)) - Math.abs(meterDateOffset(b.date, target)) || a.date.localeCompare(b.date));
+}
+
 function refreshBillingReadings(reset = false) {
   const start = document.getElementById('billingStartReading');
   const end = document.getElementById('billingEndReading');
   if (!start || !end) return;
-  const date = document.getElementById('billDate').value;
-  const rows = getMeterTimeline().filter(row => row.date <= date);
-  const endDate = !reset && rows.some(row => row.date === end.value) ? end.value : rows.at(-1)?.date || '';
-  const before = rows.filter(row => row.date < endDate);
-  const target = endDate ? twoMonthsBefore(endDate) : '';
-  const startDate = !reset && before.some(row => row.date === start.value) ? start.value : before.filter(row => row.date <= target).at(-1)?.date || '';
-  function fill(select, choices, selected) {
+  const from = document.getElementById('taipowerStartDate').value;
+  const to = document.getElementById('taipowerEndDate').value;
+  const rangeValue = document.getElementById('meterMatchDays').value;
+  const days = Number(rangeValue);
+  const valid = validBillingDate(from) && validBillingDate(to) && from < to && rangeValue !== '' && Number.isInteger(days) && days >= 0 && days <= 31;
+  const rows = getMeterTimeline().filter(row => row.date <= localDateString());
+  function fill(select, target) {
+    const choices = valid ? nearestMeterReadings(rows, target, days) : [];
+    const selected = !reset && choices.some(row => row.date === select.value) ? select.value : choices[0]?.date || '';
     select.replaceChildren(new Option('請選擇抄表紀錄', ''));
-    [...choices].reverse().forEach(row => select.add(new Option(`${row.date} · ${row.reading.toLocaleString()} 度`, row.date)));
+    choices.forEach(row => {
+      const offset = meterDateOffset(row.date, target);
+      select.add(new Option(`${row.date} · ${row.reading.toLocaleString()} 度 · ${offset === 0 ? '同日' : offset > 0 ? '晚 ' + offset + ' 天' : '早 ' + -offset + ' 天'}`, row.date));
+    });
     select.value = selected;
+    return choices.find(row => row.date === selected);
   }
-  fill(end, rows, endDate);
-  fill(start, before, startDate);
-  const first = before.find(row => row.date === start.value);
-  const last = rows.find(row => row.date === end.value);
-  document.getElementById('reading6Prev').value = first?.reading ?? '';
-  document.getElementById('reading6Curr').value = last?.reading ?? '';
-  document.getElementById('billingPeriodHint').textContent = first && last
-    ? `${first.date} → ${last.date} · 6F 用電 ${Number((last.reading - first.reading).toFixed(6))} 度。請核對是否與台電帳單計費期間一致。`
-    : '請先補齊台電計費期間的起始與結束抄表紀錄，再進行結算。';
+  const first = fill(start, from), last = fill(end, to);
+  const usable = first && last && first.date < last.date && first.reading <= last.reading;
+  document.getElementById('reading6Prev').value = usable ? first.reading : '';
+  document.getElementById('reading6Curr').value = usable ? last.reading : '';
+  document.getElementById('billingPeriodHint').textContent = !valid
+    ? '請填寫有效的台電起訖日期（起日須早於迄日），搜尋天數須為 0～31 的整數。'
+    : usable
+      ? `台電區間 ${from} → ${to}；實際抄表 ${first.date} → ${last.date}。6F 用電 ${Number((last.reading - first.reading).toFixed(6))} 度。${first.date !== from || last.date !== to ? '抄表日期與台電區間不同，請核對後再儲存。' : '抄表日期與台電區間一致。'}`
+      : first && last ? '配對結果不是兩筆依時間遞增的有效讀數，請改選或補登抄表。' : '搜尋範圍內缺少起始或結束紀錄，請補齊抄表或調整搜尋天數。';
   updateElectricityPreview();
 }
 
@@ -160,21 +177,24 @@ function initMeter() {
   const date = document.getElementById('meterDate');
   if (!date.value) date.value = localDateString();
   ['meterDate', 'meterCurrent'].forEach(id => document.getElementById(id).addEventListener('input', () => { updateMeterPreview(); saveInputs(); }));
-  document.getElementById('billingStartReading').addEventListener('change', () => { refreshBillingReadings(); saveInputs(); });
-  document.getElementById('billingEndReading').addEventListener('change', () => {
-    document.getElementById('billingStartReading').value = '';
-    refreshBillingReadings(); saveInputs();
+  const billDate = document.getElementById('billDate').value;
+  const from = document.getElementById('taipowerStartDate');
+  const to = document.getElementById('taipowerEndDate');
+  if (!from.value) from.value = twoMonthsBefore(billDate);
+  if (!to.value) to.value = billDate;
+  ['taipowerStartDate', 'taipowerEndDate', 'meterMatchDays'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => { refreshBillingReadings(true); saveInputs(); });
+  });
+  ['billingStartReading', 'billingEndReading'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => { refreshBillingReadings(); saveInputs(); });
   });
   refreshMeterUi();
   try {
     const saved = JSON.parse(localStorage.getItem(INPUT_KEY) || '{}');
-    const end = document.getElementById('billingEndReading');
-    const start = document.getElementById('billingStartReading');
-    if ([...end.options].some(option => option.value === saved.billingEndDate)) {
-      end.value = saved.billingEndDate; start.value = ''; refreshBillingReadings();
+    for (const [id, key] of [['billingStartReading', 'billingStartDate'], ['billingEndReading', 'billingEndDate']]) {
+      const select = document.getElementById(id);
+      if ([...select.options].some(option => option.value === saved[key])) select.value = saved[key];
     }
-    if ([...start.options].some(option => option.value === saved.billingStartDate)) {
-      start.value = saved.billingStartDate; refreshBillingReadings();
-    }
+    refreshBillingReadings();
   } catch { /* 舊輸入記憶不影響從歷史計算 */ }
 }
