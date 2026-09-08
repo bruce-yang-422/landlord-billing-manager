@@ -136,15 +136,14 @@ body {
 /* 標題區域 */
 .header-section {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 40px;
-    position: relative;
-    min-height: 60px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 20px;
 }
 
 .header-section h1 {
-    margin-bottom: 0;
+    margin: 0;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
     width: 100%;
@@ -892,7 +891,6 @@ tr:hover {
     }
 
     .header-actions {
-        position: static !important;
         justify-content: center;
     }
 
@@ -1068,11 +1066,27 @@ tr:hover {
 /* ── 標題列 ── */
 .header-actions {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-end;
     gap: 12px;
-    position: absolute;
-    top: 0;
-    right: 0;
+    width: 100%;
+}
+
+.header-actions > button {
+    flex: 0 0 auto;
+    width: auto;
+    white-space: nowrap;
+}
+
+.header-actions .theme-selector {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 768px) {
+    .header-actions {
+        justify-content: center;
+    }
 }
 
 .btn-settings {
@@ -1458,6 +1472,17 @@ tr:hover {
     background: rgba(255, 59, 48, 0.06);
     border-radius: 8px;
     border-left: 3px solid #FF3B30;
+}
+
+.pwa-status {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0 0 16px;
+}
+
+#pwaInstallBtn[hidden] {
+    display: none;
 }
 
 /* ── PWA 安裝提示 ── */

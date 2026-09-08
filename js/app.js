@@ -20,8 +20,9 @@ window.onload = function () {
   // 填入設定面板
   fillUnitSettingsForm();
 
-  // 自動填入 6F 上期讀數
-  autoFillLastReading();
+  // 每月抄表與雙月結算使用同一份歷史讀數。
+  initMeter();
+  initNavigation();
 
   // 渲染歷史記錄
   renderHistory();
@@ -43,11 +44,13 @@ window.onload = function () {
   const extraIds = ['5F_gas', '5F_management', '5F_other', '6F_gas', '6F_management', '6F_other'];
   extraIds.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener('input', saveInputs);
+    if (el) el.addEventListener('input', () => { updateBillTotals(); saveInputs(); });
   });
 
+  document.getElementById('includeElectricity')?.addEventListener('change', () => { updateElectricityPreview(); saveInputs(); });
+
   // 帳單日期自動儲存
-  if (billDateEl) billDateEl.addEventListener('change', saveInputs);
+  if (billDateEl) billDateEl.addEventListener('change', () => { refreshBillingReadings(true); saveInputs(); });
 
   // 初始預覽
   updateElectricityPreview();

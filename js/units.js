@@ -63,8 +63,8 @@ function saveUnitSettings() {
     });
   });
   alert('✅ 房客設定已儲存！');
-  const panel = document.getElementById('settingsPanel');
-  if (panel) panel.style.display = 'none';
+  updateWaterPreview();
+  navigateTo('calculate');
 }
 
 // 將 units 設定填入設定面板

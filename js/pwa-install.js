@@ -18,12 +18,21 @@
   const iosDialog = document.getElementById('pwaIosDialog');
   const iosCloseButton = document.getElementById('pwaIosDialogCloseBtn');
   const iosDoneButton = document.getElementById('pwaIosDialogDoneBtn');
+  const installButton = document.getElementById('pwaInstallBtn');
 
   if (!card || !actionButton || !dismissButton || !declineButton) return;
 
   let deferredPrompt = null;
   let hasEngagement = false;
   let promotionTimer = null;
+
+  function updateInstallButton() {
+    if (installButton) {
+      installButton.hidden = !window.isSecureContext ||
+        !/^https?:$/.test(location.protocol) || isStandalone() ||
+        (!isIosDevice() && !deferredPrompt);
+    }
+  }
 
   function readStorage(storage, key, fallback = null) {
     try {
@@ -96,7 +105,7 @@
 
   function canPromote() {
     const platformCanInstall = isIosDevice() || deferredPrompt !== null;
-    return platformCanInstall &&
+    return window.isSecureContext && /^https?:$/.test(location.protocol) && platformCanInstall &&
       !isStandalone() &&
       !isDismissed() &&
       !isDeclined() &&
@@ -150,6 +159,7 @@
     const promptEvent = deferredPrompt;
     deferredPrompt = null;
     hideCard();
+    updateInstallButton();
 
     await promptEvent.prompt();
     const choice = await promptEvent.userChoice;
@@ -166,6 +176,7 @@
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     deferredPrompt = event;
+    updateInstallButton();
     maybePromote();
   });
 
@@ -173,12 +184,13 @@
     deferredPrompt = null;
     writeStorage(sessionStorage, SESSION_KEY, '1');
     hideCard();
+    if (installButton) installButton.hidden = true;
     console.log('PWA installed');
   });
 
   dismissButton.addEventListener('click', dismissPromotion);
   declineButton.addEventListener('click', declinePromotion);
-  actionButton.addEventListener('click', () => {
+  function install() {
     if (isIosDevice()) {
       openIosInstructions();
     } else {
@@ -186,7 +198,14 @@
         console.error('PWA install prompt failed:', error);
       });
     }
+  }
+  actionButton.addEventListener('click', install);
+  installButton?.addEventListener('click', install);
+  window.matchMedia('(display-mode: standalone)').addEventListener('change', () => {
+    updateInstallButton();
+    if (isStandalone()) hideCard();
   });
+  updateInstallButton();
 
   iosCloseButton?.addEventListener('click', () => iosDialog?.close());
   iosDoneButton?.addEventListener('click', () => {

@@ -47,4 +47,5 @@ let appData = {
     },
   ],
   records: [],
+  meterReadings: [],
 };

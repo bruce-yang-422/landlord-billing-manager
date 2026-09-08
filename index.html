@@ -2,12 +2,12 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>房東帳務管理工具</title>
 
     <!-- PWA -->
-    <meta name="theme-color" content="#e8f0f8" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f5f8fc" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0c1422" media="(prefers-color-scheme: dark)">
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="icon" type="image/x-icon" href="./icons/icon.ico">
     <link rel="apple-touch-icon" href="./icons/icon-192.png">
@@ -18,6 +18,7 @@
     <meta name="apple-mobile-web-app-title" content="房東帳務">
 
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/flat.css">
 </head>
 <body>
 <div class="container">
@@ -26,7 +27,7 @@
     <div class="header-section">
         <h1>🏠 房東帳務管理工具</h1>
         <div class="header-actions">
-            <button class="btn-settings" onclick="toggleSettings()">⚙️ 房客設定</button>
+            <button id="pwaInstallBtn" class="btn-settings" type="button" hidden>📲 安裝 App</button>
             <div class="theme-selector">
                 <label for="themeSelect">🎨</label>
                 <select id="themeSelect" class="theme-select">
@@ -38,8 +39,258 @@
         </div>
     </div>
 
-    <!-- 房客設定面板（預設隱藏） -->
-    <div id="settingsPanel" class="settings-panel" style="display:none;">
+    <p id="pwaStatus" class="pwa-status" role="status" aria-live="polite"></p>
+
+    <nav class="app-nav" aria-label="主要功能">
+        <button type="button" data-nav="calculate" onclick="navigateTo('calculate')"><span aria-hidden="true">▦</span>計算帳單</button>
+        <button type="button" data-nav="input" onclick="navigateTo('input')"><span aria-hidden="true">✎</span>資料輸入</button>
+        <button type="button" data-nav="backup" onclick="navigateTo('backup')"><span aria-hidden="true">▤</span>歷史資料</button>
+        <button type="button" data-nav="settings" onclick="navigateTo('settings')"><span aria-hidden="true">⚙</span>設定</button>
+    </nav>
+    <main>
+    <section data-screen="calculate" aria-labelledby="calculateTitle">
+        <div class="screen-heading"><span class="section-eyebrow">每月應收帳單</span><h2 id="calculateTitle" tabindex="-1">計算帳單</h2><p class="screen-hint">確認租金、水費、瓦斯與其他費用；台電結算月再加入電費。</p></div>
+<section id="billingEntry" class="entry-panel">
+    <!-- 帳單日期 -->
+    <div class="info-card">
+        <label for="billDate">📅 帳單日期</label>
+        <input type="date" id="billDate">
+    </div>
+
+    <div class="billing-options">
+        <label class="billing-electricity-toggle"><input type="checkbox" id="includeElectricity" checked> 本次收取台電電費</label>
+        <p class="screen-hint">沒有台電帳單的月份可取消勾選，仍可收取租金、水費、瓦斯與其他費用。</p>
+        <button type="button" class="inline-action" onclick="navigateTo('input')">填寫／修改水費與瓦斯 →</button>
+    </div>
+    <!-- 台電帳單資訊（共用） -->
+    <div id="electricityBillingSection" class="fee-section">
+        <div class="section-title">台電雙月帳單 · 5F／6F 分攤</div>
+        <div class="grid-row">
+            <div>
+                <label for="season">季節</label>
+                <select id="season" class="season-select">
+                    <option value="summer">☀️ 夏月（6～9 月）</option>
+                    <option value="other">🌙 非夏月（其餘月份）</option>
+                </select>
+            </div>
+        </div>
+        <div class="grid-row">
+            <div>
+                <label for="taipowerBill">💵 台電帳單金額（元）</label>
+                <input type="number" id="taipowerBill" placeholder="例：1258">
+            </div>
+            <div>
+                <label for="taipowerUnits">📊 台電總度數（度）</label>
+                <input type="number" id="taipowerUnits" placeholder="例：566">
+            </div>
+        </div>
+        <div class="period-picker">
+            <p class="screen-hint">選擇與台電帳單起訖日相符的抄表紀錄。5F 用電量＝台電總度數－6F 同期間用電量。</p>
+            <div class="grid-row">
+                <div><label for="billingStartReading">起始抄表（上期）</label><select id="billingStartReading" class="season-select"></select></div>
+                <div><label for="billingEndReading">結束抄表（本期）</label><select id="billingEndReading" class="season-select"></select></div>
+            </div>
+            <input type="hidden" id="reading6Prev"><input type="hidden" id="reading6Curr">
+            <p id="billingPeriodHint" class="screen-hint" role="status"></p>
+            <button class="inline-action" type="button" onclick="navigateTo('input')">＋ 補登抄表紀錄</button>
+        </div>
+        <!-- 電費分攤預覽 -->
+        <div class="split-preview">
+            <div class="split-preview-row">
+                <span class="split-label unit-5F-text">5F 用電</span>
+                <span id="usage5F" class="split-value">—</span>
+                <span class="split-arrow">→</span>
+                <span class="split-label">電費</span>
+                <span id="elecFee5F" class="split-value split-amount">—</span>
+            </div>
+            <div class="split-preview-row">
+                <span class="split-label unit-6F-text">6F 用電</span>
+                <span id="usage6F" class="split-value">—</span>
+                <span class="split-arrow">→</span>
+                <span class="split-label">電費</span>
+                <span id="elecFee6F" class="split-value split-amount">—</span>
+            </div>
+        </div>
+        <div class="regulation-notice" style="margin-top:12px;">
+            <div>
+                🚨 <strong>113年7月15日起新制：</strong>向租客收取電費不得超過台電帳單平均單價，違規最高罰 50 萬元。
+            </div>
+        </div>
+    </div>
+
+    <p id="billDraftStatus" class="screen-hint" role="status"></p>
+    <!-- 兩戶帳單卡 -->
+    <div class="units-grid">
+
+        <!-- 5F 帳單 -->
+        <div class="unit-bill-card unit-bill-5F">
+            <div class="unit-bill-title unit-5F">🏠 5 樓帳單</div>
+            <div class="unit-bill-preview">
+                <div class="preview-row">
+                    <span>租金</span>
+                    <span class="preview-rent-5F preview-from-settings">（設定值）</span>
+                </div>
+                <div class="preview-row">
+                    <span>電費</span>
+                    <span id="elecFee5F_card" class="preview-from-calc">—</span>
+                </div>
+                <div class="preview-row">
+                    <span>水費</span>
+                    <span id="waterFee5F_card" class="preview-from-calc">—</span>
+                </div>
+            </div>
+            <div class="charge-breakdown">
+                <div class="preview-row"><span>瓦斯費</span><span id="gasFee5F_card">$0</span></div>
+                <div class="preview-row"><span>管理費</span><span id="managementFee5F_card">$0</span></div>
+                <div class="preview-row"><span>其他費用</span><span id="otherFee5F_card">$0</span></div>
+                <div class="bill-total-row"><strong>應收總額</strong><strong id="total5F_card">—</strong></div>
+            </div>
+            <button class="btn-save-bill btn-5F" onclick="saveBill('5F')">💾 存檔 5F 帳單</button>
+        </div>
+
+        <!-- 6F 帳單 -->
+        <div class="unit-bill-card unit-bill-6F">
+            <div class="unit-bill-title unit-6F">🏠 6 樓帳單</div>
+            <div class="unit-bill-preview">
+                <div class="preview-row">
+                    <span>租金</span>
+                    <span class="preview-rent-6F preview-from-settings">（設定值）</span>
+                </div>
+                <div class="preview-row">
+                    <span>電費</span>
+                    <span id="elecFee6F_card" class="preview-from-calc">—</span>
+                </div>
+                <div class="preview-row">
+                    <span>水費</span>
+                    <span id="waterFee6F_card" class="preview-from-calc">—</span>
+                </div>
+            </div>
+            <div class="charge-breakdown">
+                <div class="preview-row"><span>瓦斯費</span><span id="gasFee6F_card">$0</span></div>
+                <div class="preview-row"><span>管理費</span><span id="managementFee6F_card">$0</span></div>
+                <div class="preview-row"><span>其他費用</span><span id="otherFee6F_card">$0</span></div>
+                <div class="bill-total-row"><strong>應收總額</strong><strong id="total6F_card">—</strong></div>
+            </div>
+            <button class="btn-save-bill btn-6F" onclick="saveBill('6F')">💾 存檔 6F 帳單</button>
+        </div>
+
+    </div>
+
+</section>
+
+    </section>
+    <section data-screen="input" hidden aria-labelledby="inputTitle">
+        <div class="screen-heading"><span class="section-eyebrow">抄表與費用</span><h2 id="inputTitle" tabindex="-1">資料輸入</h2><p class="screen-hint">記錄 6F 電表讀數，填寫本次水費、瓦斯及其他費用。</p></div>
+    <section id="meterEntry" class="entry-panel">
+        <div class="meter-hero">
+            <span class="section-eyebrow">6F · 每月抄表</span>
+            <h3>這次電表走到哪裡？</h3>
+            <p class="screen-hint">只輸入日期與本期讀數，上期會從歷史紀錄帶入。</p>
+            <label for="meterDate">抄表日期</label><input type="date" id="meterDate">
+            <div class="meter-baseline"><span>上期讀數</span><strong id="meterPreviousValue">尚無紀錄</strong><small id="meterPreviousDate"></small></div>
+            <label for="meterCurrent">本期電表讀數（累計度數）</label><input type="number" id="meterCurrent" min="0" step="any" inputmode="decimal" placeholder="例如 1280">
+            <p id="meterUsageHint" class="screen-hint" role="status">第一次使用，先存一筆起始讀數。</p>
+            <button id="saveMeterBtn" class="btn-save-bill btn-5F" type="button" onclick="saveMeterReading()">儲存本次抄表</button>
+            <p id="meterSaveStatus" class="screen-hint" role="status"></p>
+        </div>
+        <div class="meter-next"><strong>台電帳單來了？</strong><p class="screen-hint">每兩個月選擇起訖讀數，再分攤兩戶電費。</p><button type="button" onclick="navigateTo('calculate')">前往雙月結算 →</button></div>
+    </section>
+<div id="utilityInputs"><h3 class="utility-title">水費、瓦斯與其他費用</h3><p class="screen-hint">填入本次要收取的金額，會自動記憶並帶入帳單。未收費項目填 0。</p>    <!-- 水費（共用） -->
+    <div class="fee-section">
+        <div class="section-title">💧 水費（按人數分攤）</div>
+        <div class="grid-row">
+            <div>
+                <label for="totalWater">💧 本期水費總額（元）</label>
+                <input type="number" id="totalWater" min="0" step="any" placeholder="請輸入水費總額">
+            </div>
+        </div>
+        <div class="split-preview">
+            <div class="split-preview-row">
+                <span class="split-label unit-5F-text">5F 水費</span>
+                <span id="waterFee5F" class="split-value split-amount">—</span>
+            </div>
+            <div class="split-preview-row">
+                <span class="split-label unit-6F-text">6F 水費</span>
+                <span id="waterFee6F" class="split-value split-amount">—</span>
+            </div>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
+            分攤人數請至底部「設定」修改
+        </div>
+    </div>
+
+<div class="units-grid"><div class="fee-section"><div class="section-title">5F · 瓦斯與其他費用</div>            <div class="unit-extra-fees">
+                <div class="grid-row">
+                    <div>
+                        <label>🔥 瓦斯費（元）</label>
+                        <input type="number" id="5F_gas" min="0" step="any" value="0" placeholder="0">
+                    </div>
+                    <div>
+                        <label>🏢 管理費（元）</label>
+                        <input type="number" id="5F_management" min="0" step="any" value="0" placeholder="0">
+                    </div>
+                </div>
+                <div>
+                    <label>📝 其他費用（元）</label>
+                    <input type="number" id="5F_other" min="0" step="any" value="0" placeholder="0">
+                </div>
+            </div>
+</div><div class="fee-section"><div class="section-title">6F · 瓦斯與其他費用</div>            <div class="unit-extra-fees">
+                <div class="grid-row">
+                    <div>
+                        <label>🔥 瓦斯費（元）</label>
+                        <input type="number" id="6F_gas" min="0" step="any" value="0" placeholder="0">
+                    </div>
+                    <div>
+                        <label>🏢 管理費（元）</label>
+                        <input type="number" id="6F_management" min="0" step="any" value="0" placeholder="0">
+                    </div>
+                </div>
+                <div>
+                    <label>📝 其他費用（元）</label>
+                    <input type="number" id="6F_other" min="0" step="any" value="0" placeholder="0">
+                </div>
+            </div>
+</div></div><button class="btn-save-bill btn-5F" type="button" onclick="navigateTo('calculate')">查看本次應收金額 →</button></div>
+        <div class="meter-history"><h3>6F 抄表紀錄</h3><div id="meterHistoryList"></div></div>
+    </section>
+    <section data-screen="backup" hidden aria-labelledby="backupTitle">
+        <div class="screen-heading">
+            <h2 id="backupTitle" tabindex="-1">歷史資料</h2>
+            <p class="screen-hint">查看各期費用與報表，可切換卡片或表格。</p>
+        </div>
+        <div class="backup-card">
+    <!-- 歷史帳單記錄 -->
+    <div class="history-section">
+        <div class="history-header">
+            <h3>📜 歷史帳單紀錄</h3>
+            <div class="filter-row">
+                <button class="filter-btn active" data-filter="all" onclick="setHistoryFilter('all')">全部</button>
+                <button class="filter-btn" data-filter="5F" onclick="setHistoryFilter('5F')">5 樓</button>
+                <button class="filter-btn" data-filter="6F" onclick="setHistoryFilter('6F')">6 樓</button>
+            </div>
+        </div>
+        <div class="history-actions">
+            <button class="btn-clear-history" onclick="clearHistory()">清空帳單</button>
+        </div>
+        <div class="history-view-switch" role="group" aria-label="歷史帳單顯示方式">
+            <button type="button" data-history-view="cards" aria-pressed="true" onclick="setHistoryView('cards')">卡片</button>
+            <button type="button" data-history-view="table" aria-pressed="false" onclick="setHistoryView('table')">表格</button>
+        </div>
+        <p id="historySummary" class="screen-hint" role="status"></p>
+        <div id="historyBody" class="history-wall"></div>
+    </div>
+    <!-- LINE 報表 -->
+    <div id="reportSection" style="display:none;" class="fee-section">
+        <h3>📋 LINE 報表</h3>
+        <div id="reportText" class="report-area"></div>
+        <button class="copy-btn" onclick="copyReport()">📋 複製報表</button>
+    </div>
+
+        </div>
+    </section>
+<section data-screen="settings" hidden aria-labelledby="settingsTitle"><div class="screen-heading"><button type="button" class="inline-action" onclick="navigateTo('calculate')">← 返回計算帳單</button><h2 id="settingsTitle" tabindex="-1">設定</h2><p class="screen-hint">管理房客資料、收款資訊與資料備份。</p></div>    <!-- 房客設定面板（預設隱藏） -->
+    <div id="settingsPanel" class="settings-panel">
         <h3>⚙️ 房客設定（長期記憶）</h3>
         <div class="units-grid">
 
@@ -143,211 +394,19 @@
         </div>
     </div>
 
-    <!-- 帳單日期 -->
-    <div class="info-card">
-        <label for="billDate">📅 帳單日期</label>
-        <input type="date" id="billDate">
-    </div>
+    <section class="backup-card settings-backup" aria-labelledby="backupToolsTitle">
+        <h3 id="backupToolsTitle">備份與還原</h3>
+            <div class="btn-group">
+                <button class="btn-export" onclick="exportData()">📤 備份／匯出 CSV</button>
+                <button class="btn-import" onclick="document.getElementById('fileInput').click()">📥 匯入資料</button>
+                <input type="file" id="fileInput" accept=".csv,.json" onchange="importData(this)">
+            </div>
+            <p class="screen-hint">匯出包含所有帳單、房客設定與抄表紀錄，不受歷史帳單的樓層篩選影響。匯入支援本工具的 CSV 與舊 JSON。</p>
+            <p class="screen-hint">資料保存在此裝置的瀏覽器，建議定期備份。</p>
+    </section>
 
-    <!-- 台電帳單資訊（共用） -->
-    <div class="fee-section">
-        <div class="section-title">⚡ 台電帳單資訊（共用電號）</div>
-        <div class="grid-row">
-            <div>
-                <label for="season">季節</label>
-                <select id="season" class="season-select">
-                    <option value="summer">☀️ 夏月（6～9 月）</option>
-                    <option value="other">🌙 非夏月（其餘月份）</option>
-                </select>
-            </div>
-        </div>
-        <div class="grid-row">
-            <div>
-                <label for="taipowerBill">💵 台電帳單金額（元）</label>
-                <input type="number" id="taipowerBill" placeholder="例：1258">
-            </div>
-            <div>
-                <label for="taipowerUnits">📊 台電總度數（度）</label>
-                <input type="number" id="taipowerUnits" placeholder="例：566">
-            </div>
-        </div>
-        <div class="grid-row">
-            <div>
-                <label for="reading6Prev">🔢 6F 上期電表讀數</label>
-                <input type="number" id="reading6Prev" placeholder="上期讀數">
-            </div>
-            <div>
-                <label for="reading6Curr">🔢 6F 本期電表讀數</label>
-                <input type="number" id="reading6Curr" placeholder="本期讀數">
-            </div>
-        </div>
-        <!-- 電費分攤預覽 -->
-        <div class="split-preview">
-            <div class="split-preview-row">
-                <span class="split-label unit-5F-text">5F 用電</span>
-                <span id="usage5F" class="split-value">—</span>
-                <span class="split-arrow">→</span>
-                <span class="split-label">電費</span>
-                <span id="elecFee5F" class="split-value split-amount">—</span>
-            </div>
-            <div class="split-preview-row">
-                <span class="split-label unit-6F-text">6F 用電</span>
-                <span id="usage6F" class="split-value">—</span>
-                <span class="split-arrow">→</span>
-                <span class="split-label">電費</span>
-                <span id="elecFee6F" class="split-value split-amount">—</span>
-            </div>
-        </div>
-        <div class="regulation-notice" style="margin-top:12px;">
-            <div style="font-size:13px;color:#FF3B30;line-height:1.6;">
-                🚨 <strong>113年7月15日起新制：</strong>向租客收取電費不得超過台電帳單平均單價，違規最高罰 50 萬元。
-            </div>
-        </div>
-    </div>
-
-    <!-- 水費（共用） -->
-    <div class="fee-section">
-        <div class="section-title">💧 水費（按人數分攤）</div>
-        <div class="grid-row">
-            <div>
-                <label for="totalWater">💧 本期水費總額（元）</label>
-                <input type="number" id="totalWater" placeholder="請輸入水費總額">
-            </div>
-        </div>
-        <div class="split-preview">
-            <div class="split-preview-row">
-                <span class="split-label unit-5F-text">5F 水費</span>
-                <span id="waterFee5F" class="split-value split-amount">—</span>
-            </div>
-            <div class="split-preview-row">
-                <span class="split-label unit-6F-text">6F 水費</span>
-                <span id="waterFee6F" class="split-value split-amount">—</span>
-            </div>
-        </div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
-            人數設定請至「⚙️ 房客設定」修改
-        </div>
-    </div>
-
-    <!-- 兩戶帳單卡 -->
-    <div class="units-grid">
-
-        <!-- 5F 帳單 -->
-        <div class="unit-bill-card unit-bill-5F">
-            <div class="unit-bill-title unit-5F">🏠 5 樓帳單</div>
-            <div class="unit-bill-preview">
-                <div class="preview-row">
-                    <span>租金</span>
-                    <span class="preview-rent-5F preview-from-settings">（設定值）</span>
-                </div>
-                <div class="preview-row">
-                    <span>電費</span>
-                    <span id="elecFee5F_card" class="preview-from-calc">—</span>
-                </div>
-                <div class="preview-row">
-                    <span>水費</span>
-                    <span id="waterFee5F_card" class="preview-from-calc">—</span>
-                </div>
-            </div>
-            <div class="unit-extra-fees">
-                <div class="grid-row">
-                    <div>
-                        <label>🔥 瓦斯費（元）</label>
-                        <input type="number" id="5F_gas" value="0" placeholder="0">
-                    </div>
-                    <div>
-                        <label>🏢 管理費（元）</label>
-                        <input type="number" id="5F_management" value="0" placeholder="0">
-                    </div>
-                </div>
-                <div>
-                    <label>📝 其他費用（元）</label>
-                    <input type="number" id="5F_other" value="0" placeholder="0">
-                </div>
-            </div>
-            <button class="btn-save-bill btn-5F" onclick="saveBill('5F')">💾 存檔 5F 帳單</button>
-        </div>
-
-        <!-- 6F 帳單 -->
-        <div class="unit-bill-card unit-bill-6F">
-            <div class="unit-bill-title unit-6F">🏠 6 樓帳單</div>
-            <div class="unit-bill-preview">
-                <div class="preview-row">
-                    <span>租金</span>
-                    <span class="preview-rent-6F preview-from-settings">（設定值）</span>
-                </div>
-                <div class="preview-row">
-                    <span>電費</span>
-                    <span id="elecFee6F_card" class="preview-from-calc">—</span>
-                </div>
-                <div class="preview-row">
-                    <span>水費</span>
-                    <span id="waterFee6F_card" class="preview-from-calc">—</span>
-                </div>
-            </div>
-            <div class="unit-extra-fees">
-                <div class="grid-row">
-                    <div>
-                        <label>🔥 瓦斯費（元）</label>
-                        <input type="number" id="6F_gas" value="0" placeholder="0">
-                    </div>
-                    <div>
-                        <label>🏢 管理費（元）</label>
-                        <input type="number" id="6F_management" value="0" placeholder="0">
-                    </div>
-                </div>
-                <div>
-                    <label>📝 其他費用（元）</label>
-                    <input type="number" id="6F_other" value="0" placeholder="0">
-                </div>
-            </div>
-            <button class="btn-save-bill btn-6F" onclick="saveBill('6F')">💾 存檔 6F 帳單</button>
-        </div>
-
-    </div>
-
-    <!-- 備份匯入匯出 -->
-    <div class="btn-group">
-        <button class="btn-export" onclick="exportData()">📤 備份資料 (JSON)</button>
-        <button class="btn-import" onclick="document.getElementById('fileInput').click()">📥 匯入資料</button>
-        <input type="file" id="fileInput" accept=".json" onchange="importData(this)">
-    </div>
-
-    <!-- LINE 報表 -->
-    <div id="reportSection" style="display:none;" class="fee-section">
-        <h3>📋 LINE 報表</h3>
-        <div id="reportText" class="report-area"></div>
-        <button class="copy-btn" onclick="copyReport()">📋 複製報表</button>
-    </div>
-
-    <!-- 歷史帳單記錄 -->
-    <div class="history-section">
-        <div class="history-header">
-            <h3>📜 歷史帳單紀錄</h3>
-            <div class="filter-row">
-                <button class="filter-btn active" data-filter="all" onclick="setHistoryFilter('all')">全部</button>
-                <button class="filter-btn" data-filter="5F" onclick="setHistoryFilter('5F')">5 樓</button>
-                <button class="filter-btn" data-filter="6F" onclick="setHistoryFilter('6F')">6 樓</button>
-            </div>
-        </div>
-        <div class="history-actions">
-            <button class="btn-clear-history" onclick="clearHistory()">清空紀錄</button>
-        </div>
-        <div style="overflow-x:auto;">
-            <table id="historyTable">
-                <thead>
-                    <tr>
-                        <th>日期</th>
-                        <th>樓層</th>
-                        <th>用電量</th>
-                        <th>總金額</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="historyBody"></tbody>
-            </table>
-        </div>
-    </div>
+</section>
+</main>
 
 </div>
 
@@ -380,7 +439,7 @@
         <li>確認名稱後點擊「新增」，再從主畫面開啟。</li>
     </ol>
     <p class="pwa-ios-backup-note">
-        若 Safari 內已有帳務資料，請先匯出 JSON 備份，再於主畫面版本匯入。
+        若 Safari 內已有帳務資料，請先匯出 CSV 備份，再於主畫面版本匯入。
     </p>
     <button id="pwaIosDialogDoneBtn" class="pwa-ios-done" type="button">我知道了</button>
 </dialog>
@@ -388,21 +447,15 @@
 <script src="js/data.js"></script>
 <script src="js/units.js"></script>
 <script src="js/calculation.js"></script>
+<script src="js/csv.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/pwa-install.js"></script>
+<script src="js/meter.js"></script>
+<script src="js/navigation.js"></script>
 <script src="js/app.js"></script>
 
-<!-- PWA Service Worker -->
-<script>
-    if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-            navigator.serviceWorker.register("./service-worker.js").catch((error) => {
-                console.error("Service Worker registration failed:", error);
-            });
-        });
-    }
-</script>
+<script src="js/pwa.js"></script>
 </body>
 </html>

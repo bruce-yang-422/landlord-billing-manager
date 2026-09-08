@@ -1,0 +1,392 @@
+/* 輕盈藍色扁平主題：以色塊、留白與細邊框建立層次。 */
+:root {
+    color-scheme: light;
+    --page-bg: #f5f8fc;
+    --surface: #ffffff;
+    --field-bg: #f8fafd;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-soft: #edf4ff;
+    --accent-secondary: #42658a;
+    --text-primary: #182b46;
+    --text-secondary: #5d6f86;
+    --border-color: #e0e7f0;
+    --border-color-hover: #a9c3e8;
+    --container-bg: var(--surface);
+    --card-bg: var(--surface);
+    --input-bg: var(--surface);
+    --input-bg-focus: var(--surface);
+    --link-color: var(--accent);
+    --glass-blur: none;
+    --danger-color: #aa3749;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
+    --page-bg: #0c1422;
+    --surface: #131f31;
+    --field-bg: #101a2b;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-soft: #1a2d49;
+    --accent-secondary: #acc7e3;
+    --text-primary: #e0ecf8;
+    --text-secondary: #afc1d5;
+    --border-color: #29394f;
+    --border-color-hover: #6584a4;
+    --container-bg: var(--surface);
+    --card-bg: var(--surface);
+    --input-bg: var(--surface);
+    --input-bg-focus: var(--surface);
+    --link-color: #97c7ff;
+    --glass-blur: none;
+    --danger-color: #ffabb6;
+}
+
+body {
+    background: var(--page-bg);
+    max-width: 1040px;
+}
+
+.container {
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+}
+
+/* 桌面以完整外框收攏工作區，手機維持滿版。 */
+@media (min-width: 769px) {
+    .container {
+        background: var(--surface);
+        border: 1px solid var(--border-color-hover);
+        border-radius: 24px;
+        padding: 40px;
+    }
+}
+
+.container::before,
+.info-card::before,
+.fee-section::before,
+.result::before,
+button::before {
+    display: none;
+}
+
+.header-section { gap: 22px; margin-bottom: 24px; }
+.header-section h1 { border: 0; padding-bottom: 0; letter-spacing: -0.6px; text-align: left; font-weight: 650; }
+.header-actions { gap: 10px; }
+.pwa-status { margin-bottom: 26px; font-size: 12px; }
+
+.info-card,
+.fee-section,
+.unit-bill-card,
+.settings-panel,
+.unit-settings-card,
+.result,
+.pwa-install-card,
+.pwa-ios-dialog {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.info-card, .fee-section { margin-bottom: 28px; }
+.info-card:hover, .fee-section:hover {
+    background: var(--surface);
+    box-shadow: none;
+    transform: none;
+    border-color: var(--border-color);
+}
+.units-grid { gap: 26px; margin-bottom: 28px; }
+.units-grid > *, .grid-row > * { min-width: 0; }
+.unit-bill-card { padding: 24px; }
+.section-title, .unit-bill-title, .unit-settings-title { letter-spacing: 0.3px; }
+
+input[type="text"], input[type="number"], input[type="date"],
+.season-select, .theme-select, .unit-settings-card textarea, .notes-section textarea {
+    min-width: 0;
+    max-width: 100%;
+    background: var(--field-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+input::placeholder, textarea::placeholder { color: var(--text-secondary); opacity: 0.85; }
+.theme-select { border-radius: 10px; }
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus,
+.season-select:focus, .theme-select:focus,
+.unit-settings-card textarea:focus, .notes-section textarea:focus {
+    background: var(--surface);
+    border-color: var(--link-color);
+    outline: 2px solid var(--link-color);
+    outline-offset: 3px;
+    box-shadow: none;
+}
+.theme-select:hover { background: var(--surface); box-shadow: none; }
+
+/* 次要操作使用細框，主要操作使用實心藍；互動僅改變顏色。 */
+button,
+.btn-settings, .btn-export, .btn-import, .btn-clear-history,
+.filter-btn, .settings-tab, .pwa-install-dismiss, .pwa-install-decline,
+.pwa-ios-close {
+    color: var(--link-color);
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: none;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+button:hover,
+.btn-settings:hover, .btn-export:hover, .btn-import:hover, .btn-clear-history:hover,
+.filter-btn:hover, .settings-tab:hover, .pwa-install-decline:hover {
+    background: var(--accent-soft);
+    color: var(--link-color);
+    border-color: var(--border-color-hover);
+    box-shadow: none;
+    transform: none;
+}
+#pwaInstallBtn, .btn-save-settings, .btn-5F, .btn-6F, .calculate-btn,
+.copy-btn, .filter-btn.active, .settings-tab.active,
+.pwa-install-action, .pwa-ios-done {
+    color: #fff;
+    background: var(--accent);
+    border-color: transparent;
+    box-shadow: none;
+}
+#pwaInstallBtn:hover, .btn-save-settings:hover, .btn-5F:hover, .btn-6F:hover,
+.calculate-btn:hover, .copy-btn:hover, .filter-btn.active:hover,
+.settings-tab.active:hover, .pwa-install-action:hover, .pwa-ios-done:hover {
+    color: #fff;
+    background: var(--accent-hover);
+    box-shadow: none;
+    transform: none;
+}
+button:active, .btn-settings:active, .btn-save-settings:active,
+.btn-5F:active, .btn-6F:active, .filter-btn:active, .settings-tab:active {
+    transform: none;
+    box-shadow: none;
+}
+button:focus-visible, a:focus-visible {
+    outline: 3px solid var(--link-color);
+    outline-offset: 4px;
+}
+.btn-danger, .delete-record, .btn-clear-history { color: var(--danger-color); background: var(--surface); }
+.btn-danger:hover, .delete-record:hover, .btn-clear-history:hover { color: var(--danger-color); }
+
+.split-preview, .unit-bill-preview, [data-theme="dark"] .unit-bill-preview,
+.report-area, .settings-tabs, .filter-row {
+    background: var(--field-bg);
+    border: 0;
+    border-radius: 10px;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.settings-tabs, .filter-row { padding: 8px; gap: 10px; flex-wrap: wrap; }
+.split-preview { padding: 18px; background: var(--accent-soft); }
+.split-preview-row { flex-wrap: wrap; row-gap: 4px; }
+.split-amount, .preview-from-calc, .unit-5F-text, .unit-5F { color: var(--link-color); }
+.unit-6F-text, .unit-6F { color: var(--accent-secondary); }
+.unit-5F, .unit-6F { border-color: var(--border-color) !important; }
+.unit-badge-5F, .unit-badge-6F { background: var(--accent-soft); color: var(--link-color); }
+.unit-badge-6F { color: var(--accent-secondary); }
+.unit-bill-preview { padding: 16px; }
+.report-area { overflow-wrap: anywhere; }
+
+table { background: var(--surface); box-shadow: none; border-color: var(--border-color); border-radius: 12px; }
+th { background: var(--accent-soft); color: var(--text-primary); }
+tr:hover { background: var(--accent-soft); }
+.view-record { color: var(--link-color); }
+.regulation-notice { background: var(--accent-soft); border-left-color: var(--link-color); border-radius: 12px; }
+.regulation-notice > div { color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+.pwa-ios-backup-note { background: var(--accent-soft); border-left-color: var(--link-color); }
+.pwa-install-icon { box-shadow: none; border-radius: 12px; }
+.toggle-slider { background: var(--border-color); box-shadow: none; }
+.toggle-slider::before { background: #fff; box-shadow: none; }
+.toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+
+/* 頂部膠囊操作 */
+.header-actions > button,
+.header-actions .theme-select {
+    box-sizing: border-box;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.header-actions .theme-selector { gap: 6px; }
+.header-actions .theme-selector label { font-size: 12px; }
+
+@media (max-width: 768px) {
+    .container { border-radius: 0; padding: 12px 4px; }
+    .header-section { gap: 18px; }
+    .header-actions { gap: 8px; }
+    .info-card, .fee-section, .unit-bill-card, .settings-panel { border-radius: 14px; }
+    .unit-bill-card, .settings-panel { padding: 20px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* App 畫面與導覽 */
+[data-screen][hidden], .entry-panel[hidden] { display: none; }
+#electricityBillingSection[hidden] { display: none; }
+.billing-options { padding: 16px; margin-bottom: 22px; border: 1px solid var(--border-color); border-radius: 14px; background: var(--field-bg); }
+.billing-electricity-toggle { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.billing-electricity-toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+.utility-title { margin: 26px 0 8px; font-size: 18px; }
+#utilityInputs { margin-bottom: 28px; }
+.charge-breakdown { display: grid; gap: 8px; }
+.bill-total-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-top: 14px; margin-top: 6px; border-top: 1px solid var(--border-color); }
+.bill-total-row strong:last-child { font-size: 20px; color: var(--link-color); }
+.header-section { flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
+.header-section h1 { width: auto; margin: 0; font-size: 20px; }
+.header-actions { width: auto; }
+.app-nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0 0 28px;
+    padding: 6px;
+    background: var(--field-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+}
+.app-nav button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 8px;
+    border: 0;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    background: transparent;
+    font-size: 13px;
+    box-shadow: none;
+    transform: none;
+}
+.app-nav button[aria-current="page"] { color: var(--link-color); background: var(--accent-soft); font-weight: 650; }
+.app-nav button span { font-size: 20px; line-height: 1; }
+.screen-heading { margin: 0 0 24px; }
+.screen-heading h2 { margin: 4px 0; font-size: 26px; letter-spacing: -0.6px; color: var(--text-primary); }
+.screen-heading h2:focus { outline: none; }
+.section-eyebrow { color: var(--link-color); font-size: 11px; font-weight: 650; letter-spacing: 1px; }
+.screen-hint { margin: 8px 0 16px; color: var(--text-secondary); font-size: 12px; line-height: 1.7; }
+.meter-hero, .meter-next, .backup-card, .meter-history { padding: 24px; border: 1px solid var(--border-color); border-radius: 18px; background: var(--surface); margin-bottom: 24px; }
+.meter-hero h3 { margin: 8px 0; font-size: 23px; font-weight: 600; }
+.meter-hero > input { margin-bottom: 16px; }
+.meter-hero #meterCurrent { font-size: 28px; padding: 18px; letter-spacing: 1px; }
+.meter-baseline { display: grid; grid-template-columns: 1fr auto; gap: 4px; padding: 16px; margin: 4px 0 20px; border-radius: 12px; background: var(--accent-soft); font-size: 13px; }
+.meter-baseline strong { font-size: 20px; color: var(--link-color); }
+.meter-baseline small { grid-column: 1 / -1; font-size: 11px; color: var(--text-secondary); }
+.meter-next { background: var(--field-bg); }
+.meter-next button, .inline-action { padding: 8px 12px; border-radius: 999px; width: auto; font-size: 12px; }
+.period-picker { margin: 8px 0 20px; padding: 16px; background: var(--field-bg); border-radius: 12px; }
+.period-picker .season-select { font-size: 14px; background: var(--surface); }
+.meter-history h3 { font-size: 15px; margin: 0 0 12px; }
+.meter-history-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--border-color); }
+.meter-history-row strong { display: block; font-size: 13px; }
+.meter-history-row small { display: block; margin-top: 4px; font-size: 12px; color: var(--text-secondary); }
+.meter-history-row button { flex: 0 0 auto; }
+.meter-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.backup-card .btn-group { margin-top: 0; }
+[data-screen="backup"] .history-section { margin-top: 0; padding-top: 0; border-top: 0; }
+[data-screen="backup"] .history-header h3 { font-size: 16px; }
+[data-screen="backup"] #reportSection { margin-top: 24px; margin-bottom: 0; }
+[data-screen="settings"] .settings-panel { margin: 0; padding: 0; border: 0; }
+[data-screen="settings"] .settings-panel > h3 { display: none; }
+[data-screen="calculate"] .info-card label { font-size: 12px; }
+
+@media (min-width: 769px) {
+    .meter-hero { max-width: 580px; margin-left: auto; margin-right: auto; }
+    .meter-next { max-width: 580px; margin-left: auto; margin-right: auto; }
+}
+@media (max-width: 768px) {
+    body { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+    .header-section { gap: 12px; margin-bottom: 12px; }
+    .header-section h1 { font-size: 16px; }
+    .header-actions { justify-content: flex-end; }
+    .pwa-status { margin-bottom: 20px; font-size: 11px; }
+    .app-nav {
+        position: fixed;
+        z-index: 900;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+        padding: 8px max(12px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+        border-radius: 20px 20px 0 0;
+        border-bottom: 0;
+        background: var(--surface);
+    }
+    /* 解除祖先濾鏡，讓固定導覽以螢幕為定位基準。 */
+    .container { backdrop-filter: none; -webkit-backdrop-filter: none; }
+    .app-nav button { flex-direction: column; gap: 5px; min-height: 50px; padding: 7px 4px; font-size: 11px; }
+    .screen-heading { margin-bottom: 18px; }
+    .screen-heading h2 { font-size: 24px; }
+    .meter-hero, .meter-next, .backup-card, .meter-history { padding: 18px 16px; border-radius: 16px; }
+    .meter-hero h3 { font-size: 21px; }
+    .period-picker { padding: 12px; }
+    .pwa-install-card { bottom: calc(88px + env(safe-area-inset-bottom)); }
+    .settings-actions { padding-bottom: 8px; }
+}
+
+/* 歷史帳單卡片牆 */
+.history-wall { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.bill-note { min-width: 0; padding: 18px; border: 1px solid var(--border-color); border-top: 3px solid var(--link-color); border-radius: 14px; background: var(--field-bg); color: var(--text-primary); }
+.bill-note-header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center; font-size: 12px; color: var(--text-secondary); }
+.bill-note-unit { padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--link-color); font-weight: 600; }
+.bill-note-total { margin: 18px 0 2px; font-size: 26px; line-height: 1.3; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.bill-note-caption { margin: 0 0 16px; font-size: 11px; color: var(--text-secondary); }
+.bill-note dl { margin: 0; font-size: 12px; }
+.bill-note dl > div { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; }
+.bill-note dt { color: var(--text-secondary); }
+.bill-note dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; min-width: 0; }
+.bill-note-details { margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 12px; }
+.bill-note-details summary { cursor: pointer; font-size: 12px; color: var(--link-color); padding: 6px 0; }
+.bill-note-details dl { margin-top: 8px; }
+.bill-note-actions { display: flex; gap: 8px; margin-top: 16px; }
+.bill-note-actions button { width: auto; margin: 0; min-height: 40px; padding: 8px 12px; border-radius: 999px; font-size: 12px; }
+.bill-note-actions .view-record { flex: 1; }
+.history-empty { grid-column: 1 / -1; padding: 32px 16px; text-align: center; font-size: 13px; color: var(--text-secondary); border: 1px dashed var(--border-color); border-radius: 14px; }
+@media (max-width: 600px) { .history-wall { grid-template-columns: minmax(0, 1fr); } }
+
+.history-view-switch { display: inline-flex; align-items: center; gap: 2px; padding: 3px; max-width: 100%; border: 1px solid var(--border-color); border-radius: 10px; background: var(--field-bg); }
+.history-view-switch button { flex: 0 0 auto; width: auto; min-width: 60px; min-height: 36px; padding: 8px 16px; margin: 0; font-size: 12px; line-height: 20px; white-space: nowrap; letter-spacing: 0; border: 0; border-radius: 7px; background: transparent; color: var(--text-secondary); }
+.history-view-switch button[aria-pressed="true"] { background: var(--link-color); color: #fff; }
+.history-table-scroll { overflow-x: auto; max-width: 100%; }
+.history-data-table { width: 100%; min-width: 960px; font-size: 12px; border-collapse: collapse; }
+.history-data-table caption { text-align: left; }
+.history-data-table th, .history-data-table td { padding: 12px 10px; text-align: right; vertical-align: top; font-variant-numeric: tabular-nums; }
+.history-data-table th:first-child, .history-data-table td:first-child,
+.history-data-table th:nth-child(2), .history-data-table td:nth-child(2),
+.history-data-table th:last-child, .history-data-table td:last-child { text-align: left; }
+.history-data-table td:nth-child(9) { color: var(--link-color); font-weight: 700; }
+.history-data-table td:last-child { min-width: 220px; }
+.history-data-table .bill-note-details { margin: 0; padding: 0; border: 0; }
+.history-data-table .bill-note-details dl { font-size: 12px; }
+.history-data-table .bill-note-details dl > div { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0; }
+.history-data-table .bill-note-details dd { margin: 0; overflow-wrap: anywhere; }
+.history-data-table .bill-note-actions { margin-top: 8px; }
+
+.settings-backup { margin-top: 24px; }
+.settings-backup h3 { margin: 0 0 16px; font-size: 16px; }
+
+/* 歷史資料頁統一使用膠囊操作元件。 */
+.history-section .filter-row,
+.history-section button,
+.history-view-switch { border-radius: 999px; }
+.history-section .filter-row { flex-wrap: nowrap; gap: 6px; padding: 6px; }
+.history-section .filter-btn { min-width: 0; padding: 8px 12px; font-size: 12px; line-height: 20px; white-space: nowrap; }
+.history-section .btn-clear-history { font-size: 12px; line-height: 20px; white-space: nowrap; }
