@@ -288,11 +288,11 @@
             </div>
         </div>
         <div class="history-actions">
-            <button class="btn-clear-history" onclick="clearHistory()">清空帳單</button>
-        </div>
         <div class="history-view-switch" role="group" aria-label="歷史帳單顯示方式">
             <button type="button" data-history-view="cards" aria-pressed="true" onclick="setHistoryView('cards')">卡片</button>
             <button type="button" data-history-view="table" aria-pressed="false" onclick="setHistoryView('table')">表格</button>
+        </div>
+            <button class="btn-clear-history" onclick="clearHistory()">清空帳單</button>
         </div>
         <p id="historySummary" class="screen-hint" role="status"></p>
         <div id="historyBody" class="history-wall"></div>
