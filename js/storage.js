@@ -51,6 +51,7 @@ function saveInputs() {
   try {
     const get = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
     const inputs = {
+      creditSelections: Object.fromEntries(['5F', '6F'].map(unit => [unit, selectedBillCreditItems(unit)])),
       billDate:        get('billDate'),
       currentNote5F: get('5F_currentNote'),
       currentNote6F: get('6F_currentNote'),
@@ -70,9 +71,11 @@ function saveInputs() {
       totalWater:      get('totalWater'),
       gas5F:           get('5F_gas'),
       management5F:    get('5F_management'),
+      otherDescription5F: get('5F_otherDescription'),
       other5F:         get('5F_other'),
       gas6F:           get('6F_gas'),
       management6F:    get('6F_management'),
+      otherDescription6F: get('6F_otherDescription'),
       other6F:         get('6F_other'),
     };
     localStorage.setItem(INPUT_KEY, JSON.stringify(inputs));
@@ -91,6 +94,12 @@ function loadInputs() {
       const el = document.getElementById(id);
       if (el) el.value = val;
     };
+    for (const unit of ['5F', '6F']) {
+      if (Array.isArray(inputs.creditSelections?.[unit])) for (const [key] of CREDIT_ITEMS) {
+        const el = document.getElementById(`${unit}_credit_${key}`);
+        if (el) el.checked = inputs.creditSelections[unit].includes(key);
+      }
+    }
     set('billDate',      inputs.billDate);
     set('5F_currentNote', inputs.currentNote5F);
     set('6F_currentNote', inputs.currentNote6F);
@@ -110,9 +119,11 @@ function loadInputs() {
     set('5F_gas',        inputs.gas5F);
     set('5F_management', inputs.management5F);
     set('5F_other',      inputs.other5F);
+    set('5F_otherDescription', inputs.otherDescription5F);
     set('6F_gas',        inputs.gas6F);
     set('6F_management', inputs.management6F);
     set('6F_other',      inputs.other6F);
+    set('6F_otherDescription', inputs.otherDescription6F);
   } catch (e) {
     console.error('載入輸入值失敗:', e);
   }

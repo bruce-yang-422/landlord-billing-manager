@@ -48,6 +48,7 @@
         <button type="button" data-nav="calculate" onclick="navigateTo('calculate')"><span aria-hidden="true">▦</span>計算帳單</button>
         <button type="button" data-nav="input" onclick="navigateTo('input')"><span aria-hidden="true">✎</span>資料輸入</button>
         <button type="button" data-nav="backup" onclick="navigateTo('backup')"><span aria-hidden="true">▤</span>歷史資料</button>
+        <button type="button" data-nav="utility" onclick="navigateTo('utility')"><span aria-hidden="true">▣</span>房客儲值</button>
         <button type="button" data-nav="settings" onclick="navigateTo('settings')"><span aria-hidden="true">⚙</span>設定</button>
     </nav>
     <main>
@@ -153,7 +154,9 @@
                 <div class="preview-row"><span>瓦斯費</span><span id="gasFee5F_card">$0</span></div>
                 <div class="preview-row"><span>管理費</span><span id="managementFee5F_card">$0</span></div>
                 <div class="preview-row"><span>其他費用</span><span id="otherFee5F_card">$0</span></div>
-                <div class="bill-total-row"><span>水電費儲值抵扣</span><span id="credit5F_card">—</span></div>
+                <p id="otherDescription5F_card" class="screen-hint fee-description" hidden></p>
+                <fieldset class="credit-choices"><legend>儲值抵扣項目</legend><label><input type="checkbox" id="5F_credit_electricity" checked onchange="updateBillTotals(); saveInputs()"><span>電費</span></label><label><input type="checkbox" id="5F_credit_water" checked onchange="updateBillTotals(); saveInputs()"><span>水費</span></label><label><input type="checkbox" id="5F_credit_gas" onchange="updateBillTotals(); saveInputs()"><span>瓦斯費</span></label><label><input type="checkbox" id="5F_credit_management" onchange="updateBillTotals(); saveInputs()"><span>管理費</span></label><label><input type="checkbox" id="5F_credit_other" onchange="updateBillTotals(); saveInputs()"><span>雜費／其他</span></label></fieldset>
+<div class="bill-total-row"><span>儲值抵扣</span><span id="credit5F_card">—</span></div>
                 <div class="bill-total-row"><span>抵扣後水電費餘額</span><span id="balance5F_card">—</span></div>
                 <div class="bill-total-row"><strong>應收總額</strong><strong id="total5F_card">—</strong></div>
             </div>
@@ -186,7 +189,9 @@
                 <div class="preview-row"><span>瓦斯費</span><span id="gasFee6F_card">$0</span></div>
                 <div class="preview-row"><span>管理費</span><span id="managementFee6F_card">$0</span></div>
                 <div class="preview-row"><span>其他費用</span><span id="otherFee6F_card">$0</span></div>
-                <div class="bill-total-row"><span>水電費儲值抵扣</span><span id="credit6F_card">—</span></div>
+                <p id="otherDescription6F_card" class="screen-hint fee-description" hidden></p>
+                <fieldset class="credit-choices"><legend>儲值抵扣項目</legend><label><input type="checkbox" id="6F_credit_electricity" checked onchange="updateBillTotals(); saveInputs()"><span>電費</span></label><label><input type="checkbox" id="6F_credit_water" checked onchange="updateBillTotals(); saveInputs()"><span>水費</span></label><label><input type="checkbox" id="6F_credit_gas" onchange="updateBillTotals(); saveInputs()"><span>瓦斯費</span></label><label><input type="checkbox" id="6F_credit_management" onchange="updateBillTotals(); saveInputs()"><span>管理費</span></label><label><input type="checkbox" id="6F_credit_other" onchange="updateBillTotals(); saveInputs()"><span>雜費／其他</span></label></fieldset>
+<div class="bill-total-row"><span>儲值抵扣</span><span id="credit6F_card">—</span></div>
                 <div class="bill-total-row"><span>抵扣後水電費餘額</span><span id="balance6F_card">—</span></div>
                 <div class="bill-total-row"><strong>應收總額</strong><strong id="total6F_card">—</strong></div>
             </div>
@@ -205,19 +210,7 @@
     </section>
     <section data-screen="input" hidden aria-labelledby="inputTitle">
         <div class="screen-heading"><span class="section-eyebrow">抄表與費用</span><h2 id="inputTitle" tabindex="-1">資料輸入</h2><p class="screen-hint">記錄 6F 電表讀數，填寫本次水費、瓦斯及其他費用。</p></div>
-    <section class="entry-panel" aria-labelledby="utilityTitle">
-        <h3 id="utilityTitle">水電費儲值</h3>
-        <p class="screen-hint">預付金獨立記帳，只抵水費與電費，不抵租金。存檔帳單才扣款，刪除帳單會返還抵扣金額。補登帳單亦使用目前餘額。</p>
-        <p id="utilityBalances" aria-live="polite"></p>
-        <div class="unit-extra-fees">
-            <div class="input-group"><label for="utilityUnit">樓層</label><select id="utilityUnit"><option value="6F">6 樓</option><option value="5F">5 樓</option></select></div>
-            <div class="input-group"><label for="utilityDate">儲值日期</label><input id="utilityDate" type="date"></div>
-            <div class="input-group"><label for="utilityAmount">儲值金額（元）</label><input id="utilityAmount" type="number" min="1" step="1" placeholder="例如 3000"></div>
-            <div class="input-group"><label for="utilityNote">儲值備註</label><input id="utilityNote" type="text" placeholder="例如：水電費預付"></div>
-        </div>
-        <button type="button" class="btn-save-bill btn-6F" onclick="saveUtilityDeposit()">登記水電費儲值</button>
-        <details><summary>儲值紀錄與更正</summary><div id="utilityHistory"></div></details>
-    </section>
+    <p class="screen-hint">預付水電費請至 <button type="button" class="inline-action" onclick="navigateTo('utility')">房客儲值 →</button> 登記與查看抵扣。</p>
     <section id="meterEntry" class="entry-panel">
         <div class="meter-hero">
             <span class="section-eyebrow">6F · 每月抄表</span>
@@ -270,6 +263,8 @@
                 <div>
                     <label>📝 其他費用（元）</label>
                     <input type="number" id="5F_other" min="0" step="any" value="0" placeholder="0">
+                    <label for="5F_otherDescription">其他費用內容（選填）</label>
+                    <input type="text" id="5F_otherDescription" placeholder="例如：更換門鎖、清潔費" oninput="updateBillTotals(); saveInputs()">
                 </div>
             </div>
 </div><div class="fee-section"><div class="section-title">6F · 瓦斯與其他費用</div>            <div class="unit-extra-fees">
@@ -286,10 +281,42 @@
                 <div>
                     <label>📝 其他費用（元）</label>
                     <input type="number" id="6F_other" min="0" step="any" value="0" placeholder="0">
+                    <label for="6F_otherDescription">其他費用內容（選填）</label>
+                    <input type="text" id="6F_otherDescription" placeholder="例如：更換門鎖、清潔費" oninput="updateBillTotals(); saveInputs()">
                 </div>
             </div>
 </div></div><button class="btn-save-bill btn-5F" type="button" onclick="navigateTo('calculate')">查看本次應收金額 →</button></div>
         <div class="meter-history"><h3>6F 抄表紀錄</h3><div id="meterHistoryList"></div></div>
+    </section>
+    <section data-screen="utility" hidden aria-labelledby="utilityPageTitle">
+        <div class="screen-heading"><span class="section-eyebrow">房客預付帳戶</span><h2 id="utilityPageTitle" tabindex="-1">房客儲值</h2><p class="screen-hint">查看每戶預付金、已抵扣費用及可用餘額。</p></div>
+        <div id="utilityBalances" class="utility-balances" aria-live="polite"></div>
+        <div class="utility-workspace">
+    <section class="entry-panel" aria-labelledby="utilityTitle">
+        <h3 id="utilityTitle">登記儲值</h3>
+        <p class="screen-hint">預付金獨立記帳，可勾選電費、水費、瓦斯、管理費與雜費，不抵租金。存檔帳單才扣款，刪除帳單會返還抵扣金額。補登帳單亦使用目前餘額。</p>
+        <div class="unit-extra-fees">
+            <div class="input-group"><label for="utilityUnit">樓層</label><select id="utilityUnit"><option value="6F">6 樓</option><option value="5F">5 樓</option></select></div>
+            <div class="input-group"><label for="utilityDate">儲值日期</label><input id="utilityDate" type="date"></div>
+            <div class="input-group"><label for="utilityAmount">儲值金額（元）</label><input id="utilityAmount" type="number" min="1" step="1" placeholder="例如 3000"></div>
+            <div class="input-group"><label for="utilityNote">儲值備註</label><input id="utilityNote" type="text" placeholder="例如：水電費預付"></div>
+        </div>
+        <button type="button" class="btn-save-bill btn-6F" onclick="saveUtilityDeposit()">登記水電費儲值</button>
+    </section>
+        <section class="entry-panel" aria-labelledby="utilityPendingTitle">
+            <h3 id="utilityPendingTitle">待抵扣費用</h3>
+            <p class="screen-hint">勾選尚未另行收款的項目；餘額不足時依電費、水費、瓦斯、管理費、雜費順序抵扣。</p>
+            <div id="utilityPending"></div>
+        </section>
+        </div>
+        <section class="entry-panel" aria-labelledby="utilityLedgerTitle">
+            <div class="utility-ledger-heading"><div><h3 id="utilityLedgerTitle">儲值與抵扣明細</h3><p class="screen-hint">抵扣依帳單日期排列，每張帳單合併顯示累計抵扣金額。</p></div>
+                <div class="utility-filters"><div><label for="utilityFloorFilter">樓層</label><select id="utilityFloorFilter" onchange="renderUtilityDeposits()"><option value="all">全部樓層</option><option value="5F">5 樓</option><option value="6F">6 樓</option></select></div>
+                <div><label for="utilityTypeFilter">項目</label><select id="utilityTypeFilter" onchange="renderUtilityDeposits()"><option value="all">全部項目</option><option value="deposit">儲值</option><option value="deduction">費用抵扣</option></select></div></div>
+            </div>
+            <p id="utilityLedgerSummary" class="screen-hint" aria-live="polite"></p>
+            <div id="utilityHistory" class="utility-ledger"></div>
+        </section>
     </section>
     <section data-screen="backup" hidden aria-labelledby="backupTitle">
         <div class="screen-heading">

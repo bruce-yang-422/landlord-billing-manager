@@ -59,6 +59,13 @@ function updateWaterPreview() {
 
 // ── 存檔單戶帳單 ───────────────────────────────────────────
 
+function selectedBillCreditItems(unitId) {
+  return CREDIT_ITEMS.filter(([key]) => {
+    const checkbox = document.getElementById(`${unitId}_credit_${key}`);
+    return checkbox ? checkbox.checked : DEFAULT_CREDIT_ITEMS.includes(key);
+  }).map(([key]) => key);
+}
+
 function currentBillDraft() {
   const number = id => {
     const value = document.getElementById(id)?.value ?? '';
@@ -88,12 +95,14 @@ function currentBillDraft() {
     split = calcProgressiveSplit(totalBill, totalUnits, usage, season);
   }
   const units = appData.units.map(unit => {
-    const extras = { gas: number(`${unit.id}_gas`), management: number(`${unit.id}_management`), other: number(`${unit.id}_other`) };
+    const extras = { gas: number(`${unit.id}_gas`), management: number(`${unit.id}_management`), other: number(`${unit.id}_other`), otherDescription: document.getElementById(`${unit.id}_otherDescription`)?.value.trim() || '' };
     const fee = split ? (unit.id === '5F' ? split.fee5 : split.fee6) : 0;
     const usage = split ? (unit.id === '5F' ? split.e5 : split.e6) : 0;
-    return { id: unit.id, rent: unit.rent || 0, fee, usage, water: water[unit.id], extras,
-      utilityCredit: utilityOffset(unit.id, fee, water[unit.id]),
-      total: (unit.rent || 0) + fee + water[unit.id] + extras.gas + extras.management + extras.other - utilityOffset(unit.id, fee, water[unit.id]) };
+    const selected = selectedBillCreditItems(unit.id);
+    const preview = buildRecord(unit.id, '', fee, usage, water[unit.id], extras, selected);
+    return { id: unit.id, selected, rent: unit.rent || 0, fee, usage, water: water[unit.id], extras,
+      utilityCredit: preview.utilityCredit,
+      total: preview.total };
   });
   return { includeElectricity, split, season, totalBill, totalUnits, previous, current, units };
 }
@@ -111,6 +120,11 @@ function updateBillTotals() {
       const value = Number(document.getElementById(`${unit.id}_${field}`)?.value || 0);
       set(`${label}${unit.id}_card`, Number.isFinite(value) && value >= 0 ? money(value) : '請確認金額');
     }
+    const description = document.getElementById(`otherDescription${unit.id}_card`);
+    if (description) {
+      description.textContent = document.getElementById(`${unit.id}_otherDescription`)?.value.trim() || '';
+      description.hidden = !description.textContent;
+    }
     if (!included) set(`elecFee${unit.id}_card`, '本次不收取');
   });
   try {
@@ -122,7 +136,7 @@ function updateBillTotals() {
       set(`waterFee${unit.id}_card`, money(unit.water));
       set(`elecFee${unit.id}_card`, included ? money(unit.fee) : '本次不收取');
     });
-    if (status) status.textContent = '水電費優先以儲值抵扣，餘額不足的部分列入應收；儲值不抵租金、瓦斯或其他費用。';
+    if (status) status.textContent = '只抵扣勾選項目，餘額不足依電費、水費、瓦斯、管理費、雜費順序抵扣。租金另計。';
   } catch (error) {
     appData.units.forEach(unit => {
       set(`total${unit.id}_card`, '待完成資料');
@@ -143,7 +157,7 @@ function saveBill(unitId) {
   if (!unit) return;
   if (appData.records.some(row => row.unitId === unitId && row.date === billDate) &&
       !confirm('這個樓層在同一天已有帳單。再次存檔會新增帳單並再次抵扣水電費，確定繼續？')) return;
-  const record = buildRecord(unitId, billDate, unit.fee, unit.usage, unit.water, unit.extras);
+  const record = buildRecord(unitId, billDate, unit.fee, unit.usage, unit.water, unit.extras, unit.selected);
   record.currentNote = document.getElementById(`${unitId}_currentNote`)?.value || '';
   record.tenantNote = getUnit(unitId).tenantNote || '';
   if (draft.includeElectricity) {
@@ -213,10 +227,13 @@ function generateReport(record) {
   if (record.gasFee > 0)         r += `瓦斯：$${record.gasFee.toLocaleString()}\n`;
   if (record.managementFee > 0)  r += `管理費：$${record.managementFee.toLocaleString()}\n`;
   if (record.otherFee > 0)       r += `其他：$${record.otherFee.toLocaleString()}\n`;
+  if (record.otherDescription?.trim()) r += `其他費用內容：${record.otherDescription}\n`;
   if (record.utilityCredit !== undefined) {
-    r += `水電費儲值抵扣：-$${record.utilityCredit.toLocaleString()}\n`;
-    r += `水電費另需繳付：$${(record.electricity.fee + record.waterFee - record.utilityCredit).toLocaleString()}\n`;
-    r += `存檔時水電費儲值餘額：$${record.utilityBalanceAfter.toLocaleString()}\n`;
+    r += `儲值抵扣：-$${record.utilityCredit.toLocaleString()}\n`;
+    r += `抵扣項目：${creditItemSummary(record) || '無'}\n`;
+    const offsets = recordCreditItems(record);
+    r += `水電費另需繳付：$${(record.electricity.fee + record.waterFee - (offsets.electricity || 0) - (offsets.water || 0)).toLocaleString()}\n`;
+    r += `存檔時儲值餘額：$${record.utilityBalanceAfter.toLocaleString()}\n`;
   }
   r += `──────────────\n`;
   r += `總計：$${record.total.toLocaleString()}\n\n`;
@@ -348,7 +365,7 @@ function renderHistory() {
       list.append(item);
     };
     for (const [label, value] of [['租金', record.rent], ['電費', record.electricity?.fee], ['水費', record.waterFee], ['瓦斯費', record.gasFee], ['管理費', record.managementFee], ['其他費用', record.otherFee]]) row(fees, label, amount(value));
-    row(fees, '水電費儲值抵扣', amount(record.utilityCredit || 0));
+    row(fees, '儲值抵扣', amount(record.utilityCredit || 0));
     card.append(fees);
     const details = node('details', 'bill-note-details');
     details.append(node('summary', '', '用電、計算與備註'));
@@ -376,8 +393,10 @@ function renderHistory() {
       ]) row(list, label, format(split[key]));
     }
     row(list, '固定備註（存檔內容）', record.tenantNote === undefined ? '舊帳單未保存，報表沿用目前設定' : record.tenantNote || '無');
+    row(list, '其他費用內容', record.otherDescription || '未填寫');
     row(list, '當期備註', record.currentNote || '無');
-    if (record.utilityBalanceAfter !== undefined) row(list, '存檔時水電費餘額', amount(record.utilityBalanceAfter));
+    if (record.utilityBalanceAfter !== undefined) row(list, '存檔時儲值餘額', amount(record.utilityBalanceAfter));
+    row(list, '抵扣項目', creditItemSummary(record) || '無');
     row(list, '帳單編號', String(record.id));
     details.append(list);
     card.append(details);
@@ -390,10 +409,10 @@ function renderHistory() {
     remove.setAttribute('aria-label', `刪除 ${record.date} ${record.unitId} 帳單`);
     remove.addEventListener('click', () => deleteRecord(record.id));
     actions.append(view, remove);
-    if (typeof availableRecordCredit === 'function' && availableRecordCredit(record) > 0) {
-      const credit = node('button', 'view-record', '抵扣水電儲值');
+    if (typeof availableRecordCredit === 'function' && availableRecordCredit(record, CREDIT_ITEMS.map(([key]) => key)) > 0) {
+      const credit = node('button', 'view-record', '選擇抵扣項目');
       credit.type = 'button';
-      credit.addEventListener('click', () => applyUtilityCreditToRecord(record.id));
+      credit.addEventListener('click', () => navigateTo('utility'));
       actions.append(credit);
     }
     card.append(actions);

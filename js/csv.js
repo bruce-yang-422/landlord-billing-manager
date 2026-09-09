@@ -29,7 +29,13 @@ const BACKUP_COLUMNS = [
   ['水電儲值抵扣', 'utilityCredit', 'number'],
   ['存檔時水電餘額', 'utilityBalanceAfter', 'number'],
   ['儲值金額', 'amount', 'number'],
-  ['儲值備註', 'note', 'text']
+  ['儲值備註', 'note', 'text'],
+  ['電費抵扣', 'creditItems.electricity', 'number'],
+  ['水費抵扣', 'creditItems.water', 'number'],
+  ['瓦斯費抵扣', 'creditItems.gas', 'number'],
+  ['管理費抵扣', 'creditItems.management', 'number'],
+  ['雜費抵扣', 'creditItems.other', 'number'],
+  ['其他費用內容', 'otherDescription', 'text']
 ];
 
 const BACKUP_CHECKSUM_COLUMN = '資料驗證ID';
@@ -98,7 +104,7 @@ function backupToCsv(data) {
           : key === 'id' && kind === '房客設定' ? undefined : backupValue(object, key);
         if (value === undefined || value === null) return '';
         if (key === 'electricity.season') value = value === 'summer' ? '夏月' : value === 'other' ? '非夏月' : value;
-        if (kind === '帳單' && ['tenantNote', 'currentNote'].includes(key) && value === '') return "'";
+        if (kind === '帳單' && ['tenantNote', 'currentNote', 'otherDescription'].includes(key) && value === '') return "'";
         const text = String(value);
         // 單引號保護 Excel 的前導零、長編號與公式文字；匯入時移除一層。
         return type !== 'number' && (type === 'id' || key === 'bankCode' || key === 'accountNumber' || /^[\s]*[=+\-@\t\r\n']/.test(text))
@@ -179,7 +185,7 @@ function backupFromCsv(text) {
       object.id = object.unitId;
       delete object.unitId;
       for (const [, key, type] of BACKUP_COLUMNS) {
-        if (type === 'text' && !key.includes('.') && !['kind', 'unitId', 'date', 'currentNote', 'bankName', 'branchName', 'note'].includes(key)) object[key] ??= '';
+        if (type === 'text' && !key.includes('.') && !['kind', 'unitId', 'date', 'currentNote', 'bankName', 'branchName', 'note', 'otherDescription'].includes(key)) object[key] ??= '';
       }
       data.units.push(object);
     } else if (kind === '帳單') data.records.push(object);
@@ -232,14 +238,23 @@ function validateBackup(data) {
     if (!record || !validUnit(record.unitId) || !/^\d+(?:\.\d+)?$/.test(String(record.id)) || recordIds.has(String(record.id)) ||
         typeof record.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(record.date) ||
         !['rent', 'waterFee', 'gasFee', 'managementFee', 'otherFee', 'total', 'electricity.fee', 'electricity.usage'].every(key => numeric(backupValue(record, key)))) throw new Error('帳單格式錯誤、必要欄位缺漏或編號重複');
-    if (record.utilityCredit !== undefined || record.utilityBalanceAfter !== undefined) {
+    if (record.utilityCredit !== undefined || record.utilityBalanceAfter !== undefined || record.creditItems !== undefined) {
       const credit = record.utilityCredit;
       const gross = record.rent + record.electricity.fee + record.waterFee + record.gasFee + record.managementFee + record.otherFee;
-      if (!numeric(credit) || credit < 0 || credit > Math.max(0, record.electricity.fee) + Math.max(0, record.waterFee) ||
+      const fees = { electricity: record.electricity.fee, water: record.waterFee, gas: record.gasFee, management: record.managementFee, other: record.otherFee };
+      let limit = Math.max(0, fees.electricity) + Math.max(0, fees.water);
+      if (record.creditItems !== undefined) {
+        const items = record.creditItems;
+        if (!items || typeof items !== 'object' || Array.isArray(items) || Object.keys(items).some(key => !(key in fees)) ||
+            Object.keys(fees).some(key => !numeric(items[key]) || items[key] < 0 || items[key] > Math.max(0, fees[key])) ||
+            Math.abs(Object.values(items).reduce((sum, value) => sum + value, 0) - credit) > 0.000001) throw new Error('逐項抵扣明細有誤');
+        limit = Object.values(fees).reduce((sum, fee) => sum + Math.max(0, fee), 0);
+      }
+      if (!numeric(credit) || credit < 0 || credit > limit ||
           !numeric(record.utilityBalanceAfter) || record.utilityBalanceAfter < 0 || Math.abs(record.total - (gross - credit)) > 0.000001) throw new Error('帳單儲值抵扣或總額有誤');
     }
     recordIds.add(String(record.id));
-    for (const key of ['tenantNote', 'currentNote']) {
+    for (const key of ['tenantNote', 'currentNote', 'otherDescription']) {
       if (record[key] !== undefined && typeof record[key] !== 'string') throw new Error('帳單備註必須是文字');
     }
     for (const [, key, type] of BACKUP_COLUMNS) {

@@ -57,9 +57,48 @@ test('bill preview, saved bill and tenant report agree on prepaid utility credit
   h.elements.reportText = {};
   h.generateReport(record);
   assert.match(h.elements.reportText.textContent, /房租：\$12,000/);
-  assert.match(h.elements.reportText.textContent, /水電費儲值抵扣：-\$200/);
+  assert.match(h.elements.reportText.textContent, /儲值抵扣：-\$200/);
   assert.match(h.elements.reportText.textContent, /水電費另需繳付：\$0/);
   assert.match(h.elements.reportText.textContent, /總計：\$12,480/);
+});
+
+test('bill checkboxes control preview, saved offsets and report itemization', () => {
+  const h = setup(false);
+  vm.runInContext("appData.utilityDeposits = [{ id: 1, unitId: '6F', date: '2026-09-09', amount: 3000 }];", h.ctx);
+  for (const key of ['electricity', 'water', 'gas', 'management', 'other']) h.elements[`6F_credit_${key}`] = { checked: key === 'gas' || key === 'other' };
+  const draft = h.ctx.currentBillDraft().units.find(unit => unit.id === '6F');
+  assert.equal(draft.utilityCredit, 430);
+  h.ctx.saveBill('6F');
+  const record = h.records[0];
+  assert.equal(record.total, draft.total);
+  assert.equal(record.creditItems.water, 0);
+  assert.equal(record.creditItems.gas, 400);
+  assert.equal(record.creditItems.other, 30);
+  h.elements.reportText = {};
+  h.generateReport(record);
+  assert.match(h.elements.reportText.textContent, /瓦斯費 \$400 · 雜費／其他 \$30/);
+  assert.match(h.elements.reportText.textContent, /水電費另需繳付：\$200/);
+});
+
+test('optional other-fee content is saved per bill and preserved in CSV, reports and credit details', () => {
+  const h = setup(false);
+  h.elements['6F_otherDescription'] = { value: '  更換門鎖，含安裝 "完成"  ' };
+  h.elements['5F_otherDescription'] = { value: '' };
+  vm.runInContext("appData.utilityDeposits = [{ id: 1, unitId: '6F', date: '2026-09-09', amount: 3000 }];", h.ctx);
+  h.elements['6F_credit_other'] = { checked: true };
+  h.ctx.saveBill('6F'); h.ctx.saveBill('5F');
+  const record = h.records[0];
+  assert.equal(record.otherDescription, '更換門鎖，含安裝 "完成"');
+  assert.equal(h.records[1].otherDescription, undefined);
+  h.elements['6F_otherDescription'].value = '清潔費';
+  assert.equal(record.otherDescription, '更換門鎖，含安裝 "完成"');
+  const restored = h.ctx.backupFromCsv(h.ctx.backupToCsv({ units: [], records: h.records }));
+  assert.equal(restored.records[0].otherDescription, record.otherDescription);
+  h.elements.reportText = {}; h.generateReport(record);
+  assert.match(h.elements.reportText.textContent, /其他費用內容：更換門鎖/);
+  assert.match(h.ctx.creditItemSummary(record), /雜費／其他（更換門鎖/);
+  record.otherDescription = 123;
+  assert.throws(() => h.ctx.validateBackup({ records: [record] }), /文字/);
 });
 
 test('settlement month includes every fee and matches total electricity and water bills', () => {

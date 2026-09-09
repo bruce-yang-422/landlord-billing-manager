@@ -4,19 +4,19 @@ function loadUtilityDeposits() {
   appData.utilityDeposits = JSON.parse(localStorage.getItem(UTILITY_KEY) || '[]');
 }
 
-function availableRecordCredit(record) {
-  const unpaid = Math.max(0, (record.electricity?.fee || 0) + (record.waterFee || 0) - (record.utilityCredit || 0));
-  return Math.min(unpaid, Math.max(0, utilityBalance(record.unitId)), Math.max(0, record.total));
+function availableRecordCredit(record, selected = DEFAULT_CREDIT_ITEMS) {
+  return planRecordCredit(record, selected).credit;
 }
 
-function applyUtilityCreditToRecord(id) {
+function applyUtilityCreditToRecord(id, selected = DEFAULT_CREDIT_ITEMS) {
   const record = appData.records.find(row => String(row.id) === String(id));
   if (!record) return;
-  const credit = availableRecordCredit(record);
-  if (credit <= 0) { alert('目前沒有可抵扣的水電費或儲值餘額。'); return; }
-  if (!confirm(`${getUnit(record.unitId).label} ${record.date} 帳單將抵扣水電儲值 $${credit.toLocaleString()}，應收改為 $${(record.total - credit).toLocaleString()}。請確認這筆水電費尚未另行收款，確定抵扣？`)) return;
+  const plan = planRecordCredit(record, selected);
+  const credit = plan.credit;
+  if (credit <= 0) { alert('請勾選尚未抵扣的費用，並確認有儲值餘額。'); return; }
+  if (!confirm(`${getUnit(record.unitId).label} ${record.date} 帳單將抵扣儲值 $${credit.toLocaleString()}，應收改為 $${(record.total - credit).toLocaleString()}。請確認勾選費用尚未另行收款，確定抵扣？`)) return;
   const updated = { ...record, utilityCredit: (record.utilityCredit || 0) + credit,
-    utilityBalanceAfter: utilityBalance(record.unitId) - credit, total: record.total - credit };
+    creditItems: plan.items, utilityBalanceAfter: utilityBalance(record.unitId) - credit, total: record.total - credit };
   const records = appData.records.map(row => row === record ? updated : row);
   try { saveRecords(records); }
   catch (error) { alert('未抵扣：' + error.message); return; }
@@ -24,7 +24,7 @@ function applyUtilityCreditToRecord(id) {
   renderHistory(); renderUtilityDeposits(); updateBillTotals();
   const report = document.getElementById('reportSection');
   if (report) report.style.display = 'none';
-  alert('已抵扣水電儲值，請重新查看／複製更新後的帳單報表。');
+  alert('已抵扣儲值，請重新查看／複製更新後的帳單報表。');
 }
 
 function saveUtilityDeposit() {
@@ -42,7 +42,7 @@ function saveUtilityDeposit() {
   document.getElementById('utilityAmount').value = '';
   document.getElementById('utilityNote').value = '';
   renderUtilityDeposits(); updateBillTotals(); renderHistory();
-  alert('水電費儲值已登記。既有帳單可到歷史資料按「抵扣水電儲值」。');
+  alert('水電費儲值已登記。可在本頁「待抵扣費用」選擇既有帳單抵扣。');
 }
 
 function deleteUtilityDeposit(id) {
@@ -57,21 +57,100 @@ function deleteUtilityDeposit(id) {
   renderUtilityDeposits(); updateBillTotals(); renderHistory();
 }
 
+// 抵扣來自帳單累計值，避免額外建立扣款而重複計帳。
+function utilityLedgerRows(floor = 'all', type = 'all') {
+  const deposits = (appData.utilityDeposits || []).map(row => ({ ...row, type: 'deposit' }));
+  const deductions = appData.records.filter(row => (row.utilityCredit || 0) > 0).map(row => ({
+    id: row.id, unitId: row.unitId, date: row.date, type: 'deduction', amount: row.utilityCredit,
+    note: creditItemSummary(row),
+    currentNote: row.currentNote || ''
+  }));
+  return [...deposits, ...deductions].filter(row => (floor === 'all' || row.unitId === floor) && (type === 'all' || row.type === type))
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+}
+
 function renderUtilityDeposits() {
   const balances = document.getElementById('utilityBalances');
   if (!balances) return;
-  balances.textContent = appData.units.map(unit => `${unit.label} 水電費餘額：$${utilityBalance(unit.id).toLocaleString()}`).join('　｜　');
+  const node = (tag, className, text) => {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text !== undefined) el.textContent = text;
+    return el;
+  };
+  const money = value => '$' + value.toLocaleString('zh-TW');
+  balances.replaceChildren();
+  appData.units.forEach(unit => {
+    const deposited = (appData.utilityDeposits || []).filter(row => row.unitId === unit.id).reduce((sum, row) => sum + row.amount, 0);
+    const used = appData.records.filter(row => row.unitId === unit.id).reduce((sum, row) => sum + (row.utilityCredit || 0), 0);
+    const card = node('article', 'utility-balance-card');
+    card.append(node('h3', '', unit.label), node('p', 'screen-hint', '可用儲值餘額'), node('strong', 'utility-balance-value', money(deposited - used)));
+    const totals = node('div', 'utility-balance-totals');
+    totals.append(node('span', '', '累計儲值 ' + money(deposited)), node('span', '', '已抵扣 ' + money(used)));
+    card.append(totals); balances.append(card);
+  });
+  const floor = document.getElementById('utilityFloorFilter')?.value || 'all';
+  const type = document.getElementById('utilityTypeFilter')?.value || 'all';
+  const rows = utilityLedgerRows(floor, type);
+  const summary = document.getElementById('utilityLedgerSummary');
+  if (summary) {
+    const sum = type => rows.filter(row => row.type === type).reduce((total, row) => total + row.amount, 0);
+    summary.textContent = `目前篩選：${rows.length} 筆 · 儲值 ${money(sum('deposit'))} · 抵扣 ${money(sum('deduction'))}`;
+  }
   const list = document.getElementById('utilityHistory');
   list.replaceChildren();
-  const rows = [...(appData.utilityDeposits || [])].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
-  if (!rows.length) list.textContent = '尚無儲值紀錄。';
+  if (!rows.length) list.append(node('p', 'screen-hint', '目前沒有符合條件的儲值或抵扣紀錄。'));
   rows.forEach(row => {
-    const item = document.createElement('p');
-    const text = document.createElement('span');
-    text.textContent = `${row.date} · ${getUnit(row.unitId).label} · 儲值 $${row.amount.toLocaleString()}${row.note ? ' · ' + row.note : ''} `;
-    const button = document.createElement('button');
-    button.type = 'button'; button.className = 'inline-action'; button.textContent = '刪除儲值';
-    button.addEventListener('click', () => deleteUtilityDeposit(row.id));
-    item.append(text, button); list.append(item);
+    const item = node('article', 'utility-ledger-row');
+    const content = node('div', 'utility-ledger-content');
+    const deposit = row.type === 'deposit';
+    content.append(node('p', 'utility-ledger-meta', `${row.date} · ${getUnit(row.unitId).label} · ${deposit ? '儲值日期' : '帳單日期'}`));
+    content.append(node('h4', '', deposit ? '水電費儲值' : '帳單費用抵扣'));
+    if (row.note) content.append(node('p', 'utility-ledger-note', row.note));
+    if (row.currentNote) content.append(node('p', 'utility-ledger-note', row.currentNote));
+    const action = node('div', 'utility-ledger-action');
+    action.append(node('strong', deposit ? 'utility-credit' : 'utility-debit', `${deposit ? '+' : '−'}${money(row.amount)}`));
+    const button = node('button', 'inline-action', deposit ? '刪除儲值' : '查看帳單');
+    button.type = 'button';
+    button.addEventListener('click', () => deposit ? deleteUtilityDeposit(row.id) : viewRecord(row.id));
+    action.append(button); item.append(content, action); list.append(item);
+  });
+  const pending = document.getElementById('utilityPending');
+  if (!pending) return;
+  pending.replaceChildren();
+  const unpaid = appData.records.filter(row => (floor === 'all' || row.unitId === floor) &&
+    Object.values(creditFees(row)).reduce((sum, fee) => sum + fee, 0) - (row.utilityCredit || 0) > 0)
+    .slice().sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
+  if (!unpaid.length) pending.append(node('p', 'screen-hint', '目前沒有尚未抵扣的帳單費用。'));
+  unpaid.forEach(row => {
+    const item = node('div', 'utility-pending-row');
+    const fees = creditFees(row), used = recordCreditItems(row);
+    item.append(node('p', '', `${row.date} · ${getUnit(row.unitId).label}`));
+    const choices = node('fieldset', 'credit-choices');
+    choices.append(node('legend', '', '勾選本次抵扣項目'));
+    let selected = [...DEFAULT_CREDIT_ITEMS];
+    const button = node('button', 'inline-action');
+    const refresh = () => {
+      const credit = availableRecordCredit(row, selected);
+      button.textContent = credit > 0 ? `抵扣 ${money(credit)}` : utilityBalance(row.unitId) <= 0 ? '餘額不足，請先儲值' : '請勾選可抵扣項目';
+      button.disabled = credit <= 0;
+    };
+    for (const [key, label] of CREDIT_ITEMS) {
+      const remaining = Math.max(0, fees[key] - (used[key] || 0));
+      const field = node('label');
+      const checkbox = node('input'); checkbox.type = 'checkbox';
+      checkbox.checked = selected.includes(key) && remaining > 0;
+      checkbox.disabled = remaining <= 0;
+      checkbox.addEventListener('change', () => {
+        selected = selected.filter(value => value !== key);
+        if (checkbox.checked) selected.push(key);
+        refresh();
+      });
+      field.append(checkbox, node('span', '', `${label}${key === 'other' && row.otherDescription ? '（' + row.otherDescription + '）' : ''}`)); choices.append(field);
+    }
+    button.type = 'button'; refresh();
+    button.addEventListener('click', () => applyUtilityCreditToRecord(row.id, selected));
+    item.append(choices);
+    item.append(button); pending.append(item);
   });
 }

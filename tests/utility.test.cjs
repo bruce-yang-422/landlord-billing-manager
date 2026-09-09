@@ -19,6 +19,83 @@ function setup() {
 }
 const bill = ctx => ctx.buildRecord('6F', '2026-09-09', 500, 100, 300, { gas: 100, management: 50, other: 20 });
 
+test('selected gas and miscellaneous credit excludes water, electricity and rent', () => {
+  const h = setup(); h.ctx.saveUtilityDeposit();
+  const record = h.ctx.buildRecord('6F', '2026-09-09', 500, 100, 300, { gas: 100, management: 50, other: 20 }, ['gas', 'other']);
+  assert.equal(record.utilityCredit, 120);
+  assert.equal(record.total, 12850);
+  assert.equal(record.creditItems.electricity, 0);
+  assert.equal(record.creditItems.gas, 100);
+  assert.equal(record.creditItems.other, 20);
+  h.ctx.addRecord(record);
+  h.ctx.applyUtilityCreditToRecord(record.id, ['gas', 'other']);
+  assert.equal(h.ctx.utilityBalance('6F'), 2880);
+  h.ctx.applyUtilityCreditToRecord(record.id, ['water']);
+  assert.equal(h.data().records[0].utilityCredit, 420);
+  assert.equal(h.data().records[0].creditItems.water, 300);
+  const restored = h.ctx.backupFromCsv(h.ctx.backupToCsv(h.data()));
+  assert.deepEqual(JSON.parse(JSON.stringify(restored.records[0])), JSON.parse(JSON.stringify(h.data().records[0])));
+  restored.records[0].creditItems.gas = 101;
+  assert.throws(() => h.ctx.validateBackup(restored), /抵扣/);
+});
+
+test('empty selections do not deduct and limited balance follows stable item order', () => {
+  const h = setup(); h.elements.utilityAmount.value = '550'; h.ctx.saveUtilityDeposit();
+  const empty = h.ctx.buildRecord('6F', '2026-09-09', 500, 100, 300, { gas: 100 }, []);
+  assert.equal(empty.utilityCredit, 0);
+  const partial = h.ctx.buildRecord('6F', '2026-09-09', 500, 100, 300, { gas: 100 }, ['gas', 'water', 'electricity', 'rent']);
+  assert.equal(partial.creditItems.electricity, 500);
+  assert.equal(partial.creditItems.water, 50);
+  assert.equal(partial.creditItems.gas, 0);
+  assert.equal(partial.utilityBalanceAfter, 0);
+  assert.equal(partial.rent, 12000);
+});
+
+test('legacy combined water and electricity credit is not deducted twice when adding gas', () => {
+  const h = setup(); h.ctx.saveUtilityDeposit();
+  const record = bill(h.ctx); delete record.creditItems;
+  h.ctx.addRecord(record);
+  h.ctx.applyUtilityCreditToRecord(record.id, ['electricity', 'water', 'gas']);
+  assert.equal(h.data().records[0].utilityCredit, 900);
+  assert.equal(h.data().records[0].creditItems.gas, 100);
+  assert.equal(h.ctx.utilityBalance('6F'), 2100);
+});
+
+test('ledger combines deposits and actual bill credits with independent floor and type filters', () => {
+  const h = setup(); h.ctx.saveUtilityDeposit();
+  const record = bill(h.ctx); h.ctx.addRecord(record);
+  h.elements.utilityUnit.value = '5F'; h.elements.utilityAmount.value = '500'; h.ctx.saveUtilityDeposit();
+  const rows = h.ctx.utilityLedgerRows();
+  assert.equal(rows.length, 3);
+  assert.equal(h.ctx.utilityLedgerRows('6F').length, 2);
+  assert.equal(h.ctx.utilityLedgerRows('all', 'deposit').length, 2);
+  assert.equal(h.ctx.utilityLedgerRows('5F', 'deduction').length, 0);
+  assert.equal(h.ctx.utilityLedgerRows('6F', 'deduction')[0].amount, 800);
+  h.ctx.deleteRecord(record.id);
+  assert.equal(h.ctx.utilityLedgerRows('all', 'deduction').length, 0);
+});
+
+test('utility page renders balances, filtered ledger and pending bill actions from existing data', () => {
+  const h = setup(); h.ctx.saveUtilityDeposit(); h.ctx.addRecord(bill(h.ctx));
+  h.ctx.addRecord(h.ctx.buildRecord('5F', '2026-09-09', 100, 20, 0, {}));
+  const node = () => ({ children: [], textContent: '', append(...children) { this.children.push(...children); },
+    replaceChildren(...children) { this.children = children; }, addEventListener() {} });
+  h.ctx.document.createElement = node;
+  for (const id of ['utilityBalances', 'utilityHistory', 'utilityPending', 'utilityLedgerSummary']) h.elements[id] = node();
+  h.elements.utilityFloorFilter = { value: 'all' }; h.elements.utilityTypeFilter = { value: 'all' };
+  h.ctx.renderUtilityDeposits();
+  assert.equal(h.elements.utilityBalances.children.length, 2);
+  const flatten = el => el.textContent + (el.children || []).map(flatten).join(' ');
+  assert.match(flatten(h.elements.utilityBalances), /2,200/);
+  assert.match(flatten(h.elements.utilityHistory), /−\$800/);
+  assert.match(flatten(h.elements.utilityPending), /餘額不足/);
+  h.elements.utilityFloorFilter.value = '6F'; h.elements.utilityTypeFilter.value = 'deduction';
+  h.ctx.renderUtilityDeposits();
+  assert.equal(h.elements.utilityHistory.children.length, 1);
+  assert.match(flatten(h.elements.utilityPending), /瓦斯費/);
+  assert.match(flatten(h.elements.utilityPending), /請勾選可抵扣項目/);
+});
+
 test('late deposit offsets existing bill once, preserves charges, and deletion refunds it', () => {
   const h = setup();
   const record = bill(h.ctx); h.ctx.addRecord(record); h.ctx.saveUtilityDeposit();

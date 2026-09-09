@@ -5,7 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 function setup() {
-  const screens = ['calculate', 'input', 'backup', 'settings'].map(screen => ({ dataset: { screen }, hidden: false }));
+  const screens = ['calculate', 'input', 'backup', 'utility', 'settings'].map(screen => ({ dataset: { screen }, hidden: false }));
   const buttons = screens.map(panel => ({ dataset: { nav: panel.dataset.screen }, attributes: {},
     setAttribute(key, value) { this.attributes[key] = value; }, removeAttribute(key) { delete this.attributes[key]; } }));
   const events = {};
@@ -23,7 +23,7 @@ function setup() {
 
 test('each route shows exactly one screen and tracks the active navigation item', () => {
   const h = setup(); h.ctx.initNavigation();
-  for (const screen of ['settings', 'input', 'backup', 'calculate']) {
+  for (const screen of ['settings', 'input', 'backup', 'utility', 'calculate']) {
     h.ctx.navigateTo(screen); h.events.hashchange();
     assert.deepEqual(h.screens.filter(panel => !panel.hidden).map(panel => panel.dataset.screen), [screen]);
     assert.deepEqual(h.buttons.filter(button => button.attributes['aria-current'] === 'page').map(button => button.dataset.nav), [screen]);
