@@ -6,7 +6,7 @@
     <title>房東帳務管理工具</title>
 
     <!-- PWA -->
-    <meta name="theme-color" content="#f5f8fc" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0c1422" media="(prefers-color-scheme: dark)">
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="icon" type="image/x-icon" href="./icons/icon.ico">
@@ -25,15 +25,18 @@
 
     <!-- 標題 -->
     <div class="header-section">
-        <h1>🏠 房東帳務管理工具</h1>
+        <div class="brand-lockup">
+            <img class="brand-logo" src="./icons/icon-192.png" alt="" width="48" height="48">
+            <div><h1>房東帳務管理工具</h1><p class="brand-tagline">簡單記帳 · 清楚收租 · 輕鬆管理</p></div>
+        </div>
         <div class="header-actions">
             <button id="pwaInstallBtn" class="btn-settings" type="button" hidden>📲 安裝 App</button>
             <div class="theme-selector">
-                <label for="themeSelect">🎨</label>
+                <label for="themeSelect" class="theme-label">外觀</label>
                 <select id="themeSelect" class="theme-select">
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="auto">Auto</option>
+                    <option value="light">亮色</option>
+                    <option value="dark">暗色</option>
+                    <option value="auto">自動</option>
                 </select>
             </div>
         </div>

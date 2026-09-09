@@ -1,17 +1,17 @@
-/* 輕盈藍色扁平主題：以色塊、留白與細邊框建立層次。 */
+/* Logo 寶藍主題：暖白底、柔和卡片與清楚的帳務層次。 */
 :root {
     color-scheme: light;
-    --page-bg: #f5f8fc;
+    --page-bg: #f7f6f2;
     --surface: #ffffff;
-    --field-bg: #f8fafd;
-    --accent: #2563eb;
-    --accent-hover: #1d4ed8;
-    --accent-soft: #edf4ff;
-    --accent-secondary: #42658a;
-    --text-primary: #182b46;
-    --text-secondary: #5d6f86;
-    --border-color: #e0e7f0;
-    --border-color-hover: #a9c3e8;
+    --field-bg: #f8f9fc;
+    --accent: #0735ad;
+    --accent-hover: #062987;
+    --accent-soft: #edf2fc;
+    --accent-secondary: #42768b;
+    --text-primary: #172d4b;
+    --text-secondary: #677487;
+    --border-color: #e5e8ee;
+    --border-color-hover: #b9c8e4;
     --container-bg: var(--surface);
     --card-bg: var(--surface);
     --input-bg: var(--surface);
@@ -26,8 +26,8 @@
     --page-bg: #0c1422;
     --surface: #131f31;
     --field-bg: #101a2b;
-    --accent: #2563eb;
-    --accent-hover: #1d4ed8;
+    --accent: #0735ad;
+    --accent-hover: #062987;
     --accent-soft: #1a2d49;
     --accent-secondary: #acc7e3;
     --text-primary: #e0ecf8;
@@ -131,7 +131,7 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus,
 }
 .theme-select:hover { background: var(--surface); box-shadow: none; }
 
-/* 次要操作使用細框，主要操作使用實心藍；互動僅改變顏色。 */
+/* 次要操作使用細框，主要操作使用Logo 寶藍；互動僅改變顏色。 */
 button,
 .btn-settings, .btn-export, .btn-import, .btn-clear-history,
 .filter-btn, .settings-tab, .pwa-install-dismiss, .pwa-install-decline,
@@ -404,3 +404,85 @@ tr:hover { background: var(--accent-soft); }
 .history-section .history-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; }
 .history-actions .btn-clear-history { flex: 0 0 auto; width: auto; min-height: 36px; padding: 8px 14px; border: 1px solid var(--border-color); color: var(--danger-color); background: var(--surface); }
 .history-actions .btn-clear-history:hover { background: var(--accent-soft); }
+
+/* 品牌介面：參考行動帳務卡片的留白、柔和層次與圓角。 */
+:root {
+    --card-shadow: 0 4px 22px rgba(26, 43, 73, 0.045);
+    --secondary-soft: #edf6f8;
+}
+[data-theme="dark"] {
+    --card-shadow: 0 4px 22px rgba(0, 0, 0, 0.12);
+    --secondary-soft: #192f3b;
+}
+body { font-variant-numeric: tabular-nums; }
+.brand-lockup { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.brand-logo { flex: 0 0 auto; border-radius: 14px; box-shadow: 0 4px 12px rgba(7, 53, 173, 0.12); }
+.header-section h1 { font-size: 24px; font-weight: 750; letter-spacing: 0.5px; line-height: 1.4; }
+.brand-tagline { margin: 5px 0 0; color: var(--text-secondary); font-size: 11px; letter-spacing: 1.6px; }
+.header-section { margin-bottom: 14px; }
+.pwa-status { color: var(--text-secondary); }
+.screen-heading h2 { font-size: 25px; font-weight: 700; letter-spacing: 0.3px; }
+.section-eyebrow { letter-spacing: 1.8px; }
+.info-card, .fee-section, .unit-bill-card, .unit-settings-card,
+.meter-hero, .meter-next, .meter-history, .backup-card, .bill-note, .result {
+    border-radius: 20px;
+    border-color: var(--border-color);
+    box-shadow: var(--card-shadow);
+    background: var(--surface);
+}
+.info-card, .fee-section { margin-bottom: 20px; }
+.section-title, .unit-bill-title { font-weight: 700; font-size: 17px; }
+.billing-options { background: var(--surface); border-radius: 18px; }
+.period-picker { border: 1px solid var(--border-color); background: var(--field-bg); border-radius: 14px; }
+.split-preview { padding: 8px; border-radius: 16px; background: var(--field-bg); }
+.split-preview-row { padding: 14px 12px; border-radius: 11px; background: var(--accent-soft); }
+.split-preview-row + .split-preview-row { margin-top: 6px; background: var(--secondary-soft); border-top: 0; }
+.split-amount { font-weight: 750; }
+.unit-bill-preview, [data-theme="dark"] .unit-bill-preview { background: transparent; padding: 0; }
+.preview-row { padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+.bill-total-row { padding: 14px; border: 0; border-radius: 12px; background: var(--accent-soft); }
+.unit-bill-6F .bill-total-row { background: var(--secondary-soft); }
+.unit-bill-6F .bill-total-row strong:last-child { color: var(--accent-secondary); }
+.bill-note { border-top: 1px solid var(--border-color); padding: 22px; }
+.bill-note-total { color: var(--text-primary); font-weight: 750; }
+.bill-note dl > div { padding: 8px 0; border-bottom: 1px solid var(--border-color); }
+.bill-note-unit { border-radius: 8px; padding: 6px 12px; }
+.report-area { border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; line-height: 1.85; }
+.settings-tabs { border-radius: 14px; }
+.settings-tab { border-radius: 10px; }
+.btn-save-settings, .btn-5F, .btn-6F, .calculate-btn, .copy-btn,
+.pwa-install-action, .pwa-ios-done {
+    min-height: 48px;
+    border-radius: 999px;
+    background: linear-gradient(120deg, var(--accent), var(--accent-hover));
+    font-weight: 650;
+    letter-spacing: 0.5px;
+}
+.app-nav { background: var(--surface); box-shadow: var(--card-shadow); padding: 8px; }
+.app-nav button { min-height: 48px; }
+.app-nav button[aria-current="page"] { background: var(--accent-soft); color: var(--link-color); }
+@media (min-width: 769px) {
+    body { padding-top: 30px; }
+    .container { background: var(--page-bg); border-color: var(--border-color); padding: 32px; box-shadow: 0 16px 60px rgba(26, 43, 73, 0.05); }
+    .header-section { margin-bottom: 12px; }
+    .split-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .split-preview-row + .split-preview-row { margin-top: 0; }
+    .units-grid { gap: 20px; }
+}
+@media (max-width: 768px) {
+    body { padding-left: 14px; padding-right: 14px; padding-top: 22px; }
+    .container { padding: 0; }
+    .brand-lockup { gap: 10px; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 12px; }
+    .header-section h1 { font-size: 20px; }
+    .brand-tagline { font-size: 10px; letter-spacing: 0.8px; }
+    .header-actions { margin-left: auto; }
+    .pwa-status { margin-top: 10px; margin-bottom: 24px; }
+    .info-card, .fee-section, .unit-bill-card, .unit-settings-card { padding: 20px 16px; }
+    .screen-heading h2 { font-size: 23px; }
+    .app-nav { padding: 8px max(12px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); border-radius: 22px 22px 0 0; box-shadow: 0 -4px 24px rgba(26, 43, 73, 0.06); }
+    .app-nav button[aria-current="page"] { background: transparent; }
+    .app-nav button[aria-current="page"] span { background: var(--accent-soft); border-radius: 10px; }
+    .app-nav button span { padding: 4px 15px; }
+    .app-nav button { gap: 3px; }
+}

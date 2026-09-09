@@ -106,7 +106,7 @@ python -m http.server 8080 --bind 127.0.0.1
 node --test tests/*.test.cjs
 ```
 
-發布時請一併上傳完整專案，並遞增 `service-worker.js` 的 `CACHE_NAME` 版本（目前 `v31`）。HTML、CSS、JS 採同版本預先快取；更新會等待舊版視窗全部關閉後才啟用。快取名稱包含部署路徑，避免同網域其他部署互相刪除快取。舊版 `v1`～`v3` 未包含部署路徑的快取會保留，避免刪除其他部署的資料。
+發布時請一併上傳完整專案，並遞增 `service-worker.js` 的 `CACHE_NAME` 版本（目前 `v32`）。HTML、CSS、JS 採同版本預先快取；更新會等待舊版視窗全部關閉後才啟用。快取名稱包含部署路徑，避免同網域其他部署互相刪除快取。舊版 `v1`～`v3` 未包含部署路徑的快取會保留，避免刪除其他部署的資料。
 
 > [!IMPORTANT]
 > 帳務資料儲存在目前執行環境的 localStorage。iPhone／iPad 加入主畫面後，獨立 Web App 不一定會自動帶入 Safari 中既有的資料。若已在 Safari 使用本工具，請先匯出 CSV 備份，再從主畫面版本匯入。清除瀏覽器網站資料或移除相關網站資料也可能刪除帳務內容，請定期匯出備份。
@@ -220,7 +220,7 @@ CSV 備份包含每月抄表清單、台電用電區間與實際起訖抄表日�
 landlord-billing-manager/
 ├── css/
 │   ├── style.css       # 基礎版面與響應式排版
-│   └── flat.css        # 輕盈藍色扁平風格，支援亮色/暗色/Auto 主題
+│   └── flat.css        # Logo 寶藍與暖白卡片風格，支援亮色/暗色/Auto 主題
 ├── icons/
 │   ├── icon.ico                 # 瀏覽器分頁圖示
 │   ├── icon-192.png             # PWA 一般圖示（192×192）
