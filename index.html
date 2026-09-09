@@ -291,7 +291,8 @@
     <section data-screen="utility" hidden aria-labelledby="utilityPageTitle">
         <div class="screen-heading"><span class="section-eyebrow">房客預付帳戶</span><h2 id="utilityPageTitle" tabindex="-1">房客儲值</h2><p class="screen-hint">查看每戶預付金、已抵扣費用及可用餘額。</p></div>
         <div id="utilityBalances" class="utility-balances" aria-live="polite"></div>
-        <div class="utility-workspace">
+        <div id="utilityEmpty" class="entry-panel" hidden><p>目前沒有啟用儲值功能的樓層。</p><button type="button" class="inline-action" onclick="navigateTo('settings')">前往設定啟用儲值</button></div>
+        <div id="utilityWorkspace" class="utility-workspace">
     <section class="entry-panel" aria-labelledby="utilityTitle">
         <h3 id="utilityTitle">登記儲值</h3>
         <p class="screen-hint">預付金獨立記帳，可勾選電費、水費、瓦斯、管理費與雜費，不抵租金。存檔帳單才扣款，刪除帳單會返還抵扣金額。補登帳單亦使用目前餘額。</p>
@@ -309,7 +310,7 @@
             <div id="utilityPending"></div>
         </section>
         </div>
-        <section class="entry-panel" aria-labelledby="utilityLedgerTitle">
+        <section id="utilityLedgerSection" class="entry-panel" aria-labelledby="utilityLedgerTitle">
             <div class="utility-ledger-heading"><div><h3 id="utilityLedgerTitle">儲值與抵扣明細</h3><p class="screen-hint">抵扣依帳單日期排列，每張帳單合併顯示累計抵扣金額。</p></div>
                 <div class="utility-filters"><div><label for="utilityFloorFilter">樓層</label><select id="utilityFloorFilter" onchange="renderUtilityDeposits()"><option value="all">全部樓層</option><option value="5F">5 樓</option><option value="6F">6 樓</option></select></div>
                 <div><label for="utilityTypeFilter">項目</label><select id="utilityTypeFilter" onchange="renderUtilityDeposits()"><option value="all">全部項目</option><option value="deposit">儲值</option><option value="deduction">費用抵扣</option></select></div></div>
@@ -478,7 +479,8 @@
 
         </div>
         <div class="settings-actions">
-            <button class="btn-save-settings" onclick="saveUnitSettings()">💾 儲存房客設定</button>
+            <p class="screen-hint" id="settingsSaveHint">一次儲存 5 樓與 6 樓的設定</p>
+            <button type="button" class="btn-save-settings" aria-describedby="settingsSaveHint" onclick="saveUnitSettings()">💾 儲存房客設定</button>
         </div>
     </div>
 

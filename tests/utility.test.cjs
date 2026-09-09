@@ -150,6 +150,33 @@ test('utility page renders balances, filtered ledger and pending bill actions fr
   assert.match(flatten(h.elements.utilityPending), /請勾選可抵扣項目/);
 });
 
+test('disabled units disappear from credit UI and return with their data when re-enabled', () => {
+  const h = setup(); h.ctx.saveUtilityDeposit(); h.ctx.addRecord(bill(h.ctx));
+  const before = JSON.stringify(h.data().records);
+  const node = () => ({ children: [], textContent: '', value: '', append(...children) { this.children.push(...children); },
+    replaceChildren(...children) { this.children = children; }, addEventListener() {} });
+  h.ctx.document.createElement = node;
+  for (const id of ['utilityBalances', 'utilityHistory', 'utilityPending', 'utilityLedgerSummary', 'utilityEmpty', 'utilityWorkspace', 'utilityLedgerSection']) h.elements[id] = node();
+  for (const id of ['utilityUnit', 'utilityFloorFilter']) {
+    h.elements[id] = node(); h.elements[id].options = []; h.elements[id].value = '6F';
+  }
+  const flatten = el => el.textContent + (el.children || []).map(flatten).join(' ');
+  h.ctx.setUtilityEnabled('6F', false);
+  for (const id of ['utilityBalances', 'utilityHistory', 'utilityPending', 'utilityUnit', 'utilityFloorFilter']) assert.doesNotMatch(flatten(h.elements[id]), /6 樓/);
+  assert.equal(h.elements.utilityFloorFilter.value, 'all');
+  assert.equal(h.elements.utilityUnit.value, '5F');
+  assert.equal(h.ctx.utilityBalance('6F'), 2200);
+  h.ctx.setUtilityEnabled('5F', false);
+  assert.equal(h.elements.utilityEmpty.hidden, false);
+  assert.equal(h.elements.utilityWorkspace.hidden, true);
+  assert.equal(h.elements.utilityLedgerSection.hidden, true);
+  h.ctx.setUtilityEnabled('6F', true);
+  assert.equal(h.elements.utilityEmpty.hidden, true);
+  assert.equal(h.elements.utilityWorkspace.hidden, false);
+  assert.match(flatten(h.elements.utilityHistory), /6 樓/);
+  assert.equal(JSON.stringify(h.data().records), before);
+});
+
 test('late deposit offsets existing bill once, preserves charges, and deletion refunds it', () => {
   const h = setup();
   const record = bill(h.ctx); h.ctx.addRecord(record); h.ctx.saveUtilityDeposit();

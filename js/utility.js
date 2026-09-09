@@ -91,7 +91,14 @@ function renderUtilityDeposits() {
   };
   const money = value => '$' + value.toLocaleString('zh-TW');
   balances.replaceChildren();
-  appData.units.forEach(unit => {
+  const enabledUnits = appData.units.filter(unit => utilityEnabled(unit.id));
+  const empty = document.getElementById('utilityEmpty');
+  if (empty) empty.hidden = enabledUnits.length > 0;
+  for (const id of ['utilityWorkspace', 'utilityLedgerSection']) {
+    const section = document.getElementById(id);
+    if (section) section.hidden = enabledUnits.length === 0;
+  }
+  enabledUnits.forEach(unit => {
     const deposited = (appData.utilityDeposits || []).filter(row => row.unitId === unit.id).reduce((sum, row) => sum + row.amount, 0);
     const used = appData.records.filter(row => row.unitId === unit.id).reduce((sum, row) => sum + (row.utilityCredit || 0), 0);
     const card = node('article', 'utility-balance-card');
@@ -101,17 +108,27 @@ function renderUtilityDeposits() {
     totals.append(node('span', '', '累計儲值 ' + money(deposited)), node('span', '', '已抵扣 ' + money(used)));
     card.append(totals); balances.append(card);
   });
-  const unitSelect = document.getElementById('utilityUnit');
-  if (unitSelect?.options) {
-    for (const option of unitSelect.options) option.disabled = !utilityEnabled(option.value);
-    if (!utilityEnabled(unitSelect.value)) unitSelect.value = appData.units.find(unit => utilityEnabled(unit.id))?.id || '';
-    unitSelect.disabled = !appData.units.some(unit => utilityEnabled(unit.id));
+  for (const [id, includeAll] of [['utilityUnit', false], ['utilityFloorFilter', true]]) {
+    const select = document.getElementById(id);
+    if (!select?.options) continue;
+    const previous = select.value;
+    select.replaceChildren();
+    if (includeAll) {
+      const option = node('option', '', '全部樓層'); option.value = 'all'; select.append(option);
+    }
+    for (const unit of enabledUnits) {
+      const option = node('option', '', unit.label); option.value = unit.id; select.append(option);
+    }
+    select.value = enabledUnits.some(unit => unit.id === previous) ? previous : includeAll ? 'all' : enabledUnits[0]?.id || '';
+    select.disabled = enabledUnits.length === 0;
   }
   const saveButton = document.getElementById('saveUtilityDepositBtn');
-  if (saveButton) saveButton.disabled = !appData.units.some(unit => utilityEnabled(unit.id));
-  const floor = document.getElementById('utilityFloorFilter')?.value || 'all';
+  if (saveButton) saveButton.disabled = enabledUnits.length === 0;
+  const filter = document.getElementById('utilityFloorFilter');
+  if (filter && filter.value !== 'all' && !enabledUnits.some(unit => unit.id === filter.value)) filter.value = 'all';
+  const floor = filter?.value || 'all';
   const type = document.getElementById('utilityTypeFilter')?.value || 'all';
-  const rows = utilityLedgerRows(floor, type);
+  const rows = utilityLedgerRows(floor, type).filter(row => utilityEnabled(row.unitId));
   const summary = document.getElementById('utilityLedgerSummary');
   if (summary) {
     const sum = type => rows.filter(row => row.type === type).reduce((total, row) => total + row.amount, 0);

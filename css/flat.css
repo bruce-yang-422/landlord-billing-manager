@@ -240,6 +240,7 @@ tr:hover { background: var(--accent-soft); }
 /* App 畫面與導覽 */
 [data-screen][hidden], .entry-panel[hidden] { display: none; }
 #electricityBillingSection[hidden] { display: none; }
+#utilityWorkspace[hidden] { display: none; }
 .billing-options { padding: 16px; margin-bottom: 22px; border: 1px solid var(--border-color); border-radius: 14px; background: var(--field-bg); }
 .billing-electricity-toggle { display: flex; align-items: center; gap: 10px; font-size: 14px; }
 .billing-electricity-toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
@@ -306,6 +307,22 @@ tr:hover { background: var(--accent-soft); }
 [data-screen="backup"] #reportSection { margin-top: 24px; margin-bottom: 0; }
 [data-screen="settings"] .settings-panel { margin: 0; padding: 0; border: 0; }
 [data-screen="settings"] .settings-panel > h3 { display: none; }
+[data-screen="settings"] .settings-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 24px 0 32px;
+    padding: 24px 16px;
+    border-top: 1px solid var(--border-color);
+}
+[data-screen="settings"] .settings-actions .screen-hint { margin: 0; text-align: center; }
+[data-screen="settings"] .settings-actions .btn-save-settings { width: min(100%, 320px); min-height: 48px; }
+@media (max-width: 600px) {
+    [data-screen="settings"] .settings-actions { padding: 20px 0; margin: 20px 0 24px; }
+    [data-screen="settings"] .settings-actions .btn-save-settings { width: 100%; }
+}
 [data-screen="calculate"] .info-card label { font-size: 12px; }
 
 @media (min-width: 769px) {
