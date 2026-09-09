@@ -30,14 +30,18 @@ function deleteRecord(id) {
   try { saveRecords(records); } catch (error) { alert('未刪除：' + error.message); return; }
   appData.records = records;
   renderHistory();
+  if (typeof renderUtilityDeposits === 'function') renderUtilityDeposits();
+  updateBillTotals();
   if (typeof refreshMeterUi === 'function') refreshMeterUi();
 }
 
 function clearHistory() {
-  if (!confirm('這將清空所有歷史帳單，獨立抄表紀錄會保留。建議先備份 CSV。確定要繼續嗎？')) return;
+  if (!confirm('這將清空所有歷史帳單，獨立抄表與儲值紀錄會保留，所有帳單的水電抵扣會返還餘額。建議先備份 CSV。確定要繼續嗎？')) return;
   try { saveRecords([]); } catch (error) { alert('未清空：' + error.message); return; }
   appData.records = [];
   renderHistory();
+  if (typeof renderUtilityDeposits === 'function') renderUtilityDeposits();
+  updateBillTotals();
   if (typeof refreshMeterUi === 'function') refreshMeterUi();
 }
 
@@ -118,7 +122,7 @@ function loadInputs() {
 
 function exportData() {
   try {
-    const payload = { units: appData.units, records: appData.records, meterReadings: appData.meterReadings || [] };
+    const payload = { units: appData.units, records: appData.records, utilityDeposits: appData.utilityDeposits || [], meterReadings: appData.meterReadings || [] };
     const dataStr = URL.createObjectURL(new Blob([backupToCsv(payload)], { type: 'text/csv;charset=utf-8' }));
     const a = document.createElement('a');
     a.setAttribute('href', dataStr);
@@ -142,18 +146,23 @@ function restoreBackup(data) {
   // 儲存失敗時保留原資料，不讓畫面誤報成功。
   const oldUnits = localStorage.getItem('landlord_units');
   const oldRecords = localStorage.getItem(DB_KEY);
+  const deposits = data.utilityDeposits || [];
+  if (typeof utilityBalance === 'function' && units.some(unit => utilityBalance(unit.id, deposits, data.records) < 0)) throw new Error('儲值總額不足以涵蓋帳單抵扣，請匯入完整備份。');
+  const oldDeposits = localStorage.getItem('landlord_utility_deposits');
   const oldMeters = localStorage.getItem('landlord_meter_readings');
   try {
+    localStorage.setItem('landlord_utility_deposits', JSON.stringify(deposits));
     localStorage.setItem('landlord_units', JSON.stringify(units));
     localStorage.setItem(DB_KEY, JSON.stringify(data.records));
     if (data.meterReadings !== undefined) localStorage.setItem('landlord_meter_readings', JSON.stringify(data.meterReadings));
   } catch (error) {
-    for (const [key, value] of [['landlord_units', oldUnits], [DB_KEY, oldRecords], ['landlord_meter_readings', oldMeters]]) {
+    for (const [key, value] of [['landlord_utility_deposits', oldDeposits], ['landlord_units', oldUnits], [DB_KEY, oldRecords], ['landlord_meter_readings', oldMeters]]) {
       try { if (value === null) localStorage.removeItem(key); else localStorage.setItem(key, value); }
       catch (rollbackError) { console.error('還原儲存資料失敗:', rollbackError); }
     }
     throw error;
   }
+  appData.utilityDeposits = deposits;
   appData.units = units;
   appData.records = data.records;
   if (data.meterReadings !== undefined) appData.meterReadings = data.meterReadings;
@@ -161,6 +170,8 @@ function restoreBackup(data) {
   updateElectricityPreview();
   updateWaterPreview();
   renderHistory();
+  if (typeof renderUtilityDeposits === 'function') renderUtilityDeposits();
+  updateBillTotals();
   if (typeof refreshMeterUi === 'function') refreshMeterUi();
   const report = document.getElementById('reportSection');
   if (report) report.style.display = 'none';
@@ -175,7 +186,7 @@ function importData(input) {
       const text = e.target.result.replace(/^\uFEFF/, '');
       const data = file.name.toLowerCase().endsWith('.json')
         ? validateBackup(JSON.parse(text)) : backupFromCsv(text);
-      if (!confirm(`即將匯入 ${data.records.length} 筆帳單${data.meterReadings ? `、${data.meterReadings.length} 筆抄表` : ''}，覆蓋對應資料${data.units ? '與房客設定' : ''}。未含抄表的舊備份會保留本機抄表紀錄。建議先備份目前資料。確定匯入？`)) return;
+      if (!confirm(`即將匯入 ${data.records.length} 筆帳單${data.meterReadings ? `、${data.meterReadings.length} 筆抄表` : ''}，覆蓋對應資料${data.units ? '與房客設定' : ''}。未含抄表的舊備份會保留本機抄表紀錄；儲值紀錄會一併覆蓋，舊備份未含儲值則清空儲值。建議先備份目前資料。確定匯入？`)) return;
       restoreBackup(data);
       alert('✅ 資料匯入成功！');
     } catch (err) {

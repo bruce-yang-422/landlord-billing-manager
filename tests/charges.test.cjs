@@ -44,6 +44,24 @@ test('monthly bills include water, individual gas and other fees without a Taipo
   assert.equal(restored.records[1].gasFee, 400);
 });
 
+test('bill preview, saved bill and tenant report agree on prepaid utility credit', () => {
+  const h = setup(false);
+  vm.runInContext("appData.utilityDeposits = [{ id: 1, unitId: '6F', date: '2026-09-09', amount: 3000 }];", h.ctx);
+  const draft = h.ctx.currentBillDraft().units.find(unit => unit.id === '6F');
+  assert.equal(draft.utilityCredit, 200);
+  assert.equal(draft.total, 12480);
+  h.ctx.saveBill('6F');
+  const record = h.records[0];
+  assert.equal(record.total, draft.total);
+  assert.equal(record.utilityBalanceAfter, 2800);
+  h.elements.reportText = {};
+  h.generateReport(record);
+  assert.match(h.elements.reportText.textContent, /房租：\$12,000/);
+  assert.match(h.elements.reportText.textContent, /水電費儲值抵扣：-\$200/);
+  assert.match(h.elements.reportText.textContent, /水電費另需繳付：\$0/);
+  assert.match(h.elements.reportText.textContent, /總計：\$12,480/);
+});
+
 test('settlement month includes every fee and matches total electricity and water bills', () => {
   const h = setup(true);
   h.ctx.saveBill('5F'); h.ctx.saveBill('6F');

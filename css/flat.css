@@ -373,7 +373,7 @@ tr:hover { background: var(--accent-soft); }
 .history-data-table th:first-child, .history-data-table td:first-child,
 .history-data-table th:nth-child(2), .history-data-table td:nth-child(2),
 .history-data-table th:last-child, .history-data-table td:last-child { text-align: left; }
-.history-data-table td:nth-child(9) { color: var(--link-color); font-weight: 700; }
+.history-data-table td:nth-child(10) { color: var(--link-color); font-weight: 700; }
 .history-data-table td:last-child { min-width: 220px; }
 .history-data-table .bill-note-details { margin: 0; padding: 0; border: 0; }
 .history-data-table .bill-note-details dl { font-size: 12px; }

@@ -64,6 +64,15 @@ function calcWaterSplit(totalWater, units) {
 }
 
 // 產出單戶帳單紀錄
+function utilityBalance(unitId, deposits = appData.utilityDeposits || [], records = appData.records) {
+  return deposits.filter(row => row.unitId === unitId).reduce((sum, row) => sum + row.amount, 0)
+    - records.filter(row => row.unitId === unitId).reduce((sum, row) => sum + (row.utilityCredit || 0), 0);
+}
+
+function utilityOffset(unitId, electricity, water) {
+  return Math.min(Math.max(0, utilityBalance(unitId)), Math.max(0, electricity) + Math.max(0, water));
+}
+
 function buildRecord(unitId, billDate, electricityFee, electricityUsage, waterFee, extraFees) {
   const unit = getUnit(unitId);
   const total = (unit.rent || 0) + electricityFee + waterFee +
@@ -81,6 +90,8 @@ function buildRecord(unitId, billDate, electricityFee, electricityUsage, waterFe
     gasFee: extraFees.gas || 0,
     managementFee: extraFees.management || 0,
     otherFee: extraFees.other || 0,
-    total,
+    utilityCredit: utilityOffset(unitId, electricityFee, waterFee),
+    utilityBalanceAfter: utilityBalance(unitId) - utilityOffset(unitId, electricityFee, waterFee),
+    total: total - utilityOffset(unitId, electricityFee, waterFee),
   };
 }

@@ -5,6 +5,7 @@ window.onload = function () {
   // 載入資料
   loadUnits();
   loadRecords();
+  loadUtilityDeposits();
 
   // 設定今天日期
   const today = new Date();
@@ -13,6 +14,9 @@ window.onload = function () {
     String(today.getDate()).padStart(2, '0');
   const billDateEl = document.getElementById('billDate');
   if (billDateEl) billDateEl.value = todayStr;
+
+  document.getElementById('utilityDate').value = todayStr;
+  renderUtilityDeposits();
 
   // 載入即時輸入記憶
   loadInputs();

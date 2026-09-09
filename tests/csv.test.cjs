@@ -6,6 +6,47 @@ const path = require('node:path');
 const context = vm.createContext({});
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../js/csv.js'), 'utf8'), context);
 const plain = value => JSON.parse(JSON.stringify(value));
+const serializeRows = rows => rows.map(row => row.map(value => '"' + value.replace(/"/g, '""') + '"').join(',')).join('\r\n');
+
+test('SHA-256 matches Node crypto for UTF-8, padding boundaries and long content', () => {
+  const crypto = require('node:crypto');
+  for (const text of ['', 'abc', '水電費儲值😀', ...[55, 56, 63, 64, 65, 120, 10000].map(n => 'a'.repeat(n))]) {
+    assert.equal(context.backupSha256(text), crypto.createHash('sha256').update(text, 'utf8').digest('hex'));
+  }
+});
+
+test('every exported row has a deterministic 20-character verification ID', () => {
+  const data = { ...fixture(), meterReadings: [], utilityDeposits: [{ id: 12, unitId: '6F', date: '2026-09-09', amount: 3000, note: '預付' }] };
+  const csv = context.backupToCsv(data);
+  assert.equal(csv, context.backupToCsv(data));
+  const [headers, ...rows] = context.parseCsv(csv);
+  assert.equal(headers.at(-1), '資料驗證ID');
+  for (const row of rows) {
+    assert.match(row.at(-1), /^[0-9A-F]{20}$/);
+    assert.equal(row.at(-1), context.backupRowVerificationId(headers, row));
+  }
+  assert.deepEqual(plain(context.backupFromCsv(csv)), data);
+});
+
+test('changed content, missing checksum and malformed checksum are rejected', () => {
+  const csv = context.backupToCsv(fixture());
+  for (const mutate of [
+    (h, r) => { r[h.indexOf('租金')] = '15001'; },
+    (h, r) => { r[h.indexOf('租客備註')] += '修改'; },
+    (h, r) => { r[r.length - 1] = ''; },
+    (h, r) => { r[r.length - 1] = 'X'.repeat(20); }
+  ]) {
+    const rows = context.parseCsv(csv); mutate(rows[0], rows[1]);
+    assert.throws(() => context.backupFromCsv(serializeRows(rows)), /第 1 筆資料驗證ID不符/);
+  }
+});
+
+test('legacy CSV without verification column imports and gains checksums on export', () => {
+  const rows = context.parseCsv(context.backupToCsv(fixture())).map(row => row.slice(0, -1));
+  const data = context.backupFromCsv(serializeRows(rows));
+  assert.deepEqual(plain(data), fixture());
+  assert.equal(context.parseCsv(context.backupToCsv(data))[0].at(-1), '資料驗證ID');
+});
 function fixture() {
   return {
     units: [{ id: '5F', label: '5 樓', rent: 15000, persons: 2,
@@ -81,7 +122,7 @@ function importHarness(confirmResult = true, failWrite = false) {
   const sandbox = vm.createContext({
     appData: existing, alert: message => alerts.push(message), confirm: () => confirmResult,
     console, document: { getElementById: () => null },
-    fillUnitSettingsForm() {}, updateElectricityPreview() {}, updateWaterPreview() {}, renderHistory() {},
+    fillUnitSettingsForm() {}, updateElectricityPreview() {}, updateWaterPreview() {}, updateBillTotals() {}, renderHistory() {},
     localStorage: {
       getItem: key => stored.get(key) ?? null,
       setItem(key, value) { writes++; if (failWrite && writes === 2) throw new Error('quota'); stored.set(key, value); },
@@ -97,7 +138,8 @@ function importHarness(confirmResult = true, failWrite = false) {
 
 test('import updates records and persistence only after confirmation', () => {
   const success = importHarness();
-  assert.deepEqual(plain(success.existing), success.data);
+  assert.deepEqual(plain(success.existing), { ...success.data, utilityDeposits: [] });
+  assert.match(success.alerts[0], /成功/);
   assert.deepEqual(JSON.parse(success.stored.get('landlord_billing_db')), success.data.records);
   const cancelled = importHarness(false);
   assert.equal(JSON.stringify(cancelled.existing), cancelled.original);

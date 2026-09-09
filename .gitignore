@@ -208,3 +208,4 @@ __marimo__/
 
 # 電費計算器備份檔案（包含個人資料，不應上傳）
 billing-records-backup.json
+/data/landlord-billing-backup.csv
