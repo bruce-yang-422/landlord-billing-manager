@@ -42,7 +42,7 @@ function updateUnit(id, fields) {
 
 // 從設定面板讀取兩戶的值並儲存
 function saveUnitSettings() {
-  appData.units.forEach(unit => {
+  const units = appData.units.map(unit => {
     const get = (field) => {
       const el = document.getElementById(`${unit.id}_${field}`);
       return el ? el.value : '';
@@ -52,7 +52,9 @@ function saveUnitSettings() {
       return el ? (parseFloat(el.value) || 0) : 0;
     };
 
-    updateUnit(unit.id, {
+    return {
+      ...unit,
+      utilityEnabled: document.getElementById(`${unit.id}_utilityEnabled`)?.checked ?? (unit.utilityEnabled !== false),
       rent:          getNum('rent'),
       persons:       getNum('persons'),
       bankName:      get('bankName'),
@@ -62,8 +64,13 @@ function saveUnitSettings() {
       accountNumber: get('accountNumber'),
       tenantNote:    get('tenantNote'),
       landlordNote:  get('landlordNote'),
-    });
+    };
   });
+  try { localStorage.setItem('landlord_units', JSON.stringify(units)); }
+  catch (error) { alert('設定未儲存：' + error.message); return; }
+  appData.units = units;
+  if (typeof renderUtilityDeposits === 'function') renderUtilityDeposits();
+  if (typeof renderHistory === 'function') renderHistory();
   alert('✅ 房客設定已儲存！');
   updateWaterPreview();
   navigateTo('calculate');
@@ -76,6 +83,8 @@ function fillUnitSettingsForm() {
       const el = document.getElementById(`${unit.id}_${field}`);
       if (el) el.value = value ?? '';
     };
+    const toggle = document.getElementById(`${unit.id}_utilityEnabled`);
+    if (toggle) toggle.checked = unit.utilityEnabled !== false;
     set('rent',          unit.rent);
     set('persons',       unit.persons);
     set('bankName',      unit.bankName);

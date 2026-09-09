@@ -115,6 +115,8 @@ function updateBillTotals() {
   const money = value => '$' + value.toLocaleString();
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   appData.units.forEach(unit => {
+    const choices = document.getElementById(`${unit.id}_creditChoices`);
+    if (choices) { choices.disabled = !utilityEnabled(unit.id); choices.hidden = !utilityEnabled(unit.id); }
     document.querySelectorAll(`.preview-rent-${unit.id}`).forEach(el => { el.textContent = money(unit.rent || 0); });
     for (const [field, label] of [['gas','gasFee'],['management','managementFee'],['other','otherFee']]) {
       const value = Number(document.getElementById(`${unit.id}_${field}`)?.value || 0);

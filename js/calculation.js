@@ -86,8 +86,13 @@ function recordCreditItems(record) {
   return { electricity, water: (record.utilityCredit || 0) - electricity, gas: 0, management: 0, other: 0 };
 }
 
+function utilityEnabled(unitId) {
+  return appData.units.find(unit => unit.id === unitId)?.utilityEnabled !== false;
+}
+
 function planRecordCredit(record, selected = DEFAULT_CREDIT_ITEMS) {
   const fees = creditFees(record), items = recordCreditItems(record);
+  if (!utilityEnabled(record.unitId)) return { credit: 0, items };
   let remaining = Math.min(Math.max(0, utilityBalance(record.unitId)), Math.max(0, record.total));
   let credit = 0;
   for (const [key] of CREDIT_ITEMS) {
@@ -104,6 +109,7 @@ function creditItemSummary(record) {
 }
 
 function utilityOffset(unitId, electricity, water) {
+  if (!utilityEnabled(unitId)) return 0;
   return Math.min(Math.max(0, utilityBalance(unitId)), Math.max(0, electricity) + Math.max(0, water));
 }
 

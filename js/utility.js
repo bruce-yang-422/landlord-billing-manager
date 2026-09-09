@@ -4,6 +4,15 @@ function loadUtilityDeposits() {
   appData.utilityDeposits = JSON.parse(localStorage.getItem(UTILITY_KEY) || '[]');
 }
 
+function setUtilityEnabled(unitId, enabled) {
+  if (!getUnit(unitId) || typeof enabled !== 'boolean') return;
+  const units = appData.units.map(unit => unit.id === unitId ? { ...unit, utilityEnabled: enabled } : unit);
+  try { localStorage.setItem('landlord_units', JSON.stringify(units)); }
+  catch (error) { alert('開關未儲存：' + error.message); renderUtilityDeposits(); return; }
+  appData.units = units;
+  renderUtilityDeposits(); updateBillTotals(); renderHistory();
+}
+
 function availableRecordCredit(record, selected = DEFAULT_CREDIT_ITEMS) {
   return planRecordCredit(record, selected).credit;
 }
@@ -11,6 +20,7 @@ function availableRecordCredit(record, selected = DEFAULT_CREDIT_ITEMS) {
 function applyUtilityCreditToRecord(id, selected = DEFAULT_CREDIT_ITEMS) {
   const record = appData.records.find(row => String(row.id) === String(id));
   if (!record) return;
+  if (!utilityEnabled(record.unitId)) { alert('此樓層已停用儲值，請先開啟儲值功能。'); return; }
   const plan = planRecordCredit(record, selected);
   const credit = plan.credit;
   if (credit <= 0) { alert('請勾選尚未抵扣的費用，並確認有儲值餘額。'); return; }
@@ -29,6 +39,7 @@ function applyUtilityCreditToRecord(id, selected = DEFAULT_CREDIT_ITEMS) {
 
 function saveUtilityDeposit() {
   const unitId = document.getElementById('utilityUnit').value;
+  if (!utilityEnabled(unitId)) { alert('此樓層已停用儲值，請先開啟儲值功能。'); return; }
   const date = document.getElementById('utilityDate').value;
   const amount = Number(document.getElementById('utilityAmount').value);
   const note = document.getElementById('utilityNote').value.trim();
@@ -85,10 +96,19 @@ function renderUtilityDeposits() {
     const used = appData.records.filter(row => row.unitId === unit.id).reduce((sum, row) => sum + (row.utilityCredit || 0), 0);
     const card = node('article', 'utility-balance-card');
     card.append(node('h3', '', unit.label), node('p', 'screen-hint', '可用儲值餘額'), node('strong', 'utility-balance-value', money(deposited - used)));
+    card.append(node('p', 'screen-hint', utilityEnabled(unit.id) ? '儲值功能已開啟' : '儲值功能已關閉；餘額與紀錄保留，可至設定重新開啟。'));
     const totals = node('div', 'utility-balance-totals');
     totals.append(node('span', '', '累計儲值 ' + money(deposited)), node('span', '', '已抵扣 ' + money(used)));
     card.append(totals); balances.append(card);
   });
+  const unitSelect = document.getElementById('utilityUnit');
+  if (unitSelect?.options) {
+    for (const option of unitSelect.options) option.disabled = !utilityEnabled(option.value);
+    if (!utilityEnabled(unitSelect.value)) unitSelect.value = appData.units.find(unit => utilityEnabled(unit.id))?.id || '';
+    unitSelect.disabled = !appData.units.some(unit => utilityEnabled(unit.id));
+  }
+  const saveButton = document.getElementById('saveUtilityDepositBtn');
+  if (saveButton) saveButton.disabled = !appData.units.some(unit => utilityEnabled(unit.id));
   const floor = document.getElementById('utilityFloorFilter')?.value || 'all';
   const type = document.getElementById('utilityTypeFilter')?.value || 'all';
   const rows = utilityLedgerRows(floor, type);
@@ -118,7 +138,7 @@ function renderUtilityDeposits() {
   const pending = document.getElementById('utilityPending');
   if (!pending) return;
   pending.replaceChildren();
-  const unpaid = appData.records.filter(row => (floor === 'all' || row.unitId === floor) &&
+  const unpaid = appData.records.filter(row => utilityEnabled(row.unitId) && (floor === 'all' || row.unitId === floor) &&
     Object.values(creditFees(row)).reduce((sum, fee) => sum + fee, 0) - (row.utilityCredit || 0) > 0)
     .slice().sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
   if (!unpaid.length) pending.append(node('p', 'screen-hint', '目前沒有尚未抵扣的帳單費用。'));

@@ -35,7 +35,8 @@ const BACKUP_COLUMNS = [
   ['瓦斯費抵扣', 'creditItems.gas', 'number'],
   ['管理費抵扣', 'creditItems.management', 'number'],
   ['雜費抵扣', 'creditItems.other', 'number'],
-  ['其他費用內容', 'otherDescription', 'text']
+  ['其他費用內容', 'otherDescription', 'text'],
+  ['儲值功能啟用', 'utilityEnabled', 'boolean']
 ];
 
 const BACKUP_CHECKSUM_COLUMN = '資料驗證ID';
@@ -170,6 +171,10 @@ function backupFromCsv(text) {
       let value = row[headers.indexOf(label)];
       if (value === '') continue;
       if (type !== 'number' && value.startsWith("'")) value = value.slice(1);
+      if (type === 'boolean') {
+        if (!['true', 'false'].includes(value)) throw new Error('儲值功能啟用必須為 true 或 false');
+        value = value === 'true';
+      }
       if (type === 'number' || type === 'id') {
         if (!/^-?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(value) || !Number.isFinite(Number(value))) throw new Error(`${label}必須是有效數字`);
         value = Number(value);
@@ -229,6 +234,7 @@ function validateBackup(data) {
   }
   for (const unit of data.units || []) {
     if (!unit || !validUnit(unit.id) || unitIds.has(unit.id) || !numeric(unit.rent) || !numeric(unit.persons)) throw new Error('房客設定格式錯誤或樓層重複');
+    if (unit.utilityEnabled !== undefined && typeof unit.utilityEnabled !== 'boolean') throw new Error('儲值功能開關格式錯誤');
     unitIds.add(unit.id);
     for (const key of ['label', 'bankName', 'branchName', 'bankCode', 'payeeName', 'accountNumber', 'tenantNote', 'landlordNote']) {
       if (unit[key] !== undefined && typeof unit[key] !== 'string') throw new Error(`${key}必須是文字`);

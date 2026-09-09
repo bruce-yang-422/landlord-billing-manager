@@ -155,7 +155,7 @@
                 <div class="preview-row"><span>管理費</span><span id="managementFee5F_card">$0</span></div>
                 <div class="preview-row"><span>其他費用</span><span id="otherFee5F_card">$0</span></div>
                 <p id="otherDescription5F_card" class="screen-hint fee-description" hidden></p>
-                <fieldset class="credit-choices"><legend>儲值抵扣項目</legend><label><input type="checkbox" id="5F_credit_electricity" checked onchange="updateBillTotals(); saveInputs()"><span>電費</span></label><label><input type="checkbox" id="5F_credit_water" checked onchange="updateBillTotals(); saveInputs()"><span>水費</span></label><label><input type="checkbox" id="5F_credit_gas" onchange="updateBillTotals(); saveInputs()"><span>瓦斯費</span></label><label><input type="checkbox" id="5F_credit_management" onchange="updateBillTotals(); saveInputs()"><span>管理費</span></label><label><input type="checkbox" id="5F_credit_other" onchange="updateBillTotals(); saveInputs()"><span>雜費／其他</span></label></fieldset>
+                <fieldset id="5F_creditChoices" class="credit-choices"><legend>儲值抵扣項目</legend><label><input type="checkbox" id="5F_credit_electricity" checked onchange="updateBillTotals(); saveInputs()"><span>電費</span></label><label><input type="checkbox" id="5F_credit_water" checked onchange="updateBillTotals(); saveInputs()"><span>水費</span></label><label><input type="checkbox" id="5F_credit_gas" onchange="updateBillTotals(); saveInputs()"><span>瓦斯費</span></label><label><input type="checkbox" id="5F_credit_management" onchange="updateBillTotals(); saveInputs()"><span>管理費</span></label><label><input type="checkbox" id="5F_credit_other" onchange="updateBillTotals(); saveInputs()"><span>雜費／其他</span></label></fieldset>
 <div class="bill-total-row"><span>儲值抵扣</span><span id="credit5F_card">—</span></div>
                 <div class="bill-total-row"><span>抵扣後水電費餘額</span><span id="balance5F_card">—</span></div>
                 <div class="bill-total-row"><strong>應收總額</strong><strong id="total5F_card">—</strong></div>
@@ -190,7 +190,7 @@
                 <div class="preview-row"><span>管理費</span><span id="managementFee6F_card">$0</span></div>
                 <div class="preview-row"><span>其他費用</span><span id="otherFee6F_card">$0</span></div>
                 <p id="otherDescription6F_card" class="screen-hint fee-description" hidden></p>
-                <fieldset class="credit-choices"><legend>儲值抵扣項目</legend><label><input type="checkbox" id="6F_credit_electricity" checked onchange="updateBillTotals(); saveInputs()"><span>電費</span></label><label><input type="checkbox" id="6F_credit_water" checked onchange="updateBillTotals(); saveInputs()"><span>水費</span></label><label><input type="checkbox" id="6F_credit_gas" onchange="updateBillTotals(); saveInputs()"><span>瓦斯費</span></label><label><input type="checkbox" id="6F_credit_management" onchange="updateBillTotals(); saveInputs()"><span>管理費</span></label><label><input type="checkbox" id="6F_credit_other" onchange="updateBillTotals(); saveInputs()"><span>雜費／其他</span></label></fieldset>
+                <fieldset id="6F_creditChoices" class="credit-choices"><legend>儲值抵扣項目</legend><label><input type="checkbox" id="6F_credit_electricity" checked onchange="updateBillTotals(); saveInputs()"><span>電費</span></label><label><input type="checkbox" id="6F_credit_water" checked onchange="updateBillTotals(); saveInputs()"><span>水費</span></label><label><input type="checkbox" id="6F_credit_gas" onchange="updateBillTotals(); saveInputs()"><span>瓦斯費</span></label><label><input type="checkbox" id="6F_credit_management" onchange="updateBillTotals(); saveInputs()"><span>管理費</span></label><label><input type="checkbox" id="6F_credit_other" onchange="updateBillTotals(); saveInputs()"><span>雜費／其他</span></label></fieldset>
 <div class="bill-total-row"><span>儲值抵扣</span><span id="credit6F_card">—</span></div>
                 <div class="bill-total-row"><span>抵扣後水電費餘額</span><span id="balance6F_card">—</span></div>
                 <div class="bill-total-row"><strong>應收總額</strong><strong id="total6F_card">—</strong></div>
@@ -301,7 +301,7 @@
             <div class="input-group"><label for="utilityAmount">儲值金額（元）</label><input id="utilityAmount" type="number" min="1" step="1" placeholder="例如 3000"></div>
             <div class="input-group"><label for="utilityNote">儲值備註</label><input id="utilityNote" type="text" placeholder="例如：水電費預付"></div>
         </div>
-        <button type="button" class="btn-save-bill btn-6F" onclick="saveUtilityDeposit()">登記水電費儲值</button>
+        <button type="button" id="saveUtilityDepositBtn" class="btn-save-bill btn-6F" onclick="saveUtilityDeposit()">登記水電費儲值</button>
     </section>
         <section class="entry-panel" aria-labelledby="utilityPendingTitle">
             <h3 id="utilityPendingTitle">待抵扣費用</h3>
@@ -377,6 +377,8 @@
                             <input type="number" id="5F_persons" value="1" min="1" placeholder="水費分攤人數">
                         </div>
                     </div>
+                    <label class="utility-enable-toggle" for="5F_utilityEnabled"><input type="checkbox" id="5F_utilityEnabled" checked aria-describedby="5F_utilityEnabledHint"><span>啟用儲值功能</span></label>
+                    <p id="5F_utilityEnabledHint" class="screen-hint">關閉後暫停新增儲值與抵扣，保留餘額及歷史紀錄。按「儲存房客設定」後生效。</p>
                     <div class="grid-row">
                         <div>
                             <label for="5F_bankName">銀行名稱</label>
@@ -434,6 +436,8 @@
                             <input type="number" id="6F_persons" value="1" min="1" placeholder="水費分攤人數">
                         </div>
                     </div>
+                    <label class="utility-enable-toggle" for="6F_utilityEnabled"><input type="checkbox" id="6F_utilityEnabled" checked aria-describedby="6F_utilityEnabledHint"><span>啟用儲值功能</span></label>
+                    <p id="6F_utilityEnabledHint" class="screen-hint">關閉後暫停新增儲值與抵扣，保留餘額及歷史紀錄。按「儲存房客設定」後生效。</p>
                     <div class="grid-row">
                         <div>
                             <label for="6F_bankName">銀行名稱</label>

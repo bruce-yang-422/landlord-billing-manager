@@ -19,6 +19,60 @@ function setup() {
 }
 const bill = ctx => ctx.buildRecord('6F', '2026-09-09', 500, 100, 300, { gas: 100, management: 50, other: 20 });
 
+test('settings checkbox takes effect only after saving and reloads persisted state', () => {
+  const h = setup(); h.ctx.navigateTo = () => {};
+  h.elements['5F_utilityEnabled'] = { checked: true };
+  h.elements['6F_utilityEnabled'] = { checked: true };
+  h.ctx.fillUnitSettingsForm();
+  h.elements['5F_utilityEnabled'].checked = false;
+  assert.equal(h.ctx.utilityEnabled('5F'), true);
+  h.ctx.saveUnitSettings();
+  assert.equal(h.ctx.utilityEnabled('5F'), false);
+  assert.equal(h.ctx.utilityEnabled('6F'), true);
+  h.elements['5F_utilityEnabled'].checked = true;
+  h.ctx.loadUnits(); h.ctx.fillUnitSettingsForm();
+  assert.equal(h.elements['5F_utilityEnabled'].checked, false);
+});
+
+test('settings write failure keeps existing switch values and pending form edits', () => {
+  const h = setup();
+  h.elements['5F_utilityEnabled'] = { checked: false };
+  h.ctx.localStorage.setItem = () => { throw new Error('quota'); };
+  h.ctx.saveUnitSettings();
+  assert.equal(h.ctx.utilityEnabled('5F'), true);
+  assert.equal(h.elements['5F_utilityEnabled'].checked, false);
+  assert.match(h.alerts.at(-1), /設定未儲存/);
+});
+
+test('per-unit switch blocks deposits and offsets, keeps history and resumes with the same balance', () => {
+  const h = setup(); h.ctx.saveUtilityDeposit(); h.ctx.addRecord(bill(h.ctx));
+  const beforeRecords = JSON.stringify(h.data().records);
+  h.ctx.setUtilityEnabled('6F', false);
+  assert.equal(h.ctx.utilityEnabled('6F'), false);
+  assert.equal(h.ctx.utilityEnabled('5F'), true);
+  assert.equal(h.ctx.utilityBalance('6F'), 2200);
+  h.elements.utilityAmount.value = '1000'; h.ctx.saveUtilityDeposit();
+  assert.equal(h.data().utilityDeposits.length, 1);
+  assert.equal(bill(h.ctx).utilityCredit, 0);
+  h.ctx.applyUtilityCreditToRecord(h.data().records[0].id, ['gas']);
+  assert.equal(JSON.stringify(h.data().records), beforeRecords);
+  const backup = h.ctx.backupFromCsv(h.ctx.backupToCsv(h.data()));
+  assert.equal(backup.units.find(unit => unit.id === '6F').utilityEnabled, false);
+  h.ctx.restoreBackup(backup);
+  assert.equal(h.ctx.utilityEnabled('6F'), false);
+  h.ctx.setUtilityEnabled('6F', true);
+  assert.equal(bill(h.ctx).utilityCredit, 800);
+  assert.equal(h.ctx.utilityBalance('6F'), 2200);
+});
+
+test('failed switch persistence leaves enabled state unchanged', () => {
+  const h = setup();
+  h.ctx.localStorage.setItem = () => { throw new Error('quota'); };
+  h.ctx.setUtilityEnabled('5F', false);
+  assert.equal(h.ctx.utilityEnabled('5F'), true);
+  assert.match(h.alerts.at(-1), /開關未儲存/);
+});
+
 test('selected gas and miscellaneous credit excludes water, electricity and rent', () => {
   const h = setup(); h.ctx.saveUtilityDeposit();
   const record = h.ctx.buildRecord('6F', '2026-09-09', 500, 100, 300, { gas: 100, management: 50, other: 20 }, ['gas', 'other']);
