@@ -221,6 +221,9 @@ function generateReport(record) {
     r += `本戶用電：${myUsage} 度（佔 ${((myUsage/s.totalUnits)*100).toFixed(1)}%）\n`;
     r += `本戶電費：$${record.electricity.fee.toLocaleString()}\n\n`;
   }
+  if (record.unitId === '6F' && record.electricity?.prevReading != null && record.electricity?.currReading != null) {
+    r += `上期電表讀數：${record.electricity.prevReading} 度\n本期電表讀數：${record.electricity.currReading} 度\n\n`;
+  }
 
   r += `💰 應繳金額\n`;
   if (record.rent > 0)           r += `房租：$${record.rent.toLocaleString()}\n`;
@@ -256,6 +259,9 @@ function generateReport(record) {
   const reportText = document.getElementById('reportText');
   const reportSection = document.getElementById('reportSection');
   if (reportText) reportText.textContent = r;
+  const summary = document.getElementById('reportSummary');
+  if (summary && typeof buildShortReport === 'function') summary.textContent = buildShortReport(record, unit);
+  if (typeof renderBillImage === 'function') renderBillImage(record, unit, r);
   if (reportSection) {
     reportSection.style.display = 'block';
     navigateTo('backup');
@@ -264,7 +270,7 @@ function generateReport(record) {
 }
 
 function copyReport() {
-  const text = document.getElementById('reportText')?.textContent;
+  const text = document.getElementById('reportSummary')?.textContent;
   if (!text) { alert('❌ 找不到報表內容'); return; }
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text)
@@ -403,7 +409,7 @@ function renderHistory() {
     details.append(list);
     card.append(details);
     const actions = node('div', 'bill-note-actions');
-    const view = node('button', 'view-record', '查看／複製報表');
+    const view = node('button', 'view-record', '圖文帳單');
     view.type = 'button';
     view.addEventListener('click', () => viewRecord(record.id));
     const remove = node('button', 'delete-record', '刪除');

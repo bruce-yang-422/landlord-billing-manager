@@ -19,6 +19,7 @@
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/flat.css">
+    <link rel="stylesheet" href="css/workspace.css">
 </head>
 <body>
 <div class="container">
@@ -44,6 +45,8 @@
 
     <p id="pwaStatus" class="pwa-status" role="status" aria-live="polite"></p>
 
+    <aside class="tool-sidebar" aria-label="工具欄">
+    <p class="sidebar-label">帳務工作台</p>
     <nav class="app-nav" aria-label="主要功能">
         <button type="button" data-nav="calculate" onclick="navigateTo('calculate')"><span aria-hidden="true">▦</span>計算帳單</button>
         <button type="button" data-nav="input" onclick="navigateTo('input')"><span aria-hidden="true">✎</span>資料輸入</button>
@@ -51,7 +54,14 @@
         <button type="button" data-nav="utility" onclick="navigateTo('utility')"><span aria-hidden="true">▣</span>房客儲值</button>
         <button type="button" data-nav="settings" onclick="navigateTo('settings')"><span aria-hidden="true">⚙</span>設定</button>
     </nav>
-    <main>
+    <div class="sidebar-guide">
+        <p class="sidebar-label">每月作業</p>
+        <ol><li>登記抄表與費用</li><li>確認分攤與應收</li><li>存檔並傳送帳單</li></ol>
+        <button class="sidebar-backup" type="button" onclick="exportData()">↓ 匯出備份</button>
+        <p>資料保存在此瀏覽器<br>建議完成帳務後備份</p>
+    </div>
+    </aside>
+    <main id="workspaceMain">
     <section data-screen="calculate" aria-labelledby="calculateTitle">
         <div class="screen-heading"><span class="section-eyebrow">每月應收帳單</span><h2 id="calculateTitle" tabindex="-1">計算帳單</h2><p class="screen-hint">確認租金、水費、瓦斯與其他費用；台電結算月再加入電費。</p></div>
 <section id="billingEntry" class="entry-panel">
@@ -347,9 +357,23 @@
     </div>
     <!-- LINE 報表 -->
     <div id="reportSection" style="display:none;" class="fee-section">
-        <h3>📋 LINE 報表</h3>
-        <div id="reportText" class="report-area"></div>
-        <button class="copy-btn" onclick="copyReport()">📋 複製報表</button>
+        <h3>📋 LINE 圖文帳單</h3>
+        <p class="screen-hint">複製精簡文字，再下載完整帳單圖片，一起傳給租客。</p>
+        <div class="tenant-report-grid">
+            <section class="tenant-report-text" aria-labelledby="reportSummaryTitle">
+                <h4 id="reportSummaryTitle">1. 精簡文字</h4>
+                <div id="reportSummary" class="report-area"></div>
+                <button type="button" class="copy-btn" onclick="copyReport()">📋 複製精簡文字</button>
+            </section>
+            <section class="tenant-report-image" aria-labelledby="reportImageTitle">
+                <h4 id="reportImageTitle">2. 完整帳單圖片</h4>
+                <p class="screen-hint">包含費用明細、電費分攤、匯款資訊與租客備註。</p>
+                <img id="reportImage" class="bill-image-preview" alt="完整租客帳單預覽" hidden>
+                <p id="reportImageStatus" class="screen-hint" role="status"></p>
+                <button id="downloadBillImageBtn" type="button" class="copy-btn" onclick="downloadBillImage()" disabled>↓ 下載帳單圖片 PNG</button>
+            </section>
+        </div>
+        <div id="reportText" hidden></div>
     </div>
 
         </div>
@@ -498,6 +522,26 @@
 </section>
 </main>
 
+<aside class="status-sidebar" aria-labelledby="workspaceStatusTitle">
+    <div class="status-heading"><h2 id="workspaceStatusTitle">工作狀態</h2><span class="status-badge">即時預覽</span></div>
+    <section class="status-summary" aria-labelledby="summaryTitle">
+        <h3 id="summaryTitle">當期帳單</h3>
+        <p id="workspaceBillDate" class="status-date">尚未選擇日期</p>
+        <p class="status-caption">兩戶應收合計</p>
+        <strong id="workspaceTotal" class="status-total">—</strong>
+        <p class="status-caption">試算金額，存檔後列入歷史帳單</p>
+        <dl class="status-list"><div><dt class="unit-5F-text">5F</dt><dd id="workspaceTotal5F">—</dd></div><div><dt class="unit-6F-text">6F</dt><dd id="workspaceTotal6F">—</dd></div></dl>
+        <p id="workspaceDraftHint" class="status-message"></p>
+        <button class="status-link" type="button" onclick="navigateTo('calculate')">前往確認帳單 →</button>
+    </section>
+    <section class="status-details" aria-labelledby="dataStatusTitle">
+        <h3 id="dataStatusTitle">資料概況</h3>
+        <dl class="status-list"><div><dt>歷史帳單</dt><dd id="workspaceRecordCount">0 筆</dd></div><div><dt>最近抄表</dt><dd id="workspaceLatestMeter">尚無紀錄</dd></div><div><dt>本次電費</dt><dd id="workspaceElectricity">收取</dd></div></dl>
+        <button class="status-link" type="button" onclick="navigateTo('input')">登記抄表與費用 →</button>
+    </section>
+    <div class="status-footnote"><span class="local-status-dot" aria-hidden="true"></span> 本機資料 · 請定期匯出備份</div>
+</aside>
+
 </div>
 
 <!-- PWA 安裝提示 -->
@@ -541,10 +585,12 @@
 <script src="js/storage.js"></script>
 <script src="js/utility.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/report.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/pwa-install.js"></script>
 <script src="js/meter.js"></script>
 <script src="js/navigation.js"></script>
+<script src="js/workspace.js"></script>
 <script src="js/app.js"></script>
 
 <script src="js/pwa.js"></script>
