@@ -48,8 +48,8 @@
     <aside class="tool-sidebar" aria-label="工具欄">
     <p class="sidebar-label">帳務工作台</p>
     <nav class="app-nav" aria-label="主要功能">
-        <button type="button" data-nav="calculate" onclick="navigateTo('calculate')"><span aria-hidden="true">▦</span>計算帳單</button>
         <button type="button" data-nav="input" onclick="navigateTo('input')"><span aria-hidden="true">✎</span>資料輸入</button>
+        <button type="button" data-nav="calculate" onclick="navigateTo('calculate')"><span aria-hidden="true">▦</span>計算帳單</button>
         <button type="button" data-nav="backup" onclick="navigateTo('backup')"><span aria-hidden="true">▤</span>歷史資料</button>
         <button type="button" data-nav="utility" onclick="navigateTo('utility')"><span aria-hidden="true">▣</span>房客儲值</button>
         <button type="button" data-nav="settings" onclick="navigateTo('settings')"><span aria-hidden="true">⚙</span>設定</button>
@@ -240,7 +240,12 @@
     </section>
 <div id="utilityInputs"><h3 class="utility-title">水費、瓦斯與其他費用</h3><p class="screen-hint">填入本次要收取的金額，會自動記憶並帶入帳單。未收費項目填 0。</p>    <!-- 水費（共用） -->
     <div class="fee-section">
-        <div class="section-title">💧 水費（按人數分攤）</div>
+        <div class="section-title">💧 水費（按人數與入住天數分攤）</div>
+        <div class="grid-row">
+            <div><label for="waterStartDate">上次水表抄表日</label><input type="date" id="waterStartDate"></div>
+            <div><label for="waterEndDate">本次水表抄表日</label><input type="date" id="waterEndDate"></div>
+        </div>
+        <p class="screen-hint">依兩次抄表相隔天數計算；入住日及人數請至「設定」填寫。入住前費用由房東負擔，未填入住日視為整期入住。</p>
         <div class="grid-row">
             <div>
                 <label for="totalWater">💧 本期水費總額（元）</label>
@@ -256,7 +261,9 @@
                 <span class="split-label unit-6F-text">6F 水費</span>
                 <span id="waterFee6F" class="split-value split-amount">—</span>
             </div>
+            <div class="split-preview-row"><span class="split-label">房東負擔</span><span id="waterOwnerFee" class="split-value split-amount">—</span></div>
         </div>
+        <p id="waterPeriodHint" class="screen-hint" aria-live="polite"></p>
         <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
             分攤人數請至底部「設定」修改
         </div>
@@ -298,7 +305,7 @@
                     <input type="text" id="6F_otherDescription" placeholder="例如：更換門鎖、清潔費" oninput="updateBillTotals(); saveInputs()">
                 </div>
             </div>
-</div></div><button class="btn-save-bill btn-5F" type="button" onclick="navigateTo('calculate')">查看本次應收金額 →</button></div>
+</div></div><button class="btn-save-bill btn-5F" type="button" onclick="saveFeeInputs()">儲存費用</button><p id="feeSaveStatus" class="screen-hint" role="status" aria-live="polite"></p><button class="btn-save-bill btn-5F" type="button" onclick="navigateTo('calculate')">查看本次應收金額 →</button></div>
         <div class="meter-history"><h3>6F 抄表紀錄</h3><div id="meterHistoryList"></div></div>
     </section>
     <section data-screen="utility" hidden aria-labelledby="utilityPageTitle">
@@ -395,6 +402,7 @@
                 </div>
                 <!-- 基本資料 -->
                 <div id="5F_tab_basic" class="settings-tab-panel">
+                    <div><label for="5F_moveInDate">入住日期（水費入住前由房東負擔）</label><input type="date" id="5F_moveInDate"></div>
                     <div class="grid-row">
                         <div>
                             <label>租金（元）</label>
@@ -454,6 +462,7 @@
                 </div>
                 <!-- 基本資料 -->
                 <div id="6F_tab_basic" class="settings-tab-panel">
+                    <div><label for="6F_moveInDate">入住日期（水費入住前由房東負擔）</label><input type="date" id="6F_moveInDate"></div>
                     <div class="grid-row">
                         <div>
                             <label>租金（元）</label>

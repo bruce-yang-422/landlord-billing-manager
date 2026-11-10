@@ -36,7 +36,10 @@ const BACKUP_COLUMNS = [
   ['管理費抵扣', 'creditItems.management', 'number'],
   ['雜費抵扣', 'creditItems.other', 'number'],
   ['其他費用內容', 'otherDescription', 'text'],
-  ['儲值功能啟用', 'utilityEnabled', 'boolean']
+  ['儲值功能啟用', 'utilityEnabled', 'boolean'],
+  ['入住日期', 'moveInDate', 'text'],
+  ['水費上次抄表日', 'waterPeriodStart', 'text'],
+  ['水費本次抄表日', 'waterPeriodEnd', 'text']
 ];
 
 const BACKUP_CHECKSUM_COLUMN = '資料驗證ID';
@@ -190,7 +193,7 @@ function backupFromCsv(text) {
       object.id = object.unitId;
       delete object.unitId;
       for (const [, key, type] of BACKUP_COLUMNS) {
-        if (type === 'text' && !key.includes('.') && !['kind', 'unitId', 'date', 'currentNote', 'bankName', 'branchName', 'note', 'otherDescription'].includes(key)) object[key] ??= '';
+        if (type === 'text' && !key.includes('.') && !['kind', 'unitId', 'date', 'currentNote', 'bankName', 'branchName', 'note', 'otherDescription', 'moveInDate', 'waterPeriodStart', 'waterPeriodEnd'].includes(key)) object[key] ??= '';
       }
       data.units.push(object);
     } else if (kind === '帳單') data.records.push(object);
@@ -209,6 +212,7 @@ function validateBackup(data) {
   if (!data || !Array.isArray(data.records) || (data.units !== undefined && !Array.isArray(data.units))) throw new Error('備份格式錯誤');
   const validUnit = id => ['5F', '6F'].includes(id);
   const numeric = value => typeof value === 'number' && Number.isFinite(value);
+  const optionalDate = value => value === undefined || value === '' || (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value);
   if (data.utilityDeposits !== undefined) {
     if (!Array.isArray(data.utilityDeposits)) throw new Error('儲值備份格式錯誤');
     const ids = new Set();
@@ -236,11 +240,13 @@ function validateBackup(data) {
     if (!unit || !validUnit(unit.id) || unitIds.has(unit.id) || !numeric(unit.rent) || !numeric(unit.persons)) throw new Error('房客設定格式錯誤或樓層重複');
     if (unit.utilityEnabled !== undefined && typeof unit.utilityEnabled !== 'boolean') throw new Error('儲值功能開關格式錯誤');
     unitIds.add(unit.id);
+    if (!optionalDate(unit.moveInDate)) throw new Error('入住日期格式錯誤');
     for (const key of ['label', 'bankName', 'branchName', 'bankCode', 'payeeName', 'accountNumber', 'tenantNote', 'landlordNote']) {
       if (unit[key] !== undefined && typeof unit[key] !== 'string') throw new Error(`${key}必須是文字`);
     }
   }
   for (const record of data.records) {
+    if (!optionalDate(record.waterPeriodStart) || !optionalDate(record.waterPeriodEnd) || (record.waterPeriodStart && record.waterPeriodEnd && record.waterPeriodStart >= record.waterPeriodEnd)) throw new Error('水費抄表期間格式錯誤');
     if (!record || !validUnit(record.unitId) || !/^\d+(?:\.\d+)?$/.test(String(record.id)) || recordIds.has(String(record.id)) ||
         typeof record.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(record.date) ||
         !['rent', 'waterFee', 'gasFee', 'managementFee', 'otherFee', 'total', 'electricity.fee', 'electricity.usage'].every(key => numeric(backupValue(record, key)))) throw new Error('帳單格式錯誤、必要欄位缺漏或編號重複');

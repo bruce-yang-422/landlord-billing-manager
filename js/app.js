@@ -39,10 +39,9 @@ window.onload = function () {
     if (el) el.addEventListener('change', () => { updateElectricityPreview(); saveInputs(); });
   });
 
-  const waterInputEl = document.getElementById('totalWater');
-  if (waterInputEl) {
-    waterInputEl.addEventListener('input', () => { updateWaterPreview(); saveInputs(); });
-  }
+  ['totalWater', 'waterStartDate', 'waterEndDate'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', () => { updateWaterPreview(); saveInputs(); });
+  });
 
   // 各戶額外費用自動儲存
   const extraIds = ['5F_gas', '5F_management', '5F_other', '6F_gas', '6F_management', '6F_other'];

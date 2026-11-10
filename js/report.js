@@ -27,45 +27,50 @@ function renderBillImage(record, unit, fullText) {
   preview.removeAttribute('src');
   status.textContent = '';
   try {
-    const width = 1000, padding = 64, contentWidth = width - padding * 2;
+    const width = 1000, height = 3508 / 2.48, padding = 64, contentWidth = width - padding * 2;
     const canvas = document.createElement('canvas');
+    canvas.width = 2480;
+    canvas.height = 3508;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('無法建立圖片');
     const font = '"Microsoft JhengHei", "PingFang TC", sans-serif';
-    const commands = [];
-    let y = 300;
+    let commands = [];
+    let y = 290;
     const addText = (text, size = 26, color = '#33465f', bold = false) => {
       ctx.font = `${bold ? '600 ' : ''}${size}px ${font}`;
       let line = '';
-      const emit = () => { commands.push({ text: line, y, size, color, bold }); y += size * 1.65; };
+      const emit = () => { commands.push({ text: line, y, size, color, bold }); y += size * 1.3; };
       for (const character of Array.from(text)) {
         if (ctx.measureText(line + character).width > contentWidth && line) { emit(); line = ''; }
         line += character;
       }
       if (line) emit();
     };
-    // 日期與總額集中在圖首；其餘完整內容依原始順序排列，長備註自動換行。
+    // 固定 A4 版面，先重新換行再縮小字級，不裁切、不拉長圖片。
     const lines = fullText.split('\n').slice(1);
-    for (const raw of lines) {
-      const line = raw.replace(/^(?:⚡|💰|🏦|📝) /u, '').trim();
-      if (!line) { y += 14; continue; }
-      if (/^─+$/.test(line)) {
-        commands.push({ rule: true, y });
-        y += 20;
-        continue;
+    for (const scale of [1, 0.92, 0.84, 0.76, 0.68, 0.62]) {
+      commands = [];
+      y = 290;
+      for (const raw of lines) {
+        const line = raw.replace(/^(?:⚡|💰|🏦|📝) /u, '').trim();
+        if (!line) { y += 10 * scale; continue; }
+        if (/^─+$/.test(line)) {
+          commands.push({ rule: true, y });
+          y += 8 * scale;
+          continue;
+        }
+        const heading = ['電費計算（累進分攤）', '應繳金額', '匯款資訊', '固定備註', '當期備註'].includes(line) || /^【.+】$/.test(line);
+        if (heading) {
+          y += 12 * scale;
+          commands.push({ rule: true, y });
+          y += 12 * scale;
+        }
+        addText(line, (heading ? 28 : 26) * scale, heading ? '#0735ad' : '#33465f', heading);
       }
-      const heading = ['電費計算（累進分攤）', '應繳金額', '匯款資訊', '固定備註', '當期備註'].includes(line);
-      if (heading) {
-        y += 20;
-        commands.push({ rule: true, y });
-        y += 22;
-      }
-      addText(line, heading ? 28 : 26, heading ? '#0735ad' : '#33465f', heading);
+      if (y <= height - 90) break;
     }
-    const height = Math.ceil(y + 80);
-    if (height > 30000) throw new Error('帳單內容過長，請縮短備註後重試');
-    canvas.width = width;
-    canvas.height = height;
+    if (y > height - 90) throw new Error('內容超過一頁 A4，請縮短備註後重試');
+    ctx.scale(2.48, 2.48);
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = '#0735ad'; ctx.fillRect(0, 0, width, 12);
     ctx.textBaseline = 'top';
@@ -96,7 +101,7 @@ function renderBillImage(record, unit, fullText) {
     preview.hidden = false;
     billImageDownload = { canvas, filename: `帳單_${record.unitId}_${record.date}.png` };
     button.disabled = false;
-    status.textContent = '圖片已備妥，可下載後與精簡文字一起傳送。';
+    status.textContent = 'A4 直式圖片已備妥（2480 × 3508 像素），可下載後與精簡文字一起傳送。';
   } catch (error) {
     status.textContent = `圖片未產生：${error.message}。仍可複製精簡文字。`;
   }

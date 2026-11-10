@@ -22,8 +22,13 @@ function alignMeterPeriod(first, last, from, to) {
 }
 
 function meterAlignmentNote(first, last, from, to, result) {
-  const n = value => Number(value.toFixed(6));
-  return `台電計費 ${from}～${to}（含迄日，共 ${result.billingDays} 天；結束邊界 ${result.endBoundary}）。實際抄表 ${first.date}：${first.reading} 度 → ${last.date}：${last.reading} 度，${result.actualDays} 天用電 ${n(result.actualUsage)} 度。日均 ${n(result.dailyUsage)} 度；${result.estimated ? '按日均估算對齊' : '實際讀數對齊'}：${from} 約 ${n(result.alignedStart)} 度、${result.endBoundary} 約 ${n(result.alignedEnd)} 度，6F 本期${result.estimated ? '估計' : ''}用電 ${n(result.usage)} 度。${result.estimated ? '估算假設每日平均用電相同，實際用電可能不同。' : ''}`;
+  const n = value => Number(value.toFixed(2)).toLocaleString('zh-TW');
+  return ['【電費估算】', `帳期：${from}～${to}，含迄日共 ${result.billingDays} 天`,
+    `實際抄表：${first.date}／${n(first.reading)} 度`, `實際抄表：${last.date}／${n(last.reading)} 度`,
+    `相隔 ${result.actualDays} 天，用電 ${n(result.actualUsage)} 度`,
+    `日均用電：${n(result.actualUsage)} ÷ ${result.actualDays} ≈ ${n(result.dailyUsage)} 度`,
+    `6F 本期用電：${n(result.actualUsage)} ÷ ${result.actualDays} × ${result.billingDays} ≈ ${n(result.usage)} 度`,
+    result.estimated ? '按每日平均用電估算；計算保留完整精度。' : '抄表日期已與計費邊界對齊。'].join('\n');
 }
 
 // 住宅夏月為 6/1～9/30，起訖日皆計入；跨年也逐年取交集。
@@ -43,7 +48,8 @@ function billingSeasonDays(from, to) {
 }
 
 function billingSeasonNote(period) {
-  return `費率按帳期天數加權：夏月 ${period.summerDays}/${period.totalDays}、非夏月 ${period.otherDays}/${period.totalDays}。各戶先計算兩個月累進理論電費並依天數加權，再按用電比例分攤與台電帳單的差額。`;
+  return ['【跨季費率】', `夏月 ${period.summerDays}/${period.totalDays}、非夏月 ${period.otherDays}/${period.totalDays}`,
+    '兩季累進電費按天數加權，再按用電比例分攤帳單差額。'].join('\n');
 }
 
 // 計算單戶理論電費；跨季依帳單公式，對同一度數的兩季費用加權。
@@ -102,7 +108,37 @@ function calcProgressiveSplit(totalBill, totalUnits, unit6Reading, season) {
   return { fee5, fee6, e5, e6, c5Theory, c6Theory, deltaC, ratio5, ratio6, rows5, rows6 };
 }
 
-// 水費按人數分攤
+function calcWaterSettlement(totalWater, units, from, to) {
+  if (!Number.isFinite(totalWater) || totalWater < 0) throw new Error('水費請填入有效的非負金額。');
+  if (totalWater === 0) return { fees: Object.fromEntries(units.map(u => [u.id, 0])), owner: 0, note: '' };
+  const valid = value => /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
+  if (!valid(from) || !valid(to) || from >= to) throw new Error('請填寫水費的上次及本次抄表日，本次須晚於上次。');
+  if (!units.length || units.some(u => !Number.isFinite(u.persons) || u.persons <= 0 || (u.moveInDate && !valid(u.moveInDate)))) throw new Error('請至設定確認居住人數與入住日期。');
+  const days = (Date.parse(to) - Date.parse(from)) / 86400000;
+  const persons = units.reduce((sum, u) => sum + u.persons, 0);
+  const parts = units.map(u => {
+    const occupiedDays = Math.max(0, (Date.parse(to) - Math.max(Date.parse(from), Date.parse(u.moveInDate || from))) / 86400000);
+    const raw = totalWater * u.persons * occupiedDays / (persons * days);
+    return { id: u.id, persons: u.persons, occupiedDays, raw, fee: Math.round(raw), moveInDate: u.moveInDate };
+  });
+  const budget = Math.round(totalWater);
+  // 四捨五入不得造成負的房東分攤；優先調整進位最多的戶別。
+  let excess = parts.reduce((sum, p) => sum + p.fee, 0) - budget;
+  for (const p of [...parts].sort((a, b) => (b.fee - b.raw) - (a.fee - a.raw) || b.id.localeCompare(a.id))) {
+    if (excess <= 0) break;
+    const adjustment = Math.min(excess, p.fee);
+    p.fee -= adjustment; excess -= adjustment;
+  }
+  const owner = budget - parts.reduce((sum, p) => sum + p.fee, 0);
+  const note = ['【水費分攤】', `抄表期間：${from}～${to}，相隔 ${days} 天`,
+    `水費總額：${totalWater.toLocaleString('zh-TW')} 元／共 ${persons} 人`,
+    ...parts.flatMap(p => [`${p.id}：${p.persons} 人，${p.moveInDate ? p.moveInDate + ' 入住' : '未填入住日，按整期'}，計 ${p.occupiedDays} 天`,
+      `${totalWater} × ${p.persons} × ${p.occupiedDays} ÷ (${persons} × ${days}) ≈ ${p.fee.toLocaleString('zh-TW')} 元`]),
+    `房東負擔：${owner.toLocaleString('zh-TW')} 元（入住前費用及尾差）`].join('\n');
+  return { fees: Object.fromEntries(parts.map(p => [p.id, p.fee])), owner, days, parts, note };
+}
+
+// 舊帳單及相容用途：水費按人數分攤。
 // 回傳 { [unitId]: amount }
 function calcWaterSplit(totalWater, units) {
   const totalPersons = units.reduce((sum, u) => sum + (u.persons || 1), 0);

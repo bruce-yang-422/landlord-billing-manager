@@ -57,6 +57,7 @@ function saveUnitSettings() {
       utilityEnabled: document.getElementById(`${unit.id}_utilityEnabled`)?.checked ?? (unit.utilityEnabled !== false),
       rent:          getNum('rent'),
       persons:       getNum('persons'),
+      moveInDate:    get('moveInDate'),
       bankName:      get('bankName'),
       branchName:    get('branchName'),
       bankCode:      get('bankCode'),
@@ -66,7 +67,10 @@ function saveUnitSettings() {
       landlordNote:  get('landlordNote'),
     };
   });
-  try { localStorage.setItem('landlord_units', JSON.stringify(units)); }
+  try {
+    for (const unit of units) if (unit.moveInDate && (!/^\d{4}-\d{2}-\d{2}$/.test(unit.moveInDate) || !Number.isFinite(Date.parse(unit.moveInDate)) || new Date(unit.moveInDate).toISOString().slice(0, 10) !== unit.moveInDate)) throw new Error('請填寫有效的入住日期。');
+    localStorage.setItem('landlord_units', JSON.stringify(units));
+  }
   catch (error) { alert('設定未儲存：' + error.message); return; }
   appData.units = units;
   if (typeof renderUtilityDeposits === 'function') renderUtilityDeposits();
@@ -87,6 +91,7 @@ function fillUnitSettingsForm() {
     if (toggle) toggle.checked = unit.utilityEnabled !== false;
     set('rent',          unit.rent);
     set('persons',       unit.persons);
+    set('moveInDate',    unit.moveInDate);
     set('bankName',      unit.bankName);
     set('branchName',    unit.branchName);
     set('bankCode',      unit.bankCode);

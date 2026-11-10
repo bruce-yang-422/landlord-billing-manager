@@ -156,7 +156,7 @@ test('irregular readings use closest dates on either side, with earlier ties', (
   assert.equal(elements.get('billingStartReading').value, '2026-07-06');
   assert.equal(elements.get('billingEndReading').value, '2026-09-03');
   assert.equal(elements.get('reading6Curr').value - elements.get('reading6Prev').value, 300);
-  assert.match(elements.get('billingPeriodHint').textContent, /按日均估算對齊/);
+  assert.match(elements.get('billingPeriodHint').textContent, /按每日平均用電估算/);
   elements.get('billingStartReading').value = '2026-07-10';
   ctx.refreshBillingReadings();
   assert.equal(elements.get('reading6Prev').value, 1020);
@@ -195,7 +195,7 @@ test('late November photos show aligned period and retain actual readings', () =
   assert.equal(elements.get('reading6Curr').value, 11763.2);
   const hint = elements.get('billingPeriodHint').textContent;
   assert.match(hint, /62 天/);
-  assert.match(hint, /67 天用電 384.8/);
-  assert.match(hint, /356.083582/);
-  assert.match(hint, /結束邊界 2026-11-04/);
+  assert.match(hint, /67 天，用電 384.8/);
+  assert.match(hint, /356.08/);
+  assert.doesNotMatch(hint, /356.083582/);
 });

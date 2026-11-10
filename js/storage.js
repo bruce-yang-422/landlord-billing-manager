@@ -69,6 +69,8 @@ function saveInputs() {
       reading6Prev:    get('reading6Prev'),
       reading6Curr:    get('reading6Curr'),
       totalWater:      get('totalWater'),
+      waterStartDate:  get('waterStartDate'),
+      waterEndDate:    get('waterEndDate'),
       gas5F:           get('5F_gas'),
       management5F:    get('5F_management'),
       otherDescription5F: get('5F_otherDescription'),
@@ -79,8 +81,30 @@ function saveInputs() {
       other6F:         get('6F_other'),
     };
     localStorage.setItem(INPUT_KEY, JSON.stringify(inputs));
+    const status = document.getElementById('feeSaveStatus');
+    if (status) status.textContent = '輸入內容已自動記憶；可按「儲存費用」確認後前往計算帳單。';
+    return true;
   } catch (e) {
     console.error('儲存輸入值失敗:', e);
+    const status = document.getElementById('feeSaveStatus');
+    if (status) status.textContent = '輸入尚未儲存：' + e.message;
+    return false;
+  }
+}
+
+function saveFeeInputs() {
+  const status = document.getElementById('feeSaveStatus');
+  try {
+    currentWaterSettlement();
+    for (const unit of ['5F', '6F']) for (const field of ['gas', 'management', 'other']) {
+      const amount = Number(document.getElementById(`${unit}_${field}`)?.value || 0);
+      if (!Number.isFinite(amount) || amount < 0) throw new Error('瓦斯、管理費及其他費用須為有效的非負金額。');
+    }
+    if (!saveInputs()) return;
+    updateWaterPreview();
+    if (status) status.textContent = '費用已儲存，可前往計算帳單。正式存檔帳單時才會扣除儲值。';
+  } catch (error) {
+    if (status) status.textContent = '費用未儲存：' + error.message;
   }
 }
 
@@ -116,6 +140,8 @@ function loadInputs() {
     set('reading6Prev',  inputs.reading6Prev);
     set('reading6Curr',  inputs.reading6Curr);
     set('totalWater',    inputs.totalWater);
+    set('waterStartDate', inputs.waterStartDate);
+    set('waterEndDate', inputs.waterEndDate);
     set('5F_gas',        inputs.gas5F);
     set('5F_management', inputs.management5F);
     set('5F_other',      inputs.other5F);

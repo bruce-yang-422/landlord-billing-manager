@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 function setup(includeElectricity) {
-  const values = { taipowerStartDate: '2026-07-06', taipowerEndDate: '2026-09-06', billDate: '2026-09-08', totalWater: '600', '5F_gas': '250', '6F_gas': '400',
+  const values = { waterStartDate: '2026-07-01', waterEndDate: '2026-09-01', taipowerStartDate: '2026-07-06', taipowerEndDate: '2026-09-06', billDate: '2026-09-08', totalWater: '600', '5F_gas': '250', '6F_gas': '400',
     '5F_management': '100', '6F_management': '50', '5F_other': '20', '6F_other': '30',
     taipowerBill: '1500', taipowerUnits: '600', reading6Prev: '1000', reading6Curr: '1300',
     season: 'summer', billingStartReading: '2026-07-08', billingEndReading: '2026-09-08' };
@@ -164,8 +164,8 @@ test('late photos align preview, saved usage, credits and CSV to the inclusive b
   assert.equal(record.electricity.usage, draft.split.e6);
   assert.equal(record.electricity.prevReading, 11378.4);
   assert.equal(record.electricity.currReading, 11763.2);
-  assert.match(record.currentNote, /租客延後拍照\n台電計費/);
-  assert.match(record.currentNote, /62 天.*2026-11-04/);
+  assert.match(record.currentNote, /租客延後拍照\n/);
+  assert.match(record.currentNote, /含迄日共 62 天/);
   assert.match(record.currentNote, /夏月 28\/62、非夏月 34\/62/);
   assert.equal(record.electricity.season, 'mixed');
   assert.equal(record.utilityCredit, record.electricity.fee + record.waterFee);
@@ -184,7 +184,7 @@ test('per-bill notes are separate per unit, cleared only after successful save, 
   h.ctx.testUnits[0].landlordNote = '私人租約備忘';
   h.ctx.saveBill('5F');
   const record = h.records[0];
-  assert.equal(record.currentNote, '本期維修, "門鎖"\n=測試文字');
+  assert.ok(record.currentNote.startsWith('本期維修, "門鎖"\n=測試文字\n'));
   assert.equal(record.tenantNote, '每月 5 日前繳款');
   assert.equal(h.elements['5F_currentNote'].value, '');
   assert.equal(h.elements['6F_currentNote'].value, '本期補收瓦斯');
@@ -217,4 +217,27 @@ test('bank names survive CSV and appear with bank code in tenant reports', () =>
   h.ctx.testUnits[0].bankCode = '';
   h.generateReport(h.records[0]);
   assert.match(h.elements.reportText.textContent, /銀行名稱：第一銀行\n分行名稱：台北分行\n戶名：測試房東\n帳號：00123456/);
+});
+
+test('water move-in proration agrees across preview, bill, credits and backup', () => {
+  const h = setup(false);
+  Object.assign(h.ctx.testUnits[0], { persons: 5, moveInDate: '2026-08-26' });
+  Object.assign(h.ctx.testUnits[1], { persons: 1, moveInDate: '2026-08-02' });
+  Object.assign(h.elements, { totalWater: { value: '424' }, waterStartDate: { value: '2026-08-01' }, waterEndDate: { value: '2026-10-01' }, waterOwnerFee: {}, waterPeriodHint: {}, waterFee5F: {}, waterFee6F: {} });
+  vm.runInContext('appData.utilityDeposits = [{id: 1, unitId: "6F", date: "2026-08-27", amount: 2602}]', h.ctx);
+  h.ctx.updateWaterPreview();
+  assert.equal(h.elements.waterFee5F.textContent, '$209');
+  assert.equal(h.elements.waterFee6F.textContent, '$70');
+  assert.equal(h.elements.waterOwnerFee.textContent, '$145');
+  h.ctx.saveBill('6F');
+  const r = h.records[0];
+  assert.equal(r.waterFee, 70);
+  assert.equal(r.utilityCredit, 70);
+  assert.equal(r.utilityBalanceAfter, 2532);
+  assert.equal(r.waterPeriodStart, '2026-08-01');
+  assert.match(r.currentNote, /房東負擔：145/);
+  const data = { units: h.ctx.testUnits, records: [r] };
+  const restored = h.ctx.backupFromCsv(h.ctx.backupToCsv(data));
+  assert.equal(restored.units[0].moveInDate, '2026-08-26');
+  assert.equal(restored.records[0].waterPeriodEnd, '2026-10-01');
 });

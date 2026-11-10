@@ -55,24 +55,24 @@ function updateElectricityPreview() {
 
 // ── 即時水費預覽 ───────────────────────────────────────────
 
+function currentWaterSettlement() {
+  return calcWaterSettlement(Number(document.getElementById('totalWater')?.value || 0), appData.units,
+    document.getElementById('waterStartDate')?.value || '', document.getElementById('waterEndDate')?.value || '');
+}
+
 function updateWaterPreview() {
-  const totalWater = parseFloat(document.getElementById('totalWater')?.value) || 0;
-  if (totalWater <= 0) {
-    appData.units.forEach(u => {
-      [`waterFee${u.id}`, `waterFee${u.id}_card`].forEach(id => {
-        const el = document.getElementById(id); if (el) el.textContent = '—';
-      });
-    });
-    updateBillTotals();
-    return;
-  }
-  const split = calcWaterSplit(totalWater, appData.units);
+  let result, error;
+  try { result = currentWaterSettlement(); } catch (e) { error = e; }
   appData.units.forEach(u => {
     [`waterFee${u.id}`, `waterFee${u.id}_card`].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.textContent = `$${split[u.id].toLocaleString()}`;
+      if (el) el.textContent = result ? `$${result.fees[u.id].toLocaleString()}` : '待確認';
     });
   });
+  const owner = document.getElementById('waterOwnerFee');
+  if (owner) owner.textContent = result ? `$${result.owner.toLocaleString()}` : '—';
+  const hint = document.getElementById('waterPeriodHint');
+  if (hint) hint.textContent = error ? error.message : result.note || '本次不收水費。';
   updateBillTotals();
 }
 
@@ -93,8 +93,9 @@ function currentBillDraft() {
     return result;
   };
   const includeElectricity = document.getElementById('includeElectricity')?.checked !== false;
-  const totalWater = number('totalWater');
-  const water = calcWaterSplit(totalWater, appData.units);
+  number('totalWater');
+  const waterSettlement = currentWaterSettlement();
+  const water = waterSettlement.fees;
   let split = null, alignment = null;
   let period = null;
   const totalBill = includeElectricity ? number('taipowerBill') : 0;
@@ -125,7 +126,7 @@ function currentBillDraft() {
       utilityCredit: preview.utilityCredit,
       total: preview.total };
   });
-  return { includeElectricity, split, season: period?.season, period, totalBill, totalUnits, previous, current, alignment, units };
+  return { includeElectricity, split, season: period?.season, period, totalBill, totalUnits, previous, current, alignment, waterSettlement, units };
 }
 
 function updateBillTotals() {
@@ -182,6 +183,11 @@ function saveBill(unitId) {
       !confirm('這個樓層在同一天已有帳單。再次存檔會新增帳單並再次抵扣水電費，確定繼續？')) return;
   const record = buildRecord(unitId, billDate, unit.fee, unit.usage, unit.water, unit.extras, unit.selected);
   record.currentNote = document.getElementById(`${unitId}_currentNote`)?.value || '';
+  if (draft.waterSettlement.note) {
+    record.currentNote = [record.currentNote, draft.waterSettlement.note].filter(Boolean).join('\n');
+    record.waterPeriodStart = document.getElementById('waterStartDate').value;
+    record.waterPeriodEnd = document.getElementById('waterEndDate').value;
+  }
   record.tenantNote = getUnit(unitId).tenantNote || '';
   if (draft.includeElectricity) {
     record.currentNote = [record.currentNote, draft.alignment.note, billingSeasonNote(draft.period)].filter(Boolean).join('\n');
@@ -226,9 +232,10 @@ function fmtDate(dateStr) {
 
 function generateReport(record) {
   const unit = getUnit(record.unitId);
+  const structuredNotes = record.currentNote?.includes('【電費估算】');
   let r = `📅 ${fmtDate(record.date)} 房租費用通知（${unit.label}）\n\n`;
 
-  if (record.electricity?.periodStart && record.electricity?.periodEnd) {
+  if (!structuredNotes && record.electricity?.periodStart && record.electricity?.periodEnd) {
     r += `台電用電區間：${record.electricity.periodStart}～${record.electricity.periodEnd}\n`;
     if (record.electricity.prevDate && record.electricity.currDate) r += `採用抄表區間：${record.electricity.prevDate}～${record.electricity.currDate}\n\n`;
   }
@@ -243,7 +250,7 @@ function generateReport(record) {
     r += `本戶用電：${Number(myUsage.toFixed(2))} 度（佔 ${((myUsage/s.totalUnits)*100).toFixed(1)}%）\n`;
     r += `本戶電費：$${record.electricity.fee.toLocaleString()}\n\n`;
   }
-  if (record.unitId === '6F' && record.electricity?.prevReading != null && record.electricity?.currReading != null) {
+  if (!structuredNotes && record.unitId === '6F' && record.electricity?.prevReading != null && record.electricity?.currReading != null) {
     r += `上期電表讀數：${record.electricity.prevReading} 度\n本期電表讀數：${record.electricity.currReading} 度\n\n`;
   }
 
@@ -276,7 +283,7 @@ function generateReport(record) {
 
   const fixedNote = record.tenantNote ?? unit.tenantNote;
   if (fixedNote?.trim()) r += `📝 固定備註\n${fixedNote}\n\n`;
-  if (record.currentNote?.trim()) r += `📝 當期備註\n${record.currentNote}\n\n`;
+  if (record.currentNote?.trim()) r += `${structuredNotes ? '' : '📝 當期備註\n'}${record.currentNote}\n\n`;
 
   const reportText = document.getElementById('reportText');
   const reportSection = document.getElementById('reportSection');
