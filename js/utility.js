@@ -83,6 +83,7 @@ function utilityLedgerRows(floor = 'all', type = 'all') {
 function renderUtilityDeposits() {
   const balances = document.getElementById('utilityBalances');
   if (!balances) return;
+  if (typeof clearUtilityStatementPreview === 'function') clearUtilityStatementPreview();
   const node = (tag, className, text) => {
     const el = document.createElement(tag);
     if (className) el.className = className;
@@ -106,7 +107,10 @@ function renderUtilityDeposits() {
     card.append(node('p', 'screen-hint', utilityEnabled(unit.id) ? '儲值功能已開啟' : '儲值功能已關閉；餘額與紀錄保留，可至設定重新開啟。'));
     const totals = node('div', 'utility-balance-totals');
     totals.append(node('span', '', '累計儲值 ' + money(deposited)), node('span', '', '已抵扣 ' + money(used)));
-    card.append(totals); balances.append(card);
+    const exportButton = node('button', 'inline-action', '產生儲值帳本 PNG');
+    exportButton.type = 'button';
+    exportButton.addEventListener('click', () => generateUtilityStatement(unit.id));
+    card.append(totals, exportButton); balances.append(card);
   });
   for (const [id, includeAll] of [['utilityUnit', false], ['utilityFloorFilter', true]]) {
     const select = document.getElementById(id);

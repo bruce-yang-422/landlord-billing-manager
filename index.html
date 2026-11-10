@@ -340,6 +340,11 @@
             </div>
             <p id="utilityLedgerSummary" class="screen-hint" aria-live="polite"></p>
             <div id="utilityHistory" class="utility-ledger"></div>
+            <section id="utilityStatementPreview" hidden aria-labelledby="utilityStatementTitle">
+                <h4 id="utilityStatementTitle">儲值帳本 PNG</h4>
+                <p id="utilityStatementStatus" class="screen-hint" role="status" aria-live="polite"></p>
+                <div id="utilityStatementImages" class="utility-statement-images"></div>
+            </section>
         </section>
     </section>
     <section data-screen="backup" hidden aria-labelledby="backupTitle">
@@ -601,6 +606,7 @@
 <script src="js/utility.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/report.js"></script>
+<script src="js/utility-report.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/pwa-install.js"></script>
 <script src="js/meter.js"></script>
