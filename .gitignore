@@ -210,3 +210,6 @@ __marimo__/
 billing-records-backup.json
 /data/landlord-billing-backup.csv
 landlord-billing-backup*.csv
+
+# 本機帳單、個資及帳務來源，整個目錄不納入版本控制
+/data/
