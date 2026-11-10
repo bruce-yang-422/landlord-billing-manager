@@ -52,6 +52,7 @@ function saveInputs() {
     const get = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
     const inputs = {
       creditSelections: Object.fromEntries(['5F', '6F'].map(unit => [unit, selectedBillCreditItems(unit)])),
+      rentSelections: Object.fromEntries(['5F', '6F'].map(unit => [unit, document.getElementById(`${unit}_includeRent`)?.checked !== false])),
       billDate:        get('billDate'),
       currentNote5F: get('5F_currentNote'),
       currentNote6F: get('6F_currentNote'),
@@ -120,6 +121,8 @@ function loadInputs() {
       if (el) el.value = val;
     };
     for (const unit of ['5F', '6F']) {
+      const rentToggle = document.getElementById(`${unit}_includeRent`);
+      if (rentToggle && typeof inputs.rentSelections?.[unit] === 'boolean') rentToggle.checked = inputs.rentSelections[unit];
       if (Array.isArray(inputs.creditSelections?.[unit])) for (const [key] of CREDIT_ITEMS) {
         const el = document.getElementById(`${unit}_credit_${key}`);
         if (el) el.checked = inputs.creditSelections[unit].includes(key);

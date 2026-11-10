@@ -61,6 +61,7 @@ function currentWaterSettlement() {
 }
 
 function waterChargeIsEnabled() { return document.getElementById('includeWater')?.checked !== false; }
+function rentChargeIsEnabled(unitId) { return document.getElementById(`${unitId}_includeRent`)?.checked !== false; }
 
 function waivedWaterNote(settlement) {
   const total = settlement.owner + Object.values(settlement.fees).reduce((sum, fee) => sum + fee, 0);
@@ -129,8 +130,9 @@ function currentBillDraft() {
     const fee = split ? (unit.id === '5F' ? split.fee5 : split.fee6) : 0;
     const usage = split ? (unit.id === '5F' ? split.e5 : split.e6) : 0;
     const selected = selectedBillCreditItems(unit.id);
-    const preview = buildRecord(unit.id, '', fee, usage, water[unit.id], extras, selected, waterChargeEnabled);
-    return { id: unit.id, selected, rent: unit.rent || 0, fee, usage, water: water[unit.id], extras,
+    const rentChargeEnabled = rentChargeIsEnabled(unit.id);
+    const preview = buildRecord(unit.id, '', fee, usage, water[unit.id], extras, selected, waterChargeEnabled, rentChargeEnabled);
+    return { id: unit.id, selected, rent: unit.rent || 0, rentChargeEnabled, fee, usage, water: water[unit.id], extras,
       utilityCredit: preview.utilityCredit,
       total: preview.total };
   });
@@ -147,7 +149,7 @@ function updateBillTotals() {
   appData.units.forEach(unit => {
     const choices = document.getElementById(`${unit.id}_creditChoices`);
     if (choices) { choices.disabled = !utilityEnabled(unit.id); choices.hidden = !utilityEnabled(unit.id); }
-    document.querySelectorAll(`.preview-rent-${unit.id}`).forEach(el => { el.textContent = money(unit.rent || 0); });
+    document.querySelectorAll(`.preview-rent-${unit.id}`).forEach(el => { el.textContent = money(unit.rent || 0) + (rentChargeIsEnabled(unit.id) ? '' : '（本期不收）'); });
     for (const [field, label] of [['gas','gasFee'],['management','managementFee'],['other','otherFee']]) {
       const value = Number(document.getElementById(`${unit.id}_${field}`)?.value || 0);
       set(`${label}${unit.id}_card`, Number.isFinite(value) && value >= 0 ? money(value) : '請確認金額');
@@ -168,7 +170,7 @@ function updateBillTotals() {
       set(`waterFee${unit.id}_card`, money(unit.water) + (draft.waterChargeEnabled ? '' : '（本期不收）'));
       set(`elecFee${unit.id}_card`, included ? money(unit.fee) : '本次不收取');
     });
-    if (status) status.textContent = '只抵扣勾選項目，餘額不足依電費、水費、瓦斯、管理費、雜費順序抵扣。租金另計。';
+    if (status) status.textContent = '房租依各戶收費開關計入；已另繳可取消勾選。儲值只抵扣勾選費用，依電費、水費、瓦斯、管理費、雜費順序，不抵房租。';
   } catch (error) {
     appData.units.forEach(unit => {
       set(`total${unit.id}_card`, '待完成資料');
@@ -189,7 +191,7 @@ function saveBill(unitId) {
   if (!unit) return;
   if (appData.records.some(row => row.unitId === unitId && row.date === billDate) &&
       !confirm('這個樓層在同一天已有帳單。再次存檔會新增帳單並再次抵扣水電費，確定繼續？')) return;
-  const record = buildRecord(unitId, billDate, unit.fee, unit.usage, unit.water, unit.extras, unit.selected, draft.waterChargeEnabled);
+  const record = buildRecord(unitId, billDate, unit.fee, unit.usage, unit.water, unit.extras, unit.selected, draft.waterChargeEnabled, unit.rentChargeEnabled);
   record.currentNote = document.getElementById(`${unitId}_currentNote`)?.value || '';
   if (draft.waterSettlement.note) {
     record.currentNote = [record.currentNote, draft.waterSettlement.note].filter(Boolean).join('\n');
@@ -251,7 +253,7 @@ function generateReport(record) {
   const unit = getUnit(record.unitId);
   const currentNote = tenantCurrentNote(record);
   const structuredNotes = currentNote.includes('【電費估算】');
-  let r = `📅 ${fmtDate(record.date)} 房租費用通知（${unit.label}）\n\n`;
+  let r = `📅 ${fmtDate(record.date)} ${record.rentChargeEnabled === false ? '費用結算通知' : '房租費用通知'}（${unit.label}）\n\n`;
 
   if (!structuredNotes && record.electricity?.periodStart && record.electricity?.periodEnd) {
     r += `台電用電區間：${record.electricity.periodStart}～${record.electricity.periodEnd}\n`;
@@ -274,7 +276,7 @@ function generateReport(record) {
   }
 
   r += `💰 應繳金額\n`;
-  if (record.rent > 0)           r += `房租：$${record.rent.toLocaleString()}\n`;
+  if (record.rent > 0)           r += `房租：$${record.rent.toLocaleString()}${record.rentChargeEnabled === false ? '（本期不收／已另繳）' : ''}\n`;
   if (record.electricity?.fee > 0) r += `電費：$${record.electricity.fee.toLocaleString()}\n`;
   if (record.waterFee > 0)       r += `水費：$${record.waterFee.toLocaleString()}${record.waterChargeEnabled === false ? '（本期不收，由房東吸收）' : ''}\n`;
   if (record.gasFee > 0)         r += `瓦斯：$${record.gasFee.toLocaleString()}\n`;
@@ -420,7 +422,7 @@ function renderHistory() {
       item.append(node('dt', '', label), node('dd', '', value));
       list.append(item);
     };
-    for (const [label, value] of [['租金', record.rent], ['電費', record.electricity?.fee], [record.waterChargeEnabled === false ? '水費（本期不收）' : '水費', record.waterFee], ['瓦斯費', record.gasFee], ['管理費', record.managementFee], ['其他費用', record.otherFee]]) row(fees, label, amount(value));
+    for (const [label, value] of [[record.rentChargeEnabled === false ? '租金（本期不收）' : '租金', record.rent], ['電費', record.electricity?.fee], [record.waterChargeEnabled === false ? '水費（本期不收）' : '水費', record.waterFee], ['瓦斯費', record.gasFee], ['管理費', record.managementFee], ['其他費用', record.otherFee]]) row(fees, label, amount(value));
     row(fees, '儲值抵扣', amount(record.utilityCredit || 0));
     card.append(fees);
     const details = node('details', 'bill-note-details');
@@ -475,7 +477,7 @@ function renderHistory() {
     if (tableBody) {
       const tr = node('tr');
       for (const value of [fmtDate(record.date), getUnit(record.unitId)?.label ?? record.unitId,
-        ...[record.rent, record.electricity?.fee, record.waterFee, record.gasFee, record.managementFee, record.otherFee, record.utilityCredit || 0, record.total].map((value, index) => amount(value) + (index === 2 && record.waterChargeEnabled === false ? '（本期不收）' : ''))]) {
+        ...[record.rent, record.electricity?.fee, record.waterFee, record.gasFee, record.managementFee, record.otherFee, record.utilityCredit || 0, record.total].map((value, index) => amount(value) + ((index === 0 && record.rentChargeEnabled === false) || (index === 2 && record.waterChargeEnabled === false) ? '（本期不收）' : ''))]) {
         tr.append(node('td', '', value));
       }
       const cell = node('td');

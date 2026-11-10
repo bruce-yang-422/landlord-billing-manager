@@ -40,7 +40,8 @@ const BACKUP_COLUMNS = [
   ['入住日期', 'moveInDate', 'text'],
   ['水費上次抄表日', 'waterPeriodStart', 'text'],
   ['水費本次抄表日', 'waterPeriodEnd', 'text'],
-  ['本期收取水費', 'waterChargeEnabled', 'boolean']
+  ['本期收取水費', 'waterChargeEnabled', 'boolean'],
+  ['本期收取房租', 'rentChargeEnabled', 'boolean']
 ];
 
 const BACKUP_CHECKSUM_COLUMN = '資料驗證ID';
@@ -247,6 +248,7 @@ function validateBackup(data) {
     }
   }
   for (const record of data.records) {
+    if (record.rentChargeEnabled !== undefined && typeof record.rentChargeEnabled !== 'boolean') throw new Error('本期收取房租必須為布林值');
     if (record.waterChargeEnabled !== undefined && typeof record.waterChargeEnabled !== 'boolean') throw new Error('本期收取水費必須為布林值');
     if (!optionalDate(record.waterPeriodStart) || !optionalDate(record.waterPeriodEnd) || (record.waterPeriodStart && record.waterPeriodEnd && record.waterPeriodStart >= record.waterPeriodEnd)) throw new Error('水費抄表期間格式錯誤');
     if (!record || !validUnit(record.unitId) || !/^\d+(?:\.\d+)?$/.test(String(record.id)) || recordIds.has(String(record.id)) ||
@@ -255,7 +257,7 @@ function validateBackup(data) {
     if (record.utilityCredit !== undefined || record.utilityBalanceAfter !== undefined || record.creditItems !== undefined) {
       const credit = record.utilityCredit;
       const waterDue = record.waterChargeEnabled === false ? 0 : record.waterFee;
-      const gross = record.rent + record.electricity.fee + waterDue + record.gasFee + record.managementFee + record.otherFee;
+      const gross = (record.rentChargeEnabled === false ? 0 : record.rent) + record.electricity.fee + waterDue + record.gasFee + record.managementFee + record.otherFee;
       const fees = { electricity: record.electricity.fee, water: waterDue, gas: record.gasFee, management: record.managementFee, other: record.otherFee };
       let limit = Math.max(0, fees.electricity) + Math.max(0, fees.water);
       if (record.creditItems !== undefined) {

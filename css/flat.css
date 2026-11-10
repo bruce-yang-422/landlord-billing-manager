@@ -538,6 +538,9 @@ body { font-variant-numeric: tabular-nums; }
 /* 所有功能頁共用選單樣式，避免新增欄位退回瀏覽器預設外觀。 */
 .utility-enable-toggle { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 16px 0 0; cursor: pointer; }
 .utility-enable-toggle input[type="checkbox"] { width: 20px; height: 20px; margin: 0; accent-color: var(--link-color); }
+.rent-charge-toggle { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; cursor: pointer; }
+.rent-charge-toggle input[type="checkbox"] { width: 18px; height: 18px; margin: 0; padding: 0; accent-color: var(--link-color); }
+.rent-charge-toggle + .preview-from-settings { text-align: right; }
 #saveUtilityDepositBtn:disabled { opacity: .55; cursor: not-allowed; }
 [data-screen] select {
     appearance: none;

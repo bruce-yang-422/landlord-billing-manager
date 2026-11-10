@@ -1,7 +1,7 @@
 // 租客圖文帳單：兩種輸出共用已存檔帳單，不重新試算費用。
 function buildShortReport(record, unit) {
   const money = value => '$' + Number(value || 0).toLocaleString('zh-TW');
-  const fees = [['房租', record.rent], ['電費', record.electricity?.fee], [record.waterChargeEnabled === false ? '水費（本期不收）' : '水費', record.waterFee],
+  const fees = [[record.rentChargeEnabled === false ? '房租（本期不收／已另繳）' : '房租', record.rent], ['電費', record.electricity?.fee], [record.waterChargeEnabled === false ? '水費（本期不收）' : '水費', record.waterFee],
     ['瓦斯', record.gasFee], ['管理費', record.managementFee], ['其他', record.otherFee]]
     .filter(([, value]) => value > 0).map(([label, value]) => label + money(value));
   const lines = [`${fmtDate(record.date)} ${unit.label} 帳單`, `本期應繳：${money(record.total)}`];
@@ -79,7 +79,7 @@ function renderBillImage(record, unit, fullText) {
       ctx.fillStyle = color;
       ctx.fillText(text, x, top);
     };
-    draw('房租費用通知', padding, 48, 24, '#677487');
+    draw(record.rentChargeEnabled === false ? '費用結算通知' : '房租費用通知', padding, 48, 24, '#677487');
     // 依樓層名稱長度縮放標題，避免超出圖面。
     ctx.font = `600 36px ${font}`;
     const title = `${unit.label} · ${fmtDate(record.date)}`;

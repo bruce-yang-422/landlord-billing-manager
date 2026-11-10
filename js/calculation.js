@@ -209,15 +209,16 @@ function utilityOffset(unitId, electricity, water) {
   return Math.min(Math.max(0, utilityBalance(unitId)), Math.max(0, electricity) + Math.max(0, water));
 }
 
-function buildRecord(unitId, billDate, electricityFee, electricityUsage, waterFee, extraFees, selected = DEFAULT_CREDIT_ITEMS, waterChargeEnabled = true) {
+function buildRecord(unitId, billDate, electricityFee, electricityUsage, waterFee, extraFees, selected = DEFAULT_CREDIT_ITEMS, waterChargeEnabled = true, rentChargeEnabled = true) {
   const unit = getUnit(unitId);
-  const total = (unit.rent || 0) + electricityFee + (waterChargeEnabled ? waterFee : 0) +
+  const total = (rentChargeEnabled ? unit.rent || 0 : 0) + electricityFee + (waterChargeEnabled ? waterFee : 0) +
     (extraFees.gas || 0) + (extraFees.management || 0) + (extraFees.other || 0);
   const record = {
     id: Date.now() + Math.random(),
     unitId,
     date: billDate,
     rent: unit.rent || 0,
+    ...(rentChargeEnabled ? {} : { rentChargeEnabled: false }),
     electricity: {
       fee: electricityFee,
       usage: electricityUsage,

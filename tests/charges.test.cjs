@@ -273,3 +273,45 @@ test('waived water remains visible but is excluded from totals and all prepaid o
   assert.equal(next.utilityCredit,next.fee+next.water);
   assert.equal(r.waterChargeEnabled,false); // Previously saved bills keep their own collection choice.
 });
+
+test('rent switches independently exclude already-paid rent while retaining fees and credits', () => {
+  const h = setup(true);
+  h.elements['5F_includeRent'] = {checked:false};
+  h.elements['6F_includeRent'] = {checked:false};
+  h.elements.includeWater = {checked:false};
+  vm.runInContext('appData.utilityDeposits = [{id:1,unitId:"6F",date:"2026-08-27",amount:3000}]',h.ctx);
+  const draft=h.ctx.currentBillDraft();
+  const five=draft.units.find(u=>u.id==='5F'),six=draft.units.find(u=>u.id==='6F');
+  assert.equal(five.total,five.fee+250+100+20);
+  assert.equal(six.total,400+50+30);
+  assert.equal(six.utilityCredit,six.fee);
+  h.ctx.saveBill('6F');
+  const r=h.records[0];
+  assert.equal(r.rent,12000);
+  assert.equal(r.rentChargeEnabled,false);
+  assert.equal(r.total,480);
+  assert.equal(r.creditItems.water,0);
+  h.elements.reportText={};h.generateReport(r);
+  assert.match(h.elements.reportText.textContent,/房租：\$12,000（本期不收／已另繳）/);
+  assert.match(h.elements.reportText.textContent,/費用結算通知/);
+  const restored=h.ctx.backupFromCsv(h.ctx.backupToCsv({units:[],records:[r]}));
+  assert.equal(restored.records[0].rentChargeEnabled,false);
+  assert.equal(restored.records[0].total,480);
+  h.elements['5F_includeRent'].checked=true;
+  const next=h.ctx.currentBillDraft();
+  assert.equal(next.units.find(u=>u.id==='5F').total,five.total+15000);
+  assert.equal(next.units.find(u=>u.id==='6F').rentChargeEnabled,false);
+  assert.equal(r.rentChargeEnabled,false);
+});
+
+test('fees-only bill can be fully offset to zero without charging rent or waived water', () => {
+  const h=setup(true);
+  h.elements['6F_includeRent']={checked:false};h.elements.includeWater={checked:false};
+  for(const key of ['6F_gas','6F_management','6F_other'])h.elements[key].value='0';
+  vm.runInContext('appData.utilityDeposits=[{id:1,unitId:"6F",date:"2026-08-27",amount:3000}]',h.ctx);
+  h.ctx.saveBill('6F');
+  const r=h.records[0];
+  assert.equal(r.total,0);assert.equal(r.utilityCredit,r.electricity.fee);
+  assert.equal(r.utilityBalanceAfter,3000-r.electricity.fee);
+  assert.equal(h.ctx.backupFromCsv(h.ctx.backupToCsv({units:[],records:[r]})).records[0].total,0);
+});
