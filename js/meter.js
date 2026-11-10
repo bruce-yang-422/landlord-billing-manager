@@ -120,15 +120,25 @@ function refreshBillingReadings(reset = false) {
     select.value = selected;
     return choices.find(row => row.date === selected);
   }
-  const first = fill(start, from), last = fill(end, to);
+  const endBoundary = valid ? new Date(Date.parse(to) + 86400000).toISOString().slice(0, 10) : to;
+  const first = fill(start, from), last = fill(end, endBoundary);
   const usable = first && last && first.date < last.date && first.reading <= last.reading;
   document.getElementById('reading6Prev').value = usable ? first.reading : '';
   document.getElementById('reading6Curr').value = usable ? last.reading : '';
-  document.getElementById('billingPeriodHint').textContent = !valid
+  let hint = !valid
     ? '請填寫有效的台電起訖日期（起日須早於迄日），搜尋天數須為 0～31 的整數。'
     : usable
-      ? `台電區間 ${from} → ${to}；實際抄表 ${first.date} → ${last.date}。6F 用電 ${Number((last.reading - first.reading).toFixed(6))} 度。${first.date !== from || last.date !== to ? '抄表日期與台電區間不同，請核對後再儲存。' : '抄表日期與台電區間一致。'}`
+      ? ''
       : first && last ? '配對結果不是兩筆依時間遞增的有效讀數，請改選或補登抄表。' : '搜尋範圍內缺少起始或結束紀錄，請補齊抄表或調整搜尋天數。';
+  if (usable) {
+    try { hint = meterAlignmentNote(first, last, from, to, alignMeterPeriod(first, last, from, to)); }
+    catch (error) {
+      hint = error.message;
+      document.getElementById('reading6Prev').value = '';
+      document.getElementById('reading6Curr').value = '';
+    }
+  }
+  document.getElementById('billingPeriodHint').textContent = hint;
   updateElectricityPreview();
 }
 

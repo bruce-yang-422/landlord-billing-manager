@@ -23,7 +23,7 @@ function harness() {
     localStorage: { getItem: key => stored.get(key) ?? null, setItem: (key, value) => stored.set(key, value) },
     updateElectricityPreview() {}, saveInputs() {}, confirm: () => true
   });
-  for (const file of ['csv.js', 'meter.js']) vm.runInContext(load(file), ctx);
+  for (const file of ['calculation.js', 'csv.js', 'meter.js']) vm.runInContext(load(file), ctx);
   return { ctx, elements, stored };
 }
 const rows = [
@@ -156,7 +156,7 @@ test('irregular readings use closest dates on either side, with earlier ties', (
   assert.equal(elements.get('billingStartReading').value, '2026-07-06');
   assert.equal(elements.get('billingEndReading').value, '2026-09-03');
   assert.equal(elements.get('reading6Curr').value - elements.get('reading6Prev').value, 300);
-  assert.match(elements.get('billingPeriodHint').textContent, /日期與台電區間不同/);
+  assert.match(elements.get('billingPeriodHint').textContent, /按日均估算對齊/);
   elements.get('billingStartReading').value = '2026-07-10';
   ctx.refreshBillingReadings();
   assert.equal(elements.get('reading6Prev').value, 1020);
@@ -179,4 +179,23 @@ test('invalid periods, out-of-range readings and same reading pair cannot settle
     assert.equal(elements.get('reading6Prev').value, '');
     assert.equal(elements.get('reading6Curr').value, '');
   }
+});
+
+test('late November photos show aligned period and retain actual readings', () => {
+  const {ctx, elements} = harness();
+  ctx.appData.meterReadings = [
+    {id: 1, date: '2026-09-04', reading: 11378.4},
+    {id: 2, date: '2026-11-10', reading: 11763.2}
+  ];
+  elements.get('taipowerStartDate').value = '2026-09-03';
+  elements.get('taipowerEndDate').value = '2026-11-03';
+  elements.get('meterMatchDays').value = '7';
+  ctx.refreshBillingReadings(true);
+  assert.equal(elements.get('reading6Prev').value, 11378.4);
+  assert.equal(elements.get('reading6Curr').value, 11763.2);
+  const hint = elements.get('billingPeriodHint').textContent;
+  assert.match(hint, /62 天/);
+  assert.match(hint, /67 天用電 384.8/);
+  assert.match(hint, /356.083582/);
+  assert.match(hint, /結束邊界 2026-11-04/);
 });

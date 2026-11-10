@@ -99,13 +99,13 @@
             </div>
         </div>
         <div class="period-picker">
-            <p class="screen-hint">填寫台電帳單上的用電起訖日，自動配對範圍內最接近的抄表；同距離取較早日期。6F 以兩筆實際讀數相減，不按天數推估；5F 為台電總度數扣除 6F 度數。</p>
+            <p class="screen-hint">填寫台電帳單上的用電起訖日（含迄日），結束邊界為迄日翌日。自動配對起日及結束邊界附近的抄表，同距離取較早日期。租客提早或延後拍照時，以兩筆實際抄表的日均用電對齊帳期；5F 為台電總度數扣除 6F 估算度數。請核對下方公式再儲存。</p>
             <div class="grid-row">
                 <div><label for="taipowerStartDate">台電用電起日</label><input type="date" id="taipowerStartDate"></div>
                 <div><label for="taipowerEndDate">台電用電迄日</label><input type="date" id="taipowerEndDate"></div>
             </div>
-            <label for="meterMatchDays">起訖日各前後搜尋天數（0～31 天）</label>
-            <input type="number" id="meterMatchDays" min="0" max="31" step="1" value="3" inputmode="numeric">
+            <label for="meterMatchDays">起日及結束邊界各前後搜尋天數（0～31 天）</label>
+            <input type="number" id="meterMatchDays" min="0" max="31" step="1" value="7" inputmode="numeric">
             <button type="button" class="inline-action" onclick="refreshBillingReadings(true); saveInputs()">重新自動配對</button>
             <div class="grid-row">
                 <div><label for="billingStartReading">起始抄表（上期）</label><select id="billingStartReading" class="season-select"></select></div>

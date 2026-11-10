@@ -138,6 +138,35 @@ test('CSV preserves requested Taipower period separately from matched meter date
   assert.deepEqual(JSON.parse(JSON.stringify(restored.records[0])), JSON.parse(JSON.stringify(record)));
 });
 
+test('late photos align preview, saved usage, credits and CSV to the inclusive bill period', () => {
+  const h = setup(true);
+  Object.assign(h.elements, {
+    taipowerStartDate: { value: '2026-09-03' }, taipowerEndDate: { value: '2026-11-03' },
+    billingStartReading: { value: '2026-09-04' }, billingEndReading: { value: '2026-11-10' },
+    reading6Prev: { value: '11378.4' }, reading6Curr: { value: '11763.2' },
+    taipowerBill: { value: '3064' }, taipowerUnits: { value: '1097' },
+    usage5F: {}, usage6F: {}, elecFee5F: {}, elecFee6F: {},
+    '6F_currentNote': { value: '租客延後拍照' }
+  });
+  vm.runInContext('appData.utilityDeposits = [{id: 1, unitId: "6F", date: "2026-08-27", amount: 3000}]', h.ctx);
+  h.ctx.updateElectricityPreview();
+  assert.match(h.elements.usage6F.textContent, /356.08.*估算/);
+  assert.equal(h.elements.elecFee6F.textContent, '$897');
+  const draft = h.ctx.currentBillDraft();
+  assert.ok(Math.abs(draft.split.e6 - 384.8 / 67 * 62) < 1e-9);
+  h.ctx.saveBill('6F');
+  const record = h.records[0];
+  assert.equal(record.electricity.fee, draft.split.fee6);
+  assert.equal(record.electricity.usage, draft.split.e6);
+  assert.equal(record.electricity.prevReading, 11378.4);
+  assert.equal(record.electricity.currReading, 11763.2);
+  assert.match(record.currentNote, /租客延後拍照\n台電計費/);
+  assert.match(record.currentNote, /62 天.*2026-11-04/);
+  assert.equal(record.utilityCredit, record.electricity.fee + record.waterFee);
+  const restored = h.ctx.backupFromCsv(h.ctx.backupToCsv({ units: [], records: [record] }));
+  assert.deepEqual(JSON.parse(JSON.stringify(restored.records[0])), JSON.parse(JSON.stringify(record)));
+});
+
 
 test('per-bill notes are separate per unit, cleared only after successful save, and preserved in CSV', () => {
   const h = setup(false);

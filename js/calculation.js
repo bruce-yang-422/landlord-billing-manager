@@ -1,3 +1,31 @@
+// 帳單迄日含當日；以翌日為結束邊界，讓相鄰帳期不重複計費。
+function alignMeterPeriod(first, last, from, to) {
+  const dateMs = value => {
+    const ms = Date.parse(value);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || !Number.isFinite(ms) || new Date(ms).toISOString().slice(0, 10) !== value) throw new Error('請填寫有效的台電與抄表日期。');
+    return ms;
+  };
+  const start = dateMs(from), end = dateMs(to) + 86400000;
+  const actualStart = dateMs(first.date), actualEnd = dateMs(last.date);
+  if (start >= end || actualStart >= actualEnd || !Number.isFinite(first.reading) || !Number.isFinite(last.reading) || first.reading < 0 || last.reading < first.reading) throw new Error('抄表日期或讀數順序不正確。');
+  if (actualEnd <= start || actualStart >= end) throw new Error('抄表區間與台電計費區間沒有重疊，請補登抄表。');
+  const actualDays = (actualEnd - actualStart) / 86400000;
+  const billingDays = (end - start) / 86400000;
+  const actualUsage = last.reading - first.reading;
+  const dailyUsage = actualUsage / actualDays;
+  const alignedStart = first.reading + dailyUsage * ((start - actualStart) / 86400000);
+  const alignedEnd = first.reading + dailyUsage * ((end - actualStart) / 86400000);
+  if (alignedStart < 0) throw new Error('回推讀數小於零，請補登更接近帳期的抄表紀錄。');
+  return { actualDays, billingDays, actualUsage, dailyUsage, alignedStart, alignedEnd,
+    usage: dailyUsage * billingDays, endBoundary: new Date(end).toISOString().slice(0, 10),
+    estimated: start !== actualStart || end !== actualEnd };
+}
+
+function meterAlignmentNote(first, last, from, to, result) {
+  const n = value => Number(value.toFixed(6));
+  return `台電計費 ${from}～${to}（含迄日，共 ${result.billingDays} 天；結束邊界 ${result.endBoundary}）。實際抄表 ${first.date}：${first.reading} 度 → ${last.date}：${last.reading} 度，${result.actualDays} 天用電 ${n(result.actualUsage)} 度。日均 ${n(result.dailyUsage)} 度；${result.estimated ? '按日均估算對齊' : '實際讀數對齊'}：${from} 約 ${n(result.alignedStart)} 度、${result.endBoundary} 約 ${n(result.alignedEnd)} 度，6F 本期${result.estimated ? '估計' : ''}用電 ${n(result.usage)} 度。${result.estimated ? '估算假設每日平均用電相同，實際用電可能不同。' : ''}`;
+}
+
 // 計算單戶理論電費（累進費率），回傳 { total, rows }
 function calcProgressiveFee(units, season) {
   const tiers = ELECTRICITY_RATES[season];

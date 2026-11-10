@@ -1,21 +1,31 @@
+function currentMeterAlignment() {
+  const value = id => document.getElementById(id)?.value || '';
+  if (value('reading6Prev') === '' || value('reading6Curr') === '') throw new Error('請選擇台電計費期間的起始與結束抄表紀錄。');
+  const first = { date: value('billingStartReading'), reading: Number(value('reading6Prev')) };
+  const last = { date: value('billingEndReading'), reading: Number(value('reading6Curr')) };
+  const from = value('taipowerStartDate'), to = value('taipowerEndDate');
+  const result = alignMeterPeriod(first, last, from, to);
+  return { ...result, note: meterAlignmentNote(first, last, from, to, result) };
+}
+
 // ── 即時電費預覽 ───────────────────────────────────────────
 
 function updateElectricityPreview() {
   const totalBill  = parseFloat(document.getElementById('taipowerBill')?.value) || 0;
   const totalUnits = parseFloat(document.getElementById('taipowerUnits')?.value) || 0;
-  const prev6      = parseFloat(document.getElementById('reading6Prev')?.value) || 0;
-  const curr6      = parseFloat(document.getElementById('reading6Curr')?.value) || 0;
   const season     = document.getElementById('season')?.value || 'summer';
 
   const hasReadings = document.getElementById('reading6Prev')?.value !== '' && document.getElementById('reading6Curr')?.value !== '';
-  const e6 = curr6 - prev6;
+  let alignment;
+  try { alignment = currentMeterAlignment(); } catch (_) { /* 未完成或無效資料不預覽電費 */ }
+  const e6 = alignment?.usage ?? NaN;
   const e5 = totalUnits - e6;
 
   // 更新度數顯示
   const usage5El = document.getElementById('usage5F');
   const usage6El = document.getElementById('usage6F');
-  if (usage5El) usage5El.textContent = (hasReadings && totalUnits > 0 && e5 >= 0) ? `${e5} 度` : '—';
-  if (usage6El) usage6El.textContent = (hasReadings && e6 >= 0) ? `${e6} 度` : '—';
+  if (usage5El) usage5El.textContent = (hasReadings && totalUnits > 0 && e5 >= 0) ? `${Number(e5.toFixed(2))} 度` : '—';
+  if (usage6El) usage6El.textContent = (hasReadings && e6 >= 0) ? `${Number(e6.toFixed(2))} 度${alignment.estimated ? '（估算）' : ''}` : '—';
 
   if (hasReadings && totalBill > 0 && totalUnits > 0 && e6 >= 0 && e5 >= 0) {
     const result = calcProgressiveSplit(totalBill, totalUnits, e6, season);
@@ -76,7 +86,7 @@ function currentBillDraft() {
   const includeElectricity = document.getElementById('includeElectricity')?.checked !== false;
   const totalWater = number('totalWater');
   const water = calcWaterSplit(totalWater, appData.units);
-  let split = null;
+  let split = null, alignment = null;
   const season = document.getElementById('season')?.value || 'summer';
   const totalBill = includeElectricity ? number('taipowerBill') : 0;
   const totalUnits = includeElectricity ? number('taipowerUnits') : 0;
@@ -90,7 +100,8 @@ function currentBillDraft() {
     }
     if (totalBill <= 0 || totalUnits <= 0) throw new Error('請填入台電帳單金額與總度數；本次不收電費可取消勾選。');
     if (!document.getElementById('reading6Prev')?.value || !document.getElementById('reading6Curr')?.value) throw new Error('請選擇台電計費期間的起始與結束抄表紀錄。');
-    const usage = current - previous;
+    alignment = currentMeterAlignment();
+    const usage = alignment.usage;
     if (usage < 0 || usage > totalUnits) throw new Error('6F 用電量須介於 0 與台電總度數之間。');
     split = calcProgressiveSplit(totalBill, totalUnits, usage, season);
   }
@@ -104,7 +115,7 @@ function currentBillDraft() {
       utilityCredit: preview.utilityCredit,
       total: preview.total };
   });
-  return { includeElectricity, split, season, totalBill, totalUnits, previous, current, units };
+  return { includeElectricity, split, season, totalBill, totalUnits, previous, current, alignment, units };
 }
 
 function updateBillTotals() {
@@ -163,6 +174,7 @@ function saveBill(unitId) {
   record.currentNote = document.getElementById(`${unitId}_currentNote`)?.value || '';
   record.tenantNote = getUnit(unitId).tenantNote || '';
   if (draft.includeElectricity) {
+    record.currentNote = [record.currentNote, draft.alignment.note].filter(Boolean).join('\n');
     if (unitId === '6F') {
       record.electricity.prevReading = draft.previous;
       record.electricity.currReading = draft.current;
@@ -218,7 +230,7 @@ function generateReport(record) {
     const myUsage  = isThis6F ? s.e6 : s.e5;
     r += `⚡ 電費計算（累進分攤）\n`;
     r += `台電帳單：$${s.totalBill.toLocaleString()}｜總用電：${s.totalUnits} 度\n`;
-    r += `本戶用電：${myUsage} 度（佔 ${((myUsage/s.totalUnits)*100).toFixed(1)}%）\n`;
+    r += `本戶用電：${Number(myUsage.toFixed(2))} 度（佔 ${((myUsage/s.totalUnits)*100).toFixed(1)}%）\n`;
     r += `本戶電費：$${record.electricity.fee.toLocaleString()}\n\n`;
   }
   if (record.unitId === '6F' && record.electricity?.prevReading != null && record.electricity?.currReading != null) {
