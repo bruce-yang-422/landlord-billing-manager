@@ -1,7 +1,10 @@
 /* 緊湊工作台：縮減留白，不改變帳單圖片與列印尺寸。 */
 @media screen {
+    html { scrollbar-gutter: stable; }
     body { font-size: 14px; }
     .container { box-sizing: border-box; }
+    #workspaceMain > [data-screen] { box-sizing: border-box; width: 100%; min-width: 0; max-width: none; }
+    .meter-hero, .meter-next { box-sizing: border-box; width: 100%; max-width: none; margin-inline: 0; }
     #workspaceMain { padding: 16px 14px 36px; }
     .screen-heading { margin-bottom: 14px; padding-bottom: 12px; }
     .screen-heading h2 { margin: 3px 0; font-size: 21px; }
@@ -62,6 +65,17 @@
     .calculation-details .screen-hint { white-space: pre-line; margin-bottom: 4px; }
     .billing-context { display: grid; gap: 12px; margin-bottom: 12px; }
     .billing-context > .info-card, .billing-context > .billing-options { margin-bottom: 0; }
+}
+
+@media screen and (min-width: 769px) {
+    .container {
+        background: var(--surface);
+        border-inline: 1px solid var(--border-color);
+        box-shadow: -12px 0 24px -16px rgba(23, 45, 75, 0.3), 12px 0 24px -16px rgba(23, 45, 75, 0.3);
+    }
+    [data-theme="dark"] .container {
+        box-shadow: -12px 0 24px -16px rgba(0, 0, 0, 0.7), 12px 0 24px -16px rgba(0, 0, 0, 0.7);
+    }
 }
 
 @media screen and (min-width: 1024px) {
