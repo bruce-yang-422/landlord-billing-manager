@@ -1,3 +1,7 @@
+function currentBillingSeason() {
+  return billingSeasonDays(document.getElementById('taipowerStartDate')?.value || '', document.getElementById('taipowerEndDate')?.value || '');
+}
+
 function currentMeterAlignment() {
   const value = id => document.getElementById(id)?.value || '';
   if (value('reading6Prev') === '' || value('reading6Curr') === '') throw new Error('請選擇台電計費期間的起始與結束抄表紀錄。');
@@ -13,7 +17,12 @@ function currentMeterAlignment() {
 function updateElectricityPreview() {
   const totalBill  = parseFloat(document.getElementById('taipowerBill')?.value) || 0;
   const totalUnits = parseFloat(document.getElementById('taipowerUnits')?.value) || 0;
-  const season     = document.getElementById('season')?.value || 'summer';
+  let period;
+  try { period = currentBillingSeason(); } catch (_) { /* 等待有效帳期 */ }
+  const seasonEl = document.getElementById('season');
+  if (seasonEl) seasonEl.value = period?.season || '';
+  const seasonHint = document.getElementById('seasonPeriodHint');
+  if (seasonHint) seasonHint.textContent = period ? billingSeasonNote(period) : '填寫帳單用電起訖日後，自動計算夏月及非夏月天數。';
 
   const hasReadings = document.getElementById('reading6Prev')?.value !== '' && document.getElementById('reading6Curr')?.value !== '';
   let alignment;
@@ -28,7 +37,7 @@ function updateElectricityPreview() {
   if (usage6El) usage6El.textContent = (hasReadings && e6 >= 0) ? `${Number(e6.toFixed(2))} 度${alignment.estimated ? '（估算）' : ''}` : '—';
 
   if (hasReadings && totalBill > 0 && totalUnits > 0 && e6 >= 0 && e5 >= 0) {
-    const result = calcProgressiveSplit(totalBill, totalUnits, e6, season);
+    const result = calcProgressiveSplit(totalBill, totalUnits, e6, period);
     const f5 = `$${result.fee5.toLocaleString()}`;
     const f6 = `$${result.fee6.toLocaleString()}`;
 
@@ -87,7 +96,7 @@ function currentBillDraft() {
   const totalWater = number('totalWater');
   const water = calcWaterSplit(totalWater, appData.units);
   let split = null, alignment = null;
-  const season = document.getElementById('season')?.value || 'summer';
+  let period = null;
   const totalBill = includeElectricity ? number('taipowerBill') : 0;
   const totalUnits = includeElectricity ? number('taipowerUnits') : 0;
   const previous = includeElectricity ? number('reading6Prev') : 0;
@@ -103,7 +112,8 @@ function currentBillDraft() {
     alignment = currentMeterAlignment();
     const usage = alignment.usage;
     if (usage < 0 || usage > totalUnits) throw new Error('6F 用電量須介於 0 與台電總度數之間。');
-    split = calcProgressiveSplit(totalBill, totalUnits, usage, season);
+    period = currentBillingSeason();
+    split = calcProgressiveSplit(totalBill, totalUnits, usage, period);
   }
   const units = appData.units.map(unit => {
     const extras = { gas: number(`${unit.id}_gas`), management: number(`${unit.id}_management`), other: number(`${unit.id}_other`), otherDescription: document.getElementById(`${unit.id}_otherDescription`)?.value.trim() || '' };
@@ -115,7 +125,7 @@ function currentBillDraft() {
       utilityCredit: preview.utilityCredit,
       total: preview.total };
   });
-  return { includeElectricity, split, season, totalBill, totalUnits, previous, current, alignment, units };
+  return { includeElectricity, split, season: period?.season, period, totalBill, totalUnits, previous, current, alignment, units };
 }
 
 function updateBillTotals() {
@@ -174,7 +184,7 @@ function saveBill(unitId) {
   record.currentNote = document.getElementById(`${unitId}_currentNote`)?.value || '';
   record.tenantNote = getUnit(unitId).tenantNote || '';
   if (draft.includeElectricity) {
-    record.currentNote = [record.currentNote, draft.alignment.note].filter(Boolean).join('\n');
+    record.currentNote = [record.currentNote, draft.alignment.note, billingSeasonNote(draft.period)].filter(Boolean).join('\n');
     if (unitId === '6F') {
       record.electricity.prevReading = draft.previous;
       record.electricity.currReading = draft.current;
@@ -392,7 +402,7 @@ function renderHistory() {
     const list = node('dl');
     const e = record.electricity || {};
     row(list, '本戶用電', e.usage == null ? '未記錄' : number(e.usage) + ' 度');
-    row(list, '計費季節', ({ summer: '夏月', other: '非夏月' })[e.season] || '未記錄');
+    row(list, '計費季節', ({ summer: '夏月', other: '非夏月', mixed: '夏月＋非夏月' })[e.season] || '未記錄');
     row(list, '台電用電起日', e.periodStart ? fmtDate(e.periodStart) : '未記錄');
     row(list, '台電用電迄日', e.periodEnd ? fmtDate(e.periodEnd) : '未記錄');
     row(list, '起始抄表日期', e.prevDate ? fmtDate(e.prevDate) : '未記錄');

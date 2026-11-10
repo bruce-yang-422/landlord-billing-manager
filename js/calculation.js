@@ -26,8 +26,38 @@ function meterAlignmentNote(first, last, from, to, result) {
   return `台電計費 ${from}～${to}（含迄日，共 ${result.billingDays} 天；結束邊界 ${result.endBoundary}）。實際抄表 ${first.date}：${first.reading} 度 → ${last.date}：${last.reading} 度，${result.actualDays} 天用電 ${n(result.actualUsage)} 度。日均 ${n(result.dailyUsage)} 度；${result.estimated ? '按日均估算對齊' : '實際讀數對齊'}：${from} 約 ${n(result.alignedStart)} 度、${result.endBoundary} 約 ${n(result.alignedEnd)} 度，6F 本期${result.estimated ? '估計' : ''}用電 ${n(result.usage)} 度。${result.estimated ? '估算假設每日平均用電相同，實際用電可能不同。' : ''}`;
 }
 
-// 計算單戶理論電費（累進費率），回傳 { total, rows }
+// 住宅夏月為 6/1～9/30，起訖日皆計入；跨年也逐年取交集。
+function billingSeasonDays(from, to) {
+  const valid = value => /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
+  if (!valid(from) || !valid(to) || from > to) throw new Error('請填寫有效的台電帳單區間。');
+  const start = Date.parse(from), end = Date.parse(to) + 86400000;
+  let summerDays = 0;
+  for (let year = Number(from.slice(0, 4)); year <= Number(to.slice(0, 4)); year++) {
+    const summerStart = Date.parse(`${String(year).padStart(4, '0')}-06-01`);
+    const summerEnd = Date.parse(`${String(year).padStart(4, '0')}-10-01`);
+    summerDays += Math.max(0, Math.min(end, summerEnd) - Math.max(start, summerStart)) / 86400000;
+  }
+  const totalDays = (end - start) / 86400000;
+  const otherDays = totalDays - summerDays;
+  return { summerDays, otherDays, totalDays, season: summerDays && otherDays ? 'mixed' : summerDays ? 'summer' : 'other' };
+}
+
+function billingSeasonNote(period) {
+  return `費率按帳期天數加權：夏月 ${period.summerDays}/${period.totalDays}、非夏月 ${period.otherDays}/${period.totalDays}。各戶先計算兩個月累進理論電費並依天數加權，再按用電比例分攤與台電帳單的差額。`;
+}
+
+// 計算單戶理論電費；跨季依帳單公式，對同一度數的兩季費用加權。
 function calcProgressiveFee(units, season) {
+  if (typeof season === 'object' && season !== null) {
+    const { summerDays, otherDays, totalDays } = season;
+    if (![summerDays, otherDays, totalDays].every(Number.isFinite) || summerDays < 0 || otherDays < 0 || totalDays <= 0 || summerDays + otherDays !== totalDays) throw new Error('跨季計費天數不正確。');
+    const parts = [['summer', summerDays], ['other', otherDays]].filter(([, days]) => days > 0)
+      .map(([key, days]) => {
+        const fee = calcProgressiveFee(units, key), weight = days / totalDays;
+        return { total: fee.total * weight, rows: fee.rows.map(row => ({ ...row, season: key, weight, amount: row.amount * weight })) };
+      });
+    return { total: parts.reduce((sum, part) => sum + part.total, 0), rows: parts.flatMap(part => part.rows) };
+  }
   const tiers = ELECTRICITY_RATES[season];
   let remaining = units, total = 0, prev = 0;
   const rows = [];

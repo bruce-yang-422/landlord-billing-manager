@@ -104,7 +104,7 @@ function backupToCsv(data) {
         let value = key === 'kind' ? kind : key === 'unitId' && kind === '房客設定' ? object.id
           : key === 'id' && kind === '房客設定' ? undefined : backupValue(object, key);
         if (value === undefined || value === null) return '';
-        if (key === 'electricity.season') value = value === 'summer' ? '夏月' : value === 'other' ? '非夏月' : value;
+        if (key === 'electricity.season') value = value === 'summer' ? '夏月' : value === 'other' ? '非夏月' : value === 'mixed' ? '跨季' : value;
         if (kind === '帳單' && ['tenantNote', 'currentNote', 'otherDescription'].includes(key) && value === '') return "'";
         const text = String(value);
         // 單引號保護 Excel 的前導零、長編號與公式文字；匯入時移除一層。
@@ -179,7 +179,7 @@ function backupFromCsv(text) {
         if (!/^-?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(value) || !Number.isFinite(Number(value))) throw new Error(`${label}必須是有效數字`);
         value = Number(value);
       }
-      if (key === 'electricity.season') value = value === '夏月' ? 'summer' : value === '非夏月' ? 'other' : value;
+      if (key === 'electricity.season') value = value === '夏月' ? 'summer' : value === '非夏月' ? 'other' : value === '跨季' ? 'mixed' : value;
       const parts = key.split('.');
       if (parts.length === 2) (object[parts[0]] ??= {})[parts[1]] = value;
       else object[key] = value;
@@ -267,7 +267,7 @@ function validateBackup(data) {
       const value = backupValue(record, key);
       if (type === 'number' && value !== undefined && !numeric(value)) throw new Error('帳單包含無效數字');
     }
-    if (record.electricity.season !== undefined && !['summer', 'other'].includes(record.electricity.season)) throw new Error('季節格式錯誤');
+    if (record.electricity.season !== undefined && !['summer', 'other', 'mixed'].includes(record.electricity.season)) throw new Error('季節格式錯誤');
     for (const key of ['prevDate', 'currDate', 'periodStart', 'periodEnd']) {
       const date = record.electricity[key];
       if (date !== undefined && (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date)) throw new Error('帳單抄表日期格式錯誤');

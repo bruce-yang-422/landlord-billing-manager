@@ -144,14 +144,18 @@ test('late photos align preview, saved usage, credits and CSV to the inclusive b
     taipowerStartDate: { value: '2026-09-03' }, taipowerEndDate: { value: '2026-11-03' },
     billingStartReading: { value: '2026-09-04' }, billingEndReading: { value: '2026-11-10' },
     reading6Prev: { value: '11378.4' }, reading6Curr: { value: '11763.2' },
-    taipowerBill: { value: '3064' }, taipowerUnits: { value: '1097' },
+    taipowerBill: { value: '3064' }, taipowerUnits: { value: '1097' }, totalWater: { value: '210' },
     usage5F: {}, usage6F: {}, elecFee5F: {}, elecFee6F: {},
+    seasonPeriodHint: {},
     '6F_currentNote': { value: '租客延後拍照' }
   });
-  vm.runInContext('appData.utilityDeposits = [{id: 1, unitId: "6F", date: "2026-08-27", amount: 3000}]', h.ctx);
+  vm.runInContext('appData.utilityDeposits = [{id: 1, unitId: "6F", date: "2026-08-27", amount: 2602}]', h.ctx);
   h.ctx.updateElectricityPreview();
   assert.match(h.elements.usage6F.textContent, /356.08.*估算/);
-  assert.equal(h.elements.elecFee6F.textContent, '$897');
+  assert.equal(h.elements.elecFee6F.textContent, '$916');
+  assert.equal(h.elements.elecFee5F.textContent, '$2,148');
+  assert.equal(h.elements.season.value, 'mixed');
+  assert.match(h.elements.seasonPeriodHint.textContent, /夏月 28\/62、非夏月 34\/62/);
   const draft = h.ctx.currentBillDraft();
   assert.ok(Math.abs(draft.split.e6 - 384.8 / 67 * 62) < 1e-9);
   h.ctx.saveBill('6F');
@@ -162,7 +166,11 @@ test('late photos align preview, saved usage, credits and CSV to the inclusive b
   assert.equal(record.electricity.currReading, 11763.2);
   assert.match(record.currentNote, /租客延後拍照\n台電計費/);
   assert.match(record.currentNote, /62 天.*2026-11-04/);
+  assert.match(record.currentNote, /夏月 28\/62、非夏月 34\/62/);
+  assert.equal(record.electricity.season, 'mixed');
   assert.equal(record.utilityCredit, record.electricity.fee + record.waterFee);
+  assert.equal(record.waterFee, 70);
+  assert.equal(record.utilityBalanceAfter, 1616);
   const restored = h.ctx.backupFromCsv(h.ctx.backupToCsv({ units: [], records: [record] }));
   assert.deepEqual(JSON.parse(JSON.stringify(restored.records[0])), JSON.parse(JSON.stringify(record)));
 });

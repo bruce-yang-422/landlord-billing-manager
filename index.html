@@ -81,11 +81,14 @@
         <div class="section-title">台電雙月帳單 · 5F／6F 分攤</div>
         <div class="grid-row">
             <div>
-                <label for="season">季節</label>
-                <select id="season" class="season-select">
+                <label for="season">計費季節（依帳期自動判斷）</label>
+                <select id="season" class="season-select" disabled>
+                    <option value="">請先填寫帳單用電起訖日</option>
                     <option value="summer">☀️ 夏月（6～9 月）</option>
                     <option value="other">🌙 非夏月（其餘月份）</option>
+                    <option value="mixed">☀️＋🌙 跨季（按天數加權）</option>
                 </select>
+                <p id="seasonPeriodHint" class="screen-hint" aria-live="polite">填寫帳單用電起訖日後，自動計算夏月及非夏月天數。</p>
             </div>
         </div>
         <div class="grid-row">
