@@ -1,6 +1,6 @@
 // 每次發布（包含 HTML、CSS、JS 修改）都必須遞增版本。
 const CACHE_PREFIX = `landlord-billing-${self.registration.scope}-`;
-const CACHE_NAME = `${CACHE_PREFIX}v56`;
+const CACHE_NAME = `${CACHE_PREFIX}v57`;
 
 const APP_FILES = [
     "./",
@@ -8,6 +8,7 @@ const APP_FILES = [
     "./css/style.css",
     "./css/flat.css",
     "./css/workspace.css",
+    "./css/compact.css",
     "./js/workspace.js",
     "./js/data.js",
     "./js/units.js",

@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/flat.css">
     <link rel="stylesheet" href="css/workspace.css">
+    <link rel="stylesheet" href="css/compact.css">
 </head>
 <body>
 <div class="container">
@@ -66,6 +67,7 @@
         <div class="screen-heading"><span class="section-eyebrow">每月應收帳單</span><h2 id="calculateTitle" tabindex="-1">計算帳單</h2><p class="screen-hint">確認租金、水費、瓦斯與其他費用；台電結算月再加入電費。</p></div>
 <section id="billingEntry" class="entry-panel">
     <!-- 帳單日期 -->
+    <div class="billing-context">
     <div class="info-card">
         <label for="billDate">📅 帳單日期</label>
         <input type="date" id="billDate">
@@ -77,6 +79,7 @@
         <label class="billing-electricity-toggle" for="includeWater"><input type="checkbox" id="includeWater" checked> 本期收取水費</label>
         <p class="screen-hint">取消勾選仍顯示原水費與分攤明細，並標示「本期不收」；費用由房東吸收，不計入應收總額或儲值抵扣。房租收費開關位於下方各戶帳單。</p>
         <button type="button" class="inline-action" onclick="navigateTo('input')">填寫／修改水費與瓦斯 →</button>
+    </div>
     </div>
     <!-- 台電帳單資訊（共用） -->
     <div id="electricityBillingSection" class="fee-section">
@@ -117,7 +120,7 @@
                 <div><label for="billingEndReading">結束抄表（本期）</label><select id="billingEndReading" class="season-select"></select></div>
             </div>
             <input type="hidden" id="reading6Prev"><input type="hidden" id="reading6Curr">
-            <p id="billingPeriodHint" class="screen-hint" role="status"></p>
+            <details class="calculation-details"><summary>查看抄表對齊與估算明細</summary><p id="billingPeriodHint" class="screen-hint" role="status"></p></details>
             <button class="inline-action" type="button" onclick="navigateTo('input')">＋ 補登抄表紀錄</button>
         </div>
         <!-- 電費分攤預覽 -->
@@ -266,7 +269,7 @@
             </div>
             <div class="split-preview-row"><span class="split-label">房東負擔</span><span id="waterOwnerFee" class="split-value split-amount">—</span></div>
         </div>
-        <p id="waterPeriodHint" class="screen-hint" aria-live="polite"></p>
+        <details class="calculation-details"><summary>查看水費分攤計算</summary><p id="waterPeriodHint" class="screen-hint" aria-live="polite"></p></details>
         <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">
             分攤人數請至底部「設定」修改
         </div>

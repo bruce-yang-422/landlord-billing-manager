@@ -1,0 +1,115 @@
+/* 緊湊工作台：縮減留白，不改變帳單圖片與列印尺寸。 */
+@media screen {
+    body { font-size: 14px; }
+    .container { box-sizing: border-box; }
+    #workspaceMain { padding: 16px 14px 36px; }
+    .screen-heading { margin-bottom: 14px; padding-bottom: 12px; }
+    .screen-heading h2 { margin: 3px 0; font-size: 21px; }
+    .screen-hint { margin: 5px 0 9px; font-size: 12px; line-height: 1.5; }
+    .section-eyebrow { font-size: 10px; }
+    .info-card, .fee-section, .unit-bill-card, .unit-settings-card,
+    .meter-hero, .meter-next, .meter-history, .backup-card, .bill-note,
+    .utility-balance-card { padding: 14px; margin-bottom: 12px; border-radius: 8px; }
+    .section-title, .unit-bill-title { margin-bottom: 10px; padding-bottom: 8px; font-size: 14px; }
+    .grid-row { gap: 12px; margin-bottom: 8px; }
+    .units-grid, .utility-workspace, .utility-balances, .history-wall { gap: 12px; margin-bottom: 12px; }
+    .unit-bill-card { gap: 6px; }
+    .unit-bill-card .unit-bill-title { margin-bottom: 2px; }
+    [data-screen] label { margin-bottom: 4px; font-size: 12px; }
+    [data-screen] input:not([type="checkbox"]):not([type="file"]):not([type="hidden"]),
+    [data-screen] select, [data-screen] textarea {
+        box-sizing: border-box; min-height: 36px; padding: 7px 10px;
+        margin-bottom: 8px; border-radius: 6px; font-size: 14px; line-height: 1.4;
+    }
+    [data-screen] textarea { min-height: 68px; }
+    [data-screen] button { min-height: 34px; padding: 7px 12px; margin-top: 6px; border-radius: 6px; font-size: 12px; }
+    [data-screen] .inline-action { min-height: 30px; padding: 5px 10px; }
+    .billing-options { padding: 10px 12px; margin-bottom: 12px; border-radius: 8px; }
+    .billing-electricity-toggle, .utility-enable-toggle { min-height: 32px; margin: 4px 0; gap: 8px; }
+    .period-picker { padding: 12px; margin: 8px 0 12px; border-radius: 6px; }
+    .split-preview { padding: 10px 12px; border-radius: 6px; }
+    .unit-bill-preview { padding: 0; gap: 0; border-radius: 6px; }
+    .charge-breakdown { gap: 4px; }
+    .bill-total-row { margin-top: 2px; padding: 8px 10px; border-radius: 6px; font-size: 12px; }
+    .bill-total-row strong:last-child { font-size: 17px; }
+    .split-preview-row { padding: 8px; }
+    .split-value { font-size: 18px; }
+    .preview-row { padding: 7px 0; align-items: center; gap: 10px; }
+    .preview-row > :last-child { min-width: 0; overflow-wrap: anywhere; text-align: right; }
+    .rent-charge-toggle { flex-shrink: 0; }
+    .credit-choices { padding: 8px 10px; gap: 6px 12px; margin: 10px 0; border-radius: 6px; }
+    .credit-choices label { margin: 0; font-size: 12px; }
+    .bill-current-note { margin: 6px 0; }
+    .bill-current-note textarea { min-height: 60px; }
+    .unit-bill-total { padding: 10px 0; font-size: 18px; }
+    .meter-hero h3 { margin: 5px 0; font-size: 20px; }
+    .meter-hero #meterCurrent { padding: 10px 12px; min-height: 44px; font-size: 23px; }
+    .meter-baseline { padding: 8px 10px; margin-bottom: 10px; }
+    .meter-history-row, .utility-ledger-row { padding: 10px 0; }
+    .utility-balance-value { font-size: 26px; }
+    .utility-balance-totals { margin-top: 8px; font-size: 12px; }
+    .utility-ledger-heading, .utility-filters { gap: 10px; }
+    .utility-ledger-meta, .utility-ledger-note { font-size: 12px; line-height: 1.5; }
+    .history-header { margin-bottom: 10px; gap: 8px; }
+    .history-actions, .filter-row { gap: 6px; padding: 5px; margin-bottom: 10px; }
+    .history-table th, .history-table td { padding: 8px; font-size: 12px; }
+    .settings-tabs { padding: 5px; gap: 6px; margin-bottom: 10px; border-radius: 6px; }
+    [data-screen="settings"] .settings-actions { margin: 12px 0 18px; gap: 8px; }
+    .tenant-report-grid { gap: 14px; }
+    .report-area { padding: 12px; line-height: 1.55; border-radius: 8px; }
+    .calculation-details { margin: 6px 0 10px; border-top: 1px solid var(--border-color); padding-top: 8px; }
+    .calculation-details > summary { cursor: pointer; color: var(--link-color); font-size: 12px; line-height: 1.6; }
+    .calculation-details .screen-hint { white-space: pre-line; margin-bottom: 4px; }
+    .billing-context { display: grid; gap: 12px; margin-bottom: 12px; }
+    .billing-context > .info-card, .billing-context > .billing-options { margin-bottom: 0; }
+}
+
+@media screen and (min-width: 1024px) {
+    .container { grid-template-columns: 168px minmax(0, 1fr) 224px; max-width: 1600px; }
+    .header-section { min-height: 60px; padding: 10px 18px; gap: 12px; }
+    .brand-logo { width: 32px; height: 32px; border-radius: 7px; }
+    .header-section h1 { font-size: 16px; }
+    .tool-sidebar { top: 61px; height: calc(100dvh - 61px); padding: 18px 10px; }
+    .sidebar-label { margin: 0 9px 10px; font-size: 10px; }
+    .app-nav { gap: 3px; }
+    .app-nav button { min-height: 38px; padding: 8px 10px; gap: 8px; font-size: 12px; border-radius: 6px; }
+    .app-nav button span { width: 18px; font-size: 16px; }
+    .sidebar-guide { padding-top: 18px; }
+    .sidebar-guide ol { padding-left: 24px; margin-bottom: 14px; line-height: 1.9; font-size: 11px; }
+    #workspaceMain { max-width: 1200px; padding: 18px 20px 40px; }
+    .status-sidebar { top: 61px; height: calc(100dvh - 61px); padding: 18px 14px 90px; }
+    .status-heading { margin-bottom: 14px; }
+    .status-summary { padding: 12px; border-radius: 7px; }
+    .status-date { margin-bottom: 12px; }
+    .status-total { font-size: 26px; }
+    .status-list { margin-top: 8px; }
+    .status-list > div { padding: 8px 0; gap: 8px; }
+    .status-details { margin-top: 18px; }
+    .status-message, .status-footnote { line-height: 1.5; }
+    .status-footnote { margin-top: 18px; }
+    #pwaStatus { right: max(14px, calc((100vw - 1600px) / 2 + 14px)); max-width: 196px; padding: 8px; font-size: 10px; }
+    .pwa-install-card { right: max(14px, calc((100vw - 1600px) / 2 + 14px)); }
+    .utility-workspace .unit-extra-fees { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+    .utility-workspace .input-group select { margin-bottom: 8px; }
+}
+
+@media screen and (min-width: 1200px) {
+    .units-grid, .utility-workspace, .utility-balances, .history-wall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .billing-context { grid-template-columns: 190px minmax(0, 1fr); align-items: start; }
+}
+
+@media screen and (max-width: 768px) {
+    body { padding: 10px; }
+    .container { padding: 12px 10px; }
+    #workspaceMain { padding: 8px 0 82px; }
+    .header-section { margin-bottom: 12px; gap: 10px; }
+    .screen-heading h2 { font-size: 20px; }
+    .info-card, .fee-section, .unit-bill-card, .unit-settings-card,
+    .meter-hero, .meter-next, .meter-history, .backup-card, .utility-balance-card { padding: 12px; }
+    .grid-row { gap: 10px; }
+    [data-screen] input:not([type="checkbox"]):not([type="file"]):not([type="hidden"]),
+    [data-screen] select, [data-screen] textarea { min-height: 44px; font-size: 16px; }
+    [data-screen] button { min-height: 44px; }
+    .credit-choices label, .rent-charge-toggle { min-height: 36px; }
+    .rent-charge-toggle { font-size: 12px; }
+}
