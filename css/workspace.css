@@ -1,5 +1,5 @@
 /* 桌面帳務工作台；小螢幕維持原有底部導覽。 */
-.sidebar-label, .sidebar-guide, .status-sidebar { display: none; }
+.sidebar-label, .sidebar-guide { display: none; }
 main { min-width: 0; }
 .tenant-report-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 .tenant-report-grid > section { min-width: 0; }
@@ -12,7 +12,7 @@ main { min-width: 0; }
 @media (max-width: 1279px) { .tenant-report-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (min-width: 1024px) {
     body { max-width: none; margin: 0; padding: 0; }
-    .container { display: grid; grid-template-columns: 200px minmax(0, 1fr) 272px; grid-template-rows: auto 1fr; align-items: start; width: 100%; max-width: 1572px; min-height: 100vh; margin: 0 auto; padding: 0; border: 0; border-radius: 0; box-shadow: none; }
+    .container { display: grid; grid-template-columns: 200px minmax(0, 1fr); grid-template-rows: auto 1fr; align-items: start; width: 100%; max-width: 1572px; min-height: 100vh; margin: 0 auto; padding: 0; border: 0; border-radius: 0; box-shadow: none; }
     .header-section { grid-column: 1 / -1; position: sticky; top: 0; z-index: 20; min-height: 76px; box-sizing: border-box; margin: 0; padding: 14px 24px; border-bottom: 1px solid var(--border-color); background: var(--surface); }
     .brand-logo { width: 38px; height: 38px; border-radius: 10px; box-shadow: none; }
     .header-section h1 { font-size: 17px; letter-spacing: .3px; }
@@ -42,39 +42,19 @@ main { min-width: 0; }
     .period-picker { border-radius: 8px; }
     .btn-save-bill, .btn-save-settings { border-radius: 8px; }
     .meter-hero, .meter-next { max-width: none; }
-    .status-sidebar { display: block; grid-column: 3; grid-row: 2; position: sticky; top: 77px; box-sizing: border-box; height: calc(100dvh - 77px); overflow-y: auto; padding: 28px 20px 100px; border-left: 1px solid var(--border-color); background: var(--surface); }
-    .status-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 24px; }
-    .status-heading h2 { margin: 0; font-size: 14px; }
-    .status-badge { font-size: 10px; padding: 3px 7px; color: var(--link-color); border-radius: 5px; background: var(--accent-soft); }
-    .status-sidebar h3 { font-size: 12px; margin: 0 0 8px; }
-    .status-summary { padding: 18px 16px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--field-bg); }
-    .status-date { margin: 0 0 24px; font-size: 12px; color: var(--text-secondary); }
-    .status-caption { margin: 8px 0; color: var(--text-secondary); font-size: 11px; line-height: 1.7; }
-    .status-total { display: block; color: var(--link-color); font-size: 30px; line-height: 1.4; letter-spacing: -1px; overflow-wrap: anywhere; }
-    .status-list { margin: 16px 0 0; font-size: 12px; }
-    .status-list > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
-    .status-list dt { color: var(--text-secondary); flex-shrink: 0; }
-    .status-list dd { margin: 0; text-align: right; font-weight: 600; overflow-wrap: anywhere; }
-    .status-message { color: var(--text-secondary); font-size: 11px; line-height: 1.8; }
-    .status-link { display: block; width: auto; padding: 8px 0; margin: 12px 0 0; min-height: 36px; font-size: 12px; letter-spacing: 0; text-align: left; color: var(--link-color); background: transparent; border: 0; box-shadow: none; border-radius: 4px; }
-    .status-link:hover { background: var(--accent-soft); transform: none; box-shadow: none; }
-    .status-details { margin-top: 28px; }
-    .status-footnote { margin-top: 32px; font-size: 10px; color: var(--text-secondary); line-height: 1.8; }
-    .local-status-dot { display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: var(--link-color); }
     #pwaStatus { position: fixed; right: max(20px, calc((100vw - 1572px) / 2 + 20px)); bottom: 12px; z-index: 21; box-sizing: border-box; max-width: 232px; max-height: 80px; overflow: auto; margin: 0; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--surface); font-size: 11px; }
     .pwa-install-card { right: max(20px, calc((100vw - 1572px) / 2 + 20px)); }
     #pwaStatus:empty { display: none; }
     button:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--link-color); outline-offset: 3px; }
 }
 @media (min-width: 1024px) and (max-width: 1279px) {
-    .container { grid-template-columns: 176px minmax(0, 1fr) 240px; }
-    .status-sidebar { padding-left: 16px; padding-right: 16px; }
+    .container { grid-template-columns: 176px minmax(0, 1fr); }
     .units-grid, .utility-workspace, .utility-balances, .history-wall { grid-template-columns: minmax(0, 1fr); }
     .split-preview { display: block; }
     .split-preview-row + .split-preview-row { margin-top: 6px; }
     #pwaStatus { max-width: 208px; right: 16px; }
 }
 @media print {
-    .tool-sidebar, .status-sidebar { display: none; }
+    .tool-sidebar { display: none; }
     .container { display: block; }
 }

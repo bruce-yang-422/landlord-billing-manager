@@ -545,26 +545,6 @@
 </section>
 </main>
 
-<aside class="status-sidebar" aria-labelledby="workspaceStatusTitle">
-    <div class="status-heading"><h2 id="workspaceStatusTitle">工作狀態</h2><span class="status-badge">即時預覽</span></div>
-    <section class="status-summary" aria-labelledby="summaryTitle">
-        <h3 id="summaryTitle">當期帳單</h3>
-        <p id="workspaceBillDate" class="status-date">尚未選擇日期</p>
-        <p class="status-caption">兩戶應收合計</p>
-        <strong id="workspaceTotal" class="status-total">—</strong>
-        <p class="status-caption">試算金額，存檔後列入歷史帳單</p>
-        <dl class="status-list"><div><dt class="unit-5F-text">5F</dt><dd id="workspaceTotal5F">—</dd></div><div><dt class="unit-6F-text">6F</dt><dd id="workspaceTotal6F">—</dd></div></dl>
-        <p id="workspaceDraftHint" class="status-message"></p>
-        <button class="status-link" type="button" onclick="navigateTo('calculate')">前往確認帳單 →</button>
-    </section>
-    <section class="status-details" aria-labelledby="dataStatusTitle">
-        <h3 id="dataStatusTitle">資料概況</h3>
-        <dl class="status-list"><div><dt>歷史帳單</dt><dd id="workspaceRecordCount">0 筆</dd></div><div><dt>最近抄表</dt><dd id="workspaceLatestMeter">尚無紀錄</dd></div><div><dt>本次電費</dt><dd id="workspaceElectricity">收取</dd></div></dl>
-        <button class="status-link" type="button" onclick="navigateTo('input')">登記抄表與費用 →</button>
-    </section>
-    <div class="status-footnote"><span class="local-status-dot" aria-hidden="true"></span> 本機資料 · 請定期匯出備份</div>
-</aside>
-
 </div>
 
 <!-- PWA 安裝提示 -->
@@ -614,7 +594,6 @@
 <script src="js/pwa-install.js"></script>
 <script src="js/meter.js"></script>
 <script src="js/navigation.js"></script>
-<script src="js/workspace.js"></script>
 <script src="js/app.js"></script>
 
 <script src="js/pwa.js"></script>
