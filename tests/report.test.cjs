@@ -38,3 +38,20 @@ test('zero total and older bills without credit or bank information still produc
   assert.match(summary, /本期應繳：\$0/);
   assert.doesNotMatch(summary, /匯款：|已抵扣儲值|undefined|NaN/);
 });
+
+test('5F receives only 6F usage, while 6F retains its meter estimation details', () => {
+  const {ctx, elements, record} = setup();
+  Object.assign(record, {unitId: '5F', splitInfo: {totalBill:3064,totalUnits:1097,e5:740.92,e6:356.08},
+    currentNote: '請按時繳款\n【電費估算】\n實際抄表：2026-09-04／11378.4 度\n實際抄表：2026-11-10／11763.2 度\n日均用電：384.8 ÷ 67\n【跨季費率】\n夏月 28/62、非夏月 34/62'});
+  Object.assign(record.electricity, {periodStart:'2026-09-03',periodEnd:'2026-11-03',prevDate:'2026-09-04',currDate:'2026-11-10'});
+  ctx.generateReport(record);
+  assert.match(elements.reportText.textContent,/6F 用電：356.08 度/);
+  assert.match(elements.reportText.textContent,/請按時繳款/);
+  assert.match(elements.reportText.textContent,/跨季費率/);
+  assert.doesNotMatch(elements.reportText.textContent,/電費估算|實際抄表|日均用電|11378.4|11763.2|2026-09-04|採用抄表區間/);
+  record.unitId='6F';
+  ctx.generateReport(record);
+  assert.match(elements.reportText.textContent,/電費估算/);
+  assert.match(elements.reportText.textContent,/11378.4/);
+  assert.match(elements.reportText.textContent,/日均用電/);
+});

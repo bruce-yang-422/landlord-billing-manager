@@ -199,7 +199,7 @@ function saveBill(unitId) {
   if (!draft.waterChargeEnabled) record.currentNote = [record.currentNote, waivedWaterNote(draft.waterSettlement)].filter(Boolean).join('\n\n');
   record.tenantNote = getUnit(unitId).tenantNote || '';
   if (draft.includeElectricity) {
-    record.currentNote = [record.currentNote, draft.alignment.note, billingSeasonNote(draft.period)].filter(Boolean).join('\n');
+    record.currentNote = [record.currentNote, unitId === '6F' ? draft.alignment.note : '', billingSeasonNote(draft.period)].filter(Boolean).join('\n');
     if (unitId === '6F') {
       record.electricity.prevReading = draft.previous;
       record.electricity.currReading = draft.current;
@@ -239,14 +239,23 @@ function fmtDate(dateStr) {
   }
 }
 
+function tenantCurrentNote(record) {
+  if (record.unitId !== '5F') return record.currentNote || '';
+  // 舊帳單也移除自動產生的 6F 抄表估算段落，保留其他備註。
+  return (record.currentNote || '')
+    .replace(/【電費估算】[\s\S]*?(?=【|$)/g, '')
+    .replace(/^(?:台電計費 |台電本次抄表日為)[^\n]*(?:\n|$)/gm, '').trim();
+}
+
 function generateReport(record) {
   const unit = getUnit(record.unitId);
-  const structuredNotes = record.currentNote?.includes('【電費估算】');
+  const currentNote = tenantCurrentNote(record);
+  const structuredNotes = currentNote.includes('【電費估算】');
   let r = `📅 ${fmtDate(record.date)} 房租費用通知（${unit.label}）\n\n`;
 
   if (!structuredNotes && record.electricity?.periodStart && record.electricity?.periodEnd) {
     r += `台電用電區間：${record.electricity.periodStart}～${record.electricity.periodEnd}\n`;
-    if (record.electricity.prevDate && record.electricity.currDate) r += `採用抄表區間：${record.electricity.prevDate}～${record.electricity.currDate}\n\n`;
+    if (record.unitId === '6F' && record.electricity.prevDate && record.electricity.currDate) r += `採用抄表區間：${record.electricity.prevDate}～${record.electricity.currDate}\n\n`;
   }
 
   // 電費計算說明
@@ -257,6 +266,7 @@ function generateReport(record) {
     r += `⚡ 電費計算（累進分攤）\n`;
     r += `台電帳單：$${s.totalBill.toLocaleString()}｜總用電：${s.totalUnits} 度\n`;
     r += `本戶用電：${Number(myUsage.toFixed(2))} 度（佔 ${((myUsage/s.totalUnits)*100).toFixed(1)}%）\n`;
+    if (record.unitId === '5F') r += `6F 用電：${Number(s.e6.toFixed(2))} 度\n`;
     r += `本戶電費：$${record.electricity.fee.toLocaleString()}\n\n`;
   }
   if (!structuredNotes && record.unitId === '6F' && record.electricity?.prevReading != null && record.electricity?.currReading != null) {
@@ -292,7 +302,7 @@ function generateReport(record) {
 
   const fixedNote = record.tenantNote ?? unit.tenantNote;
   if (fixedNote?.trim()) r += `📝 固定備註\n${fixedNote}\n\n`;
-  if (record.currentNote?.trim()) r += `${structuredNotes ? '' : '📝 當期備註\n'}${record.currentNote}\n\n`;
+  if (currentNote.trim()) r += `${structuredNotes ? '' : '📝 當期備註\n'}${currentNote}\n\n`;
 
   const reportText = document.getElementById('reportText');
   const reportSection = document.getElementById('reportSection');
