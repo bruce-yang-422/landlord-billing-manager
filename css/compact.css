@@ -1,8 +1,13 @@
 /* 緊湊工作台：縮減留白，不改變帳單圖片與列印尺寸。 */
 @media screen {
+    :root { --workspace-header-bg: #e7edf8; --workspace-nav-bg: #f0f3f9; }
+    [data-theme="dark"] { --workspace-header-bg: #1a2c46; --workspace-nav-bg: #17263b; }
     html { scrollbar-gutter: stable; }
     body { font-size: 14px; }
     .container { box-sizing: border-box; }
+    .header-section { background: var(--workspace-header-bg); border-bottom: 1px solid var(--border-color); }
+    .tool-sidebar, .app-nav { background: var(--workspace-nav-bg); }
+    #workspaceMain { background: var(--surface); }
     #workspaceMain > [data-screen] { box-sizing: border-box; width: 100%; min-width: 0; max-width: none; }
     .meter-hero, .meter-next { box-sizing: border-box; width: 100%; max-width: none; margin-inline: 0; }
     #workspaceMain { padding: 16px 14px 36px; }
@@ -106,7 +111,7 @@
     body { padding: 10px; }
     .container { padding: 12px 10px; }
     #workspaceMain { padding: 8px 0 82px; }
-    .header-section { margin-bottom: 12px; gap: 10px; }
+    .header-section { margin-bottom: 12px; padding: 10px; border-radius: 8px; gap: 10px; }
     .screen-heading h2 { font-size: 20px; }
     .info-card, .fee-section, .unit-bill-card, .unit-settings-card,
     .meter-hero, .meter-next, .meter-history, .backup-card, .utility-balance-card { padding: 12px; }
