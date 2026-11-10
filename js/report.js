@@ -1,7 +1,7 @@
 // 租客圖文帳單：兩種輸出共用已存檔帳單，不重新試算費用。
 function buildShortReport(record, unit) {
   const money = value => '$' + Number(value || 0).toLocaleString('zh-TW');
-  const fees = [['房租', record.rent], ['電費', record.electricity?.fee], ['水費', record.waterFee],
+  const fees = [['房租', record.rent], ['電費', record.electricity?.fee], [record.waterChargeEnabled === false ? '水費（本期不收）' : '水費', record.waterFee],
     ['瓦斯', record.gasFee], ['管理費', record.managementFee], ['其他', record.otherFee]]
     .filter(([, value]) => value > 0).map(([label, value]) => label + money(value));
   const lines = [`${fmtDate(record.date)} ${unit.label} 帳單`, `本期應繳：${money(record.total)}`];
@@ -48,7 +48,7 @@ function renderBillImage(record, unit, fullText) {
     };
     // 固定 A4 版面，先重新換行再縮小字級，不裁切、不拉長圖片。
     const lines = fullText.split('\n').slice(1);
-    for (const scale of [1, 0.92, 0.84, 0.76, 0.68, 0.62]) {
+    for (const scale of [1, 0.92, 0.84, 0.76, 0.68, 0.62, 0.58]) {
       commands = [];
       y = 290;
       for (const raw of lines) {

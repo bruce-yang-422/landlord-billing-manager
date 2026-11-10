@@ -60,19 +60,26 @@ function currentWaterSettlement() {
     document.getElementById('waterStartDate')?.value || '', document.getElementById('waterEndDate')?.value || '');
 }
 
+function waterChargeIsEnabled() { return document.getElementById('includeWater')?.checked !== false; }
+
+function waivedWaterNote(settlement) {
+  const total = settlement.owner + Object.values(settlement.fees).reduce((sum, fee) => sum + fee, 0);
+  return `【本期水費不收取】\n原分攤金額保留供核對，不計入應繳總額，也不抵扣儲值。\n本期水費共 ${total.toLocaleString('zh-TW')} 元，全數由房東吸收。`;
+}
+
 function updateWaterPreview() {
   let result, error;
   try { result = currentWaterSettlement(); } catch (e) { error = e; }
   appData.units.forEach(u => {
     [`waterFee${u.id}`, `waterFee${u.id}_card`].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.textContent = result ? `$${result.fees[u.id].toLocaleString()}` : '待確認';
+      if (el) el.textContent = result ? `$${result.fees[u.id].toLocaleString()}${waterChargeIsEnabled() ? '' : '（本期不收）'}` : '待確認';
     });
   });
   const owner = document.getElementById('waterOwnerFee');
-  if (owner) owner.textContent = result ? `$${result.owner.toLocaleString()}` : '—';
+  if (owner) owner.textContent = result ? `$${(result.owner + (waterChargeIsEnabled() ? 0 : Object.values(result.fees).reduce((sum, fee) => sum + fee, 0))).toLocaleString()}` : '—';
   const hint = document.getElementById('waterPeriodHint');
-  if (hint) hint.textContent = error ? error.message : result.note || '本次不收水費。';
+  if (hint) hint.textContent = error ? error.message : [result.note || '本次無水費。', waterChargeIsEnabled() ? '' : waivedWaterNote(result)].filter(Boolean).join('\n\n');
   updateBillTotals();
 }
 
@@ -95,6 +102,7 @@ function currentBillDraft() {
   const includeElectricity = document.getElementById('includeElectricity')?.checked !== false;
   number('totalWater');
   const waterSettlement = currentWaterSettlement();
+  const waterChargeEnabled = waterChargeIsEnabled();
   const water = waterSettlement.fees;
   let split = null, alignment = null;
   let period = null;
@@ -121,12 +129,12 @@ function currentBillDraft() {
     const fee = split ? (unit.id === '5F' ? split.fee5 : split.fee6) : 0;
     const usage = split ? (unit.id === '5F' ? split.e5 : split.e6) : 0;
     const selected = selectedBillCreditItems(unit.id);
-    const preview = buildRecord(unit.id, '', fee, usage, water[unit.id], extras, selected);
+    const preview = buildRecord(unit.id, '', fee, usage, water[unit.id], extras, selected, waterChargeEnabled);
     return { id: unit.id, selected, rent: unit.rent || 0, fee, usage, water: water[unit.id], extras,
       utilityCredit: preview.utilityCredit,
       total: preview.total };
   });
-  return { includeElectricity, split, season: period?.season, period, totalBill, totalUnits, previous, current, alignment, waterSettlement, units };
+  return { includeElectricity, split, season: period?.season, period, totalBill, totalUnits, previous, current, alignment, waterSettlement, waterChargeEnabled, units };
 }
 
 function updateBillTotals() {
@@ -157,7 +165,7 @@ function updateBillTotals() {
       set(`total${unit.id}_card`, money(unit.total));
       set(`credit${unit.id}_card`, money(unit.utilityCredit));
       set(`balance${unit.id}_card`, money(utilityBalance(unit.id) - unit.utilityCredit));
-      set(`waterFee${unit.id}_card`, money(unit.water));
+      set(`waterFee${unit.id}_card`, money(unit.water) + (draft.waterChargeEnabled ? '' : '（本期不收）'));
       set(`elecFee${unit.id}_card`, included ? money(unit.fee) : '本次不收取');
     });
     if (status) status.textContent = '只抵扣勾選項目，餘額不足依電費、水費、瓦斯、管理費、雜費順序抵扣。租金另計。';
@@ -181,13 +189,14 @@ function saveBill(unitId) {
   if (!unit) return;
   if (appData.records.some(row => row.unitId === unitId && row.date === billDate) &&
       !confirm('這個樓層在同一天已有帳單。再次存檔會新增帳單並再次抵扣水電費，確定繼續？')) return;
-  const record = buildRecord(unitId, billDate, unit.fee, unit.usage, unit.water, unit.extras, unit.selected);
+  const record = buildRecord(unitId, billDate, unit.fee, unit.usage, unit.water, unit.extras, unit.selected, draft.waterChargeEnabled);
   record.currentNote = document.getElementById(`${unitId}_currentNote`)?.value || '';
   if (draft.waterSettlement.note) {
     record.currentNote = [record.currentNote, draft.waterSettlement.note].filter(Boolean).join('\n');
     record.waterPeriodStart = document.getElementById('waterStartDate').value;
     record.waterPeriodEnd = document.getElementById('waterEndDate').value;
   }
+  if (!draft.waterChargeEnabled) record.currentNote = [record.currentNote, waivedWaterNote(draft.waterSettlement)].filter(Boolean).join('\n\n');
   record.tenantNote = getUnit(unitId).tenantNote || '';
   if (draft.includeElectricity) {
     record.currentNote = [record.currentNote, draft.alignment.note, billingSeasonNote(draft.period)].filter(Boolean).join('\n');
@@ -257,7 +266,7 @@ function generateReport(record) {
   r += `💰 應繳金額\n`;
   if (record.rent > 0)           r += `房租：$${record.rent.toLocaleString()}\n`;
   if (record.electricity?.fee > 0) r += `電費：$${record.electricity.fee.toLocaleString()}\n`;
-  if (record.waterFee > 0)       r += `水費：$${record.waterFee.toLocaleString()}\n`;
+  if (record.waterFee > 0)       r += `水費：$${record.waterFee.toLocaleString()}${record.waterChargeEnabled === false ? '（本期不收，由房東吸收）' : ''}\n`;
   if (record.gasFee > 0)         r += `瓦斯：$${record.gasFee.toLocaleString()}\n`;
   if (record.managementFee > 0)  r += `管理費：$${record.managementFee.toLocaleString()}\n`;
   if (record.otherFee > 0)       r += `其他：$${record.otherFee.toLocaleString()}\n`;
@@ -266,7 +275,7 @@ function generateReport(record) {
     r += `儲值抵扣：-$${record.utilityCredit.toLocaleString()}\n`;
     r += `抵扣項目：${creditItemSummary(record) || '無'}\n`;
     const offsets = recordCreditItems(record);
-    r += `水電費另需繳付：$${(record.electricity.fee + record.waterFee - (offsets.electricity || 0) - (offsets.water || 0)).toLocaleString()}\n`;
+    r += `水電費另需繳付：$${(record.electricity.fee + payableWaterFee(record) - (offsets.electricity || 0) - (offsets.water || 0)).toLocaleString()}\n`;
     r += `存檔時儲值餘額：$${record.utilityBalanceAfter.toLocaleString()}\n`;
   }
   r += `──────────────\n`;
@@ -401,7 +410,7 @@ function renderHistory() {
       item.append(node('dt', '', label), node('dd', '', value));
       list.append(item);
     };
-    for (const [label, value] of [['租金', record.rent], ['電費', record.electricity?.fee], ['水費', record.waterFee], ['瓦斯費', record.gasFee], ['管理費', record.managementFee], ['其他費用', record.otherFee]]) row(fees, label, amount(value));
+    for (const [label, value] of [['租金', record.rent], ['電費', record.electricity?.fee], [record.waterChargeEnabled === false ? '水費（本期不收）' : '水費', record.waterFee], ['瓦斯費', record.gasFee], ['管理費', record.managementFee], ['其他費用', record.otherFee]]) row(fees, label, amount(value));
     row(fees, '儲值抵扣', amount(record.utilityCredit || 0));
     card.append(fees);
     const details = node('details', 'bill-note-details');
@@ -456,7 +465,7 @@ function renderHistory() {
     if (tableBody) {
       const tr = node('tr');
       for (const value of [fmtDate(record.date), getUnit(record.unitId)?.label ?? record.unitId,
-        ...[record.rent, record.electricity?.fee, record.waterFee, record.gasFee, record.managementFee, record.otherFee, record.utilityCredit || 0, record.total].map(amount)]) {
+        ...[record.rent, record.electricity?.fee, record.waterFee, record.gasFee, record.managementFee, record.otherFee, record.utilityCredit || 0, record.total].map((value, index) => amount(value) + (index === 2 && record.waterChargeEnabled === false ? '（本期不收）' : ''))]) {
         tr.append(node('td', '', value));
       }
       const cell = node('td');

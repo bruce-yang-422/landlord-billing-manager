@@ -241,3 +241,35 @@ test('water move-in proration agrees across preview, bill, credits and backup', 
   assert.equal(restored.units[0].moveInDate, '2026-08-26');
   assert.equal(restored.records[0].waterPeriodEnd, '2026-10-01');
 });
+
+test('waived water remains visible but is excluded from totals and all prepaid offsets', () => {
+  const h = setup(true);
+  h.elements.includeWater = { checked: false };
+  h.elements.waterFee6F = {};
+  h.elements.waterOwnerFee = {};
+  vm.runInContext('appData.utilityDeposits = [{id: 1, unitId: "6F", date: "2026-08-27", amount: 3000}]', h.ctx);
+  h.ctx.updateWaterPreview();
+  assert.equal(h.elements.waterFee6F.textContent, '$200（本期不收）');
+  assert.equal(h.elements.waterOwnerFee.textContent, '$600');
+  const d = h.ctx.currentBillDraft();
+  const u = d.units.find(u => u.id === '6F');
+  assert.equal(u.utilityCredit, u.fee);
+  assert.equal(u.total, 12000 + 400 + 50 + 30);
+  h.ctx.saveBill('6F');
+  const r = h.records[0];
+  assert.equal(r.waterFee,200);
+  assert.equal(r.waterChargeEnabled,false);
+  assert.equal(r.creditItems.water,0);
+  assert.equal(h.ctx.planRecordCredit(r,['water']).credit,0);
+  assert.match(r.currentNote,/全數由房東吸收/);
+  h.elements.reportText = {};
+  h.generateReport(r);
+  assert.match(h.elements.reportText.textContent,/水費：\$200（本期不收/);
+  const csv = h.ctx.backupToCsv({units:[],records:[r]});
+  assert.equal(h.ctx.backupFromCsv(csv).records[0].waterChargeEnabled,false);
+  assert.throws(() => h.ctx.validateBackup({records:[{...r,creditItems:{...r.creditItems,water:1},utilityCredit:r.utilityCredit+1,total:r.total-1}]}),/抵扣/);
+  h.elements.includeWater.checked = true;
+  const next = h.ctx.currentBillDraft().units.find(u => u.id === '6F');
+  assert.equal(next.utilityCredit,next.fee+next.water);
+  assert.equal(r.waterChargeEnabled,false); // Previously saved bills keep their own collection choice.
+});

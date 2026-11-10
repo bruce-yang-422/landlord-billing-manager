@@ -168,8 +168,10 @@ const CREDIT_ITEMS = [
 ];
 const DEFAULT_CREDIT_ITEMS = ['electricity', 'water'];
 
+function payableWaterFee(record) { return record.waterChargeEnabled === false ? 0 : record.waterFee || 0; }
+
 function creditFees(record) {
-  return { electricity: Math.max(0, record.electricity?.fee || 0), water: Math.max(0, record.waterFee || 0),
+  return { electricity: Math.max(0, record.electricity?.fee || 0), water: Math.max(0, payableWaterFee(record)),
     gas: Math.max(0, record.gasFee || 0), management: Math.max(0, record.managementFee || 0), other: Math.max(0, record.otherFee || 0) };
 }
 
@@ -207,9 +209,9 @@ function utilityOffset(unitId, electricity, water) {
   return Math.min(Math.max(0, utilityBalance(unitId)), Math.max(0, electricity) + Math.max(0, water));
 }
 
-function buildRecord(unitId, billDate, electricityFee, electricityUsage, waterFee, extraFees, selected = DEFAULT_CREDIT_ITEMS) {
+function buildRecord(unitId, billDate, electricityFee, electricityUsage, waterFee, extraFees, selected = DEFAULT_CREDIT_ITEMS, waterChargeEnabled = true) {
   const unit = getUnit(unitId);
-  const total = (unit.rent || 0) + electricityFee + waterFee +
+  const total = (unit.rent || 0) + electricityFee + (waterChargeEnabled ? waterFee : 0) +
     (extraFees.gas || 0) + (extraFees.management || 0) + (extraFees.other || 0);
   const record = {
     id: Date.now() + Math.random(),
@@ -221,6 +223,7 @@ function buildRecord(unitId, billDate, electricityFee, electricityUsage, waterFe
       usage: electricityUsage,
     },
     waterFee,
+    ...(waterChargeEnabled ? {} : { waterChargeEnabled: false }),
     gasFee: extraFees.gas || 0,
     managementFee: extraFees.management || 0,
     otherFee: extraFees.other || 0,

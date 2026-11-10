@@ -39,7 +39,8 @@ const BACKUP_COLUMNS = [
   ['儲值功能啟用', 'utilityEnabled', 'boolean'],
   ['入住日期', 'moveInDate', 'text'],
   ['水費上次抄表日', 'waterPeriodStart', 'text'],
-  ['水費本次抄表日', 'waterPeriodEnd', 'text']
+  ['水費本次抄表日', 'waterPeriodEnd', 'text'],
+  ['本期收取水費', 'waterChargeEnabled', 'boolean']
 ];
 
 const BACKUP_CHECKSUM_COLUMN = '資料驗證ID';
@@ -246,14 +247,16 @@ function validateBackup(data) {
     }
   }
   for (const record of data.records) {
+    if (record.waterChargeEnabled !== undefined && typeof record.waterChargeEnabled !== 'boolean') throw new Error('本期收取水費必須為布林值');
     if (!optionalDate(record.waterPeriodStart) || !optionalDate(record.waterPeriodEnd) || (record.waterPeriodStart && record.waterPeriodEnd && record.waterPeriodStart >= record.waterPeriodEnd)) throw new Error('水費抄表期間格式錯誤');
     if (!record || !validUnit(record.unitId) || !/^\d+(?:\.\d+)?$/.test(String(record.id)) || recordIds.has(String(record.id)) ||
         typeof record.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(record.date) ||
         !['rent', 'waterFee', 'gasFee', 'managementFee', 'otherFee', 'total', 'electricity.fee', 'electricity.usage'].every(key => numeric(backupValue(record, key)))) throw new Error('帳單格式錯誤、必要欄位缺漏或編號重複');
     if (record.utilityCredit !== undefined || record.utilityBalanceAfter !== undefined || record.creditItems !== undefined) {
       const credit = record.utilityCredit;
-      const gross = record.rent + record.electricity.fee + record.waterFee + record.gasFee + record.managementFee + record.otherFee;
-      const fees = { electricity: record.electricity.fee, water: record.waterFee, gas: record.gasFee, management: record.managementFee, other: record.otherFee };
+      const waterDue = record.waterChargeEnabled === false ? 0 : record.waterFee;
+      const gross = record.rent + record.electricity.fee + waterDue + record.gasFee + record.managementFee + record.otherFee;
+      const fees = { electricity: record.electricity.fee, water: waterDue, gas: record.gasFee, management: record.managementFee, other: record.otherFee };
       let limit = Math.max(0, fees.electricity) + Math.max(0, fees.water);
       if (record.creditItems !== undefined) {
         const items = record.creditItems;

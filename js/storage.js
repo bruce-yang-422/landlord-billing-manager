@@ -59,6 +59,7 @@ function saveInputs() {
       taipowerEndDate: get('taipowerEndDate'),
       meterMatchDays: get('meterMatchDays'),
       includeElectricity: document.getElementById('includeElectricity')?.checked !== false,
+      includeWater: document.getElementById('includeWater')?.checked !== false,
       meterDate:       get('meterDate'),
       meterCurrent:    get('meterCurrent'),
       billingStartDate: get('billingStartReading'),
@@ -131,6 +132,8 @@ function loadInputs() {
     set('taipowerEndDate', inputs.taipowerEndDate);
     set('meterMatchDays', inputs.meterMatchDays);
     const electricityToggle = document.getElementById('includeElectricity');
+    const waterToggle = document.getElementById('includeWater');
+    if (waterToggle && typeof inputs.includeWater === 'boolean') waterToggle.checked = inputs.includeWater;
     if (electricityToggle && typeof inputs.includeElectricity === 'boolean') electricityToggle.checked = inputs.includeElectricity;
     set('meterDate',     inputs.meterDate);
     set('meterCurrent',  inputs.meterCurrent);

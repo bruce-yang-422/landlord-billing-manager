@@ -51,6 +51,7 @@ window.onload = function () {
   });
 
   document.getElementById('includeElectricity')?.addEventListener('change', () => { updateElectricityPreview(); saveInputs(); });
+  document.getElementById('includeWater')?.addEventListener('change', () => { updateWaterPreview(); saveInputs(); });
 
   // 帳單日期自動儲存
   ['5F_currentNote', '6F_currentNote'].forEach(id => {

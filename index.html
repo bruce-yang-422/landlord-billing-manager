@@ -241,6 +241,8 @@
 <div id="utilityInputs"><h3 class="utility-title">水費、瓦斯與其他費用</h3><p class="screen-hint">填入本次要收取的金額，會自動記憶並帶入帳單。未收費項目填 0。</p>    <!-- 水費（共用） -->
     <div class="fee-section">
         <div class="section-title">💧 水費（按人數與入住天數分攤）</div>
+        <label class="utility-enable-toggle" for="includeWater"><input type="checkbox" id="includeWater" checked><span>本期收取水費</span></label>
+        <p class="screen-hint">取消勾選仍顯示原水費與分攤明細，並標示「本期不收」；費用由房東吸收，不計入應收總額或儲值抵扣。</p>
         <div class="grid-row">
             <div><label for="waterStartDate">上次水表抄表日</label><input type="date" id="waterStartDate"></div>
             <div><label for="waterEndDate">本次水表抄表日</label><input type="date" id="waterEndDate"></div>
